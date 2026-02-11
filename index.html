@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CMBOOKS – Cloud Accounting Software</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+:root{
+--primary-blue:#2962ff;
+--dark-blue:#0d47a1;
+--success-green:#2e7d32;
+--danger-red:#d32f2f;
+--bg:#f4f6f9;
+--white:#fff;
+--text:#333;
+--muted:#888;
+--border:#e0e0e0;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Roboto,sans-serif;background:var(--bg);color:var(--text);height:100vh}
+
+.app-wrapper{display:flex;flex-direction:column;height:100%}
+
+/* HEADER */
+.header{
+background:#fff;border-bottom:1px solid var(--border);
+height:70px;display:flex;align-items:center;
+justify-content:space-between;padding:0 20px
+}
+.logo-header{
+font-family:"Roboto Mono",monospace;
+font-size:20px;font-weight:700;color:var(--dark-blue);
+text-decoration:none;display:flex;align-items:center;gap:10px
+}
+.logo-header i{color:var(--primary-blue);font-size:22px}
+.header-icons button{
+background:var(--bg);border:none;border-radius:50%;
+width:40px;height:40px;cursor:pointer
+}
+
+/* MAIN */
+.main-content{flex:1;display:flex;overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{
+width:260px;background:#fff;border-right:1px solid var(--border);
+padding-top:12px;overflow-y:auto
+}
+.sidebar-title{
+font-size:11px;font-weight:700;color:var(--muted);
+padding:12px 16px;text-transform:uppercase
+}
+.nav-item{
+display:flex;align-items:center;gap:12px;
+padding:12px 16px;color:var(--text);
+font-size:14px;border-left:3px solid transparent;
+cursor:pointer
+}
+.nav-item:hover{background:var(--bg);color:var(--primary-blue)}
+.nav-item.active{
+background:#e3f2fd;color:var(--primary-blue);
+border-left-color:var(--primary-blue);font-weight:600
+}
+.add-btn{
+margin:16px;width:calc(100% - 32px);
+background:var(--primary-blue);color:#fff;
+border:none;border-radius:8px;padding:12px;
+font-weight:600;cursor:pointer
+}
+
+/* CONTENT */
+.content{flex:1;padding:20px;overflow-y:auto}
+
+/* DASHBOARD */
+.stats-grid{
+display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:16px;margin-bottom:24px
+}
+.stat-card{
+background:#fff;border:1px solid var(--border);
+border-radius:12px;padding:20px
+}
+.stat-title{font-size:12px;color:var(--muted);margin-bottom:8px}
+.stat-value{font-size:26px;font-weight:700}
+.section-card{
+background:#fff;border-radius:12px;border:1px solid var(--border);
+margin-bottom:20px
+}
+.section-header{
+padding:16px;border-bottom:1px solid var(--border)
+}
+table{width:100%;border-collapse:collapse}
+th,td{padding:12px 16px;border-bottom:1px solid var(--border)}
+th{font-size:12px;color:var(--muted);text-transform:uppercase}
+</style>
+</head>
+
+<body>
+
+<div class="app-wrapper">
+
+<!-- HEADER -->
+<div class="header">
+  <a class="logo-header"><i class="fas fa-book"></i>cm<strong>books</strong></a>
+  <div class="header-icons">
+    <button><i class="fas fa-bell"></i></button>
+    <button><i class="fas fa-gear"></i></button>
+    <button><i class="fas fa-user"></i></button>
+  </div>
+</div>
+
+<div class="main-content">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+
+  <button class="add-btn">
+    <i class="fas fa-plus"></i> New Transaction
+  </button>
+
+  <div class="sidebar-title">Overview</div>
+  <div class="nav-item active">
+    <i class="fas fa-chart-line"></i> Dashboard
+  </div>
+
+  <div class="sidebar-title">Masters</div>
+  <div class="nav-item"><i class="fas fa-users"></i> Parties</div>
+  <div class="nav-item"><i class="fas fa-box"></i> Items / Services</div>
+
+  <div class="sidebar-title">Transactions</div>
+  <div class="nav-item"><i class="fas fa-file-invoice-dollar"></i> Sales</div>
+
+  <!-- RULE CONTROLLED -->
+  <div class="nav-item" data-module="purchase">
+    <i class="fas fa-cart-shopping"></i> Purchase
+  </div>
+
+  <div class="nav-item"><i class="fas fa-money-bill"></i> Expenses</div>
+  <div class="nav-item"><i class="fas fa-arrow-down"></i> Receipts</div>
+  <div class="nav-item"><i class="fas fa-arrow-up"></i> Payments</div>
+  <div class="nav-item"><i class="fas fa-book"></i> Journal Entries</div>
+
+  <!-- RULE CONTROLLED -->
+  <div class="nav-item" data-module="inventory">
+    <i class="fas fa-warehouse"></i> Stock Summary
+  </div>
+
+  <!-- RULE CONTROLLED -->
+  <div class="nav-item" data-module="manufacturing">
+    <i class="fas fa-industry"></i> Production
+  </div>
+
+  <div class="sidebar-title">Reports</div>
+  <div class="nav-item"><i class="fas fa-chart-bar"></i> Reports</div>
+
+  <div class="sidebar-title">Settings</div>
+  <div class="nav-item"><i class="fas fa-gear"></i> Settings</div>
+
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-title">Total Sales</div>
+      <div class="stat-value">₹ 0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-title">Receivables</div>
+      <div class="stat-value">₹ 0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-title">Total Expenses</div>
+      <div class="stat-value">₹ 0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-title">Net Balance</div>
+      <div class="stat-value">₹ 0</div>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-header">
+      <strong>Recent Transactions</strong>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th><th>Party</th><th>Date</th><th>Amount</th><th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td colspan="5" style="text-align:center;color:#999">
+            No transactions yet
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+</div>
+</div>
+
+<!-- RULE ENGINE -->
+<script src="rules.js"></script>
+
+</body>
+</html>

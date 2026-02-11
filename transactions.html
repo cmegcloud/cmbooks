@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CMBOOKS – Transactions</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+body{font-family:Roboto,sans-serif;background:#f4f6f9;margin:0}
+.container{padding:20px}
+
+.header-row{
+display:flex;justify-content:space-between;align-items:center;margin-bottom:20px
+}
+h1{font-size:24px}
+
+.btn{
+padding:10px 16px;border:none;border-radius:6px;
+font-weight:600;cursor:pointer
+}
+.btn-primary{background:#2962ff;color:#fff}
+.btn-secondary{background:#eee}
+.btn-danger{background:#d32f2f;color:#fff}
+
+.table-wrap{
+background:#fff;border-radius:10px;border:1px solid #e0e0e0
+}
+table{width:100%;border-collapse:collapse}
+th,td{
+padding:12px 14px;border-bottom:1px solid #eee;text-align:left
+}
+th{
+background:#f9fafc;font-size:12px;
+text-transform:uppercase;color:#777
+}
+tr:hover{background:#f4f6f9}
+
+.badge{
+padding:4px 10px;border-radius:20px;
+font-size:12px;font-weight:600
+}
+.badge-sale{background:#e3f2fd;color:#1565c0}
+.badge-purchase{background:#ede7f6;color:#512da8}
+.badge-receipt{background:#e8f5e9;color:#2e7d32}
+.badge-payment{background:#ffebee;color:#c62828}
+.badge-journal{background:#eeeeee;color:#444}
+
+.modal{
+display:none;position:fixed;top:0;left:0;right:0;bottom:0;
+background:rgba(0,0,0,.4);align-items:center;justify-content:center
+}
+.modal.show{display:flex}
+.modal-box{
+background:#fff;border-radius:10px;
+width:90%;max-width:520px
+}
+.modal-header{
+padding:16px;border-bottom:1px solid #eee;
+display:flex;justify-content:space-between;align-items:center
+}
+.modal-body{padding:16px}
+.modal-footer{
+padding:12px 16px;border-top:1px solid #eee;
+display:flex;justify-content:flex-end;gap:8px
+}
+
+.form-group{margin-bottom:12px}
+.form-group label{
+display:block;font-size:13px;font-weight:600;margin-bottom:4px
+}
+.form-group input,.form-group select,textarea{
+width:100%;padding:8px;border:1px solid #ccc;border-radius:5px
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="header-row">
+<h1>Transactions</h1>
+<button class="btn btn-primary" onclick="openModal()">+ New Transaction</button>
+</div>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Type</th>
+<th>Party</th>
+<th>Amount</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="txnTable">
+<tr>
+<td colspan="6" style="text-align:center;color:#888">
+No transactions recorded
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+</div>
+
+<!-- MODAL -->
+<div class="modal" id="txnModal">
+<div class="modal-box">
+
+<div class="modal-header">
+<h3 id="modalTitle">New Transaction</h3>
+<button onclick="closeModal()">✕</button>
+</div>
+
+<div class="modal-body">
+
+<div class="form-group">
+<label>Date</label>
+<input type="date" id="txnDate">
+</div>
+
+<div class="form-group">
+<label>Transaction Type</label>
+<select id="txnType">
+<option value="sale">Sale</option>
+<option value="purchase">Purchase</option>
+<option value="receipt">Receipt</option>
+<option value="payment">Payment</option>
+<option value="journal">Journal</option>
+</select>
+</div>
+
+<div class="form-group">
+<label>Party (optional)</label>
+<input id="txnParty" placeholder="Select party">
+</div>
+
+<div class="form-group">
+<label>Amount</label>
+<input type="number" id="txnAmount" placeholder="0.00">
+</div>
+
+<div class="form-group">
+<label>Status</label>
+<select id="txnStatus">
+<option value="draft">Draft</option>
+<option value="posted">Posted</option>
+</select>
+</div>
+
+<div class="form-group">
+<label>Notes</label>
+<textarea id="txnNotes" rows="3"></textarea>
+</div>
+
+</div>
+
+<div class="modal-footer">
+<button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+<button class="btn btn-primary" onclick="saveTransaction()">Save</button>
+</div>
+
+</div>
+</div>
+
+<script>
+let transactions=[];
+let editIndex=null;
+
+document.getElementById('txnDate').valueAsDate=new Date();
+
+function openModal(index=null){
+  document.getElementById('txnModal').classList.add('show');
+  editIndex=index;
+
+  if(index!==null){
+    const t=transactions[index];
+    txnDate.value=t.date;
+    txnType.value=t.type;
+    txnParty.value=t.party;
+    txnAmount.value=t.amount;
+    txnStatus.value=t.status;
+    txnNotes.value=t.notes;
+    modalTitle.innerText='Edit Transaction';
+  }else{
+    txnParty.value='';
+    txnAmount.value='';
+    txnStatus.value='draft';
+    txnNotes.value='';
+    modalTitle.innerText='New Transaction';
+  }
+}
+
+function closeModal(){
+  document.getElementById('txnModal').classList.remove('show');
+}
+
+function saveTransaction(){
+  const t={
+    date:txnDate.value,
+    type:txnType.value,
+    party:txnParty.value || '-',
+    amount:parseFloat(txnAmount.value||0),
+    status:txnStatus.value,
+    notes:txnNotes.value
+  };
+
+  if(editIndex!==null){
+    transactions[editIndex]=t;
+  }else{
+    transactions.unshift(t);
+  }
+  editIndex=null;
+  renderTable();
+  closeModal();
+}
+
+function renderTable(){
+  const tbody=document.getElementById('txnTable');
+  if(transactions.length===0){
+    tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:#888">No transactions recorded</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML=transactions.map((t,i)=>`
+    <tr>
+      <td>${new Date(t.date).toLocaleDateString('en-IN')}</td>
+      <td><span class="badge badge-${t.type}">${t.type.toUpperCase()}</span></td>
+      <td>${t.party}</td>
+      <td>₹ ${t.amount.toLocaleString('en-IN',{maximumFractionDigits:2})}</td>
+      <td>${t.status}</td>
+      <td>
+        <button onclick="openModal(${i})">Edit</button>
+        <button class="btn-danger" onclick="deleteTxn(${i})">Delete</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function deleteTxn(i){
+  if(confirm('Delete this transaction?')){
+    transactions.splice(i,1);
+    renderTable();
+  }
+}
+</script>
+
+</body>
+</html>
