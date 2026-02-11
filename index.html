@@ -212,5 +212,29 @@ th{font-size:12px;color:var(--muted);text-transform:uppercase}
 <!-- RULE ENGINE -->
 <script src="rules.js"></script>
 
+  <script src="ledger.js"></script>
+<script src="transactions.js"></script>
+<script src="rules.js"></script>
+
+<script>
+function updateDashboard() {
+  document.querySelector(".stat-card:nth-child(1) .stat-value")
+    .innerText = "₹ " + getBalance("Sales");
+
+  document.querySelector(".stat-card:nth-child(2) .stat-value")
+    .innerText = "₹ " + getBalance("Accounts Receivable");
+
+  document.querySelector(".stat-card:nth-child(3) .stat-value")
+    .innerText = "₹ " + getBalance("Expenses");
+
+  document.querySelector(".stat-card:nth-child(4) .stat-value")
+    .innerText = "₹ " + (
+      getBalance("Sales") - getBalance("Expenses")
+    );
+}
+
+document.addEventListener("DOMContentLoaded", updateDashboard);
+</script>
+
 </body>
 </html>
