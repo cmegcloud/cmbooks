@@ -223,8 +223,9 @@ z-index:1000;
 <div class="main-content">
 
 <!-- SIDEBAR -->
-<div class="sidebar">
-<button class="add-btn" onclick="openModal()">+ New Sale</button>
+<div class="sidebar" id="sidebar">
+<button class="add-btn" onclick="closeSidebarMobile(); openSaleModal();">
+
 
 <div class="sidebar-title">Overview</div>
 <div class="nav-item active">Dashboard</div>
@@ -352,6 +353,13 @@ table.innerHTML+=`<tr>
 }
 
 document.addEventListener("DOMContentLoaded",updateDashboard);
+</script>
+<script>
+function closeSidebarMobile() {
+  if (window.innerWidth < 768) {
+    document.getElementById('sidebar').classList.remove('active');
+  }
+}
 </script>
 
 </body>
