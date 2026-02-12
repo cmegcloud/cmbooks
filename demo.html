@@ -6,6 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#1c212e">
     <link rel="icon" type="image/png" href="https://img.icons8.com/color/96/general-ledger.png">
+    <link rel="manifest" href="manifest.json">
     
     <title>CMB | Cloud Accounting</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -45,7 +46,7 @@
         .hidden-section { display: none; }
         
         /* LOGIN SCREEN STYLES */
-        #loginScreen { position: fixed; inset: 0; background: #1c212e; z-index: 100; display: flex; justify-content: center; align-items: center; }
+        #loginScreen { position: fixed; inset: 0; background: #1c212e; z-index: 100; display: flex; justify-content: center; align-items: center; padding: 20px; }
         .login-box { background: white; padding: 40px; border-radius: 8px; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); text-align: center; border-top: 4px solid var(--zoho-yellow); }
     </style>
 </head>
@@ -56,7 +57,8 @@
         <div class="login-box">
             <h1 class="text-3xl font-bold mb-2">CMB <span style="color:var(--zoho-yellow)">Books</span></h1>
             <p class="text-gray-500 mb-6 text-sm">Please login to access your account</p>
-            <form id="loginForm" onsubmit="handleLogin(event)">
+            
+            <form id="loginForm" onsubmit="event.preventDefault(); handleLogin(); return false;">
                 <div class="text-left mb-4">
                     <label class="text-xs font-bold text-gray-500 uppercase">Username</label>
                     <select id="loginUser" class="form-input text-lg py-3">
@@ -226,7 +228,7 @@
                 <div><label class="text-xs font-bold text-gray-500">DATE</label><input type="date" name="date" class="form-input" required></div>
                 <div><label class="text-xs font-bold text-gray-500">DEBIT (Dr)</label><select name="drLedger" id="drSelect" class="form-input"><option>Loading...</option></select></div>
                 <div><label class="text-xs font-bold text-gray-500">CREDIT (Cr)</label><select name="crLedger" id="crSelect" class="form-input"><option>Loading...</option></select></div>
-                <div><label class="text-xs font-bold text-gray-500">AMOUNT</label><input type="number" name="amount" class="form-input" required></div>
+                <div><label class="text-xs font-bold text-gray-500">AMOUNT</label><input type="number" name="amount" class="form-input" step="0.01" required></div>
                 <div><label class="text-xs font-bold text-gray-500">NARRATION</label><input type="text" name="narration" class="form-input"></div>
                 <button type="submit" class="btn-primary mt-6 w-full py-3">Save</button>
             </form>
@@ -234,13 +236,12 @@
     </div>
 
     <script>
-        // *** REPLACE THIS WITH YOUR CURRENT APP SCRIPT URL ***
+        // *** YOUR CURRENT DEPLOYMENT URL ***
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz-9anHvoVyrJFM0xzCSMmwyPnJ1nrEF-rAeiq-egScciq-FC68BzIj4q4OftdpIO0hhA/exec";
 
         let appData = { ledgers: [], vouchers: [] };
         
-        // --- AUTHENTICATION LOGIC ---
-        // Format: 'username': { pass: 'password', role: 'ROLE_NAME' }
+        // --- AUTHENTICATION ---
         const USERS = {
             'admin': { pass: '1234', role: 'ADMIN' },
             'accountree': { pass: '1234', role: 'ACCOUNTREE' },
@@ -251,53 +252,62 @@
         let activeUser = null;
 
         function checkLogin() {
-            // Check if logged in before
-            const savedUser = localStorage.getItem('cmb_user');
-            if (savedUser && USERS[savedUser]) {
-                activeUser = USERS[savedUser];
-                activeUser.name = savedUser;
-                showApp();
-            }
-            // Otherwise, login screen stays visible
+            try {
+                const savedUser = localStorage.getItem('cmb_user');
+                if (savedUser && USERS[savedUser]) {
+                    activeUser = USERS[savedUser];
+                    activeUser.name = savedUser;
+                    showApp();
+                }
+            } catch (e) { console.warn("Local storage blocked"); }
         }
 
-        function handleLogin(e) {
-            e.preventDefault();
-            const user = document.getElementById('loginUser').value;
-            const pass = document.getElementById('loginPass').value;
-            const err = document.getElementById('loginError');
+        // BULLETPROOF LOGIN FUNCTION
+        function handleLogin() {
+            try {
+                const user = document.getElementById('loginUser').value;
+                const pass = document.getElementById('loginPass').value;
+                const err = document.getElementById('loginError');
 
-            if (USERS[user] && USERS[user].pass === pass) {
-                activeUser = USERS[user];
-                activeUser.name = user;
-                localStorage.setItem('cmb_user', user); // Remember user
-                err.classList.add('hidden');
-                document.getElementById('loginPass').value = '';
-                showApp();
-            } else {
-                err.classList.remove('hidden');
+                if (USERS[user] && USERS[user].pass === pass) {
+                    activeUser = USERS[user];
+                    activeUser.name = user;
+                    
+                    try { localStorage.setItem('cmb_user', user); } catch(e){} // Safe save
+                    
+                    err.classList.add('hidden');
+                    document.getElementById('loginPass').value = '';
+                    showApp();
+                } else {
+                    err.classList.remove('hidden');
+                }
+            } catch (error) {
+                alert("Login Error: " + error.message);
             }
         }
 
         function logout() {
-            localStorage.removeItem('cmb_user');
+            try { localStorage.removeItem('cmb_user'); } catch(e){}
             activeUser = null;
             document.getElementById('mainApp').classList.add('hidden');
             document.getElementById('loginScreen').classList.remove('hidden');
         }
 
         function showApp() {
-            document.getElementById('loginScreen').classList.add('hidden');
-            document.getElementById('mainApp').classList.remove('hidden');
-            document.getElementById('userRoleBadge').textContent = "Role: " + activeUser.role;
-            applyRolePermissions();
-            loadAllData();
+            try {
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('mainApp').classList.remove('hidden');
+                document.getElementById('userRoleBadge').textContent = "Role: " + activeUser.role;
+                applyRolePermissions();
+                loadAllData();
+            } catch (error) {
+                alert("App Error: " + error.message);
+            }
         }
 
         function applyRolePermissions() {
             const role = activeUser.role;
 
-            // Display Navigation items based on role
             const showDashAndRep = (role === 'ADMIN' || role === 'AS');
             const showCompany = (role === 'ADMIN');
             
@@ -307,12 +317,10 @@
             document.getElementById('sec-analysis').style.display = showDashAndRep ? 'block' : 'none';
             document.getElementById('nav-company').style.display = showCompany ? 'flex' : 'none';
 
-            // Display Action Buttons based on role
             document.getElementById('btn-create-company').style.display = (role === 'ADMIN') ? 'block' : 'none';
             document.getElementById('btn-create-ledger').style.display = (role === 'ADMIN' || role === 'ACCOUNTREE') ? 'block' : 'none';
             document.getElementById('btn-create-voucher').style.display = (role === 'ADMIN' || role === 'ACCOUNTREE' || role === 'AJWA') ? 'block' : 'none';
 
-            // Set Default Page on Login
             if (role === 'ACCOUNTREE' || role === 'AJWA') {
                 nav('vouchers', document.getElementById('nav-vouchers'));
             } else {
@@ -320,8 +328,7 @@
             }
         }
 
-        // --- END AUTHENTICATION ---
-
+        // --- UI TOGGLES ---
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('open');
             document.getElementById('mobileBackdrop').classList.toggle('active');
@@ -342,192 +349,3 @@
             document.getElementById('pageTitle').textContent = el.textContent.substring(2);
             if(window.innerWidth < 768) toggleSidebar();
         }
-
-        function openModal(id) { document.getElementById(id).classList.add('show'); populateDropdowns(); }
-        function closeModal(id) { document.getElementById(id).classList.remove('show'); }
-
-        function openVoucherModal() {
-            document.getElementById('voucherForm').reset();
-            document.getElementById('voucherId').value = ""; 
-            document.getElementById('voucherModalTitle').textContent = "New Voucher";
-            openModal('voucherModal');
-        }
-
-        function editVoucher(id) {
-            const v = appData.vouchers.find(x => x.id === id);
-            if(!v) return;
-            openModal('voucherModal');
-            document.getElementById('voucherModalTitle').textContent = "Edit Voucher " + id;
-            const f = document.getElementById('voucherForm');
-            f.id.value = v.id; f.date.value = v.date; f.type.value = v.type;
-            f.amount.value = v.amount; f.narration.value = v.narration;
-            setTimeout(() => { f.drLedger.value = v.dr; f.crLedger.value = v.cr; }, 100);
-        }
-
-        function deleteVoucher(id) {
-            if(!confirm("Are you sure you want to delete " + id + "?")) return;
-            submitData({ preventDefault:()=>{}, target: { closest: ()=>({}) } }, 'deleteItem', { type:'voucher', id: id });
-        }
-
-        function printVoucher(id) {
-            const v = appData.vouchers.find(x => x.id === id);
-            if(!v) return;
-            const drName = appData.ledgers.find(l=>l.id==v.dr)?.name || v.dr;
-            const crName = appData.ledgers.find(l=>l.id==v.cr)?.name || v.cr;
-            const companyName = (appData.companies && appData.companies[0]) ? appData.companies[0].name : "CM Books";
-
-            const win = window.open('', '', 'width=800,height=600');
-            win.document.write(`
-                <html><head><title>Voucher ${id}</title>
-                <style>
-                    body { font-family: sans-serif; padding: 40px; }
-                    .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
-                    .row { display: flex; justify-content: space-between; margin-bottom: 10px; }
-                    .box { border: 1px solid #ccc; padding: 20px; margin-bottom: 30px; }
-                    .amount { font-size: 20px; font-weight: bold; text-align: right; }
-                    .footer { margin-top: 50px; display: flex; justify-content: space-between; }
-                    .sign { border-top: 1px solid #333; width: 200px; text-align: center; padding-top: 5px; }
-                </style>
-                </head><body>
-                <div class="header"><h1>${companyName}</h1><h2>${v.type.toUpperCase()} VOUCHER</h2></div>
-                <div class="row"><div><strong>Voucher No:</strong> ${v.id}</div><div><strong>Date:</strong> ${v.date}</div></div>
-                <div class="box">
-                    <div class="row"><div><strong>Debit:</strong></div><div>${drName}</div></div>
-                    <div class="row"><div><strong>Credit:</strong></div><div>${crName}</div></div>
-                    <hr><div class="row"><div><strong>Narration:</strong></div><div>${v.narration}</div></div>
-                </div>
-                <div class="amount">Amount: ₹ ${formatMoney(v.amount)}</div>
-                <div class="footer"><div class="sign">Prepared By</div><div class="sign">Authorized Signatory</div></div>
-                <script>window.print();<\/script>
-                </body></html>
-            `);
-            win.document.close();
-        }
-
-        // --- DATA ENGINE ---
-        function loadAllData() {
-            document.getElementById('loadingIndicator').classList.remove('hidden');
-            fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "getAllData" }) })
-            .then(res => res.json())
-            .then(result => {
-                if(result.status === "SUCCESS") {
-                    appData = result.data;
-                    renderDashboard(result.data.stats);
-                    renderTable('companyTableBody', result.data.companies, ['id','name','gst','state']);
-                    renderTable('ledgerTableBody', result.data.ledgers, ['id','name','category','bal'], true);
-                    renderVoucherTable(); 
-                    populateDropdowns();
-                }
-            })
-            .finally(() => document.getElementById('loadingIndicator').classList.add('hidden'));
-        }
-
-        function loadReport() {
-            const ledgerId = document.getElementById('reportLedgerSelect').value;
-            if(!ledgerId) return alert("Select Ledger");
-            const tbody = document.getElementById('reportTableBody');
-            tbody.innerHTML = "<tr><td colspan='6' class='text-center p-4'>Loading...</td></tr>";
-            fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "getReport", ledgerId: ledgerId }) })
-            .then(res => res.json())
-            .then(res => {
-                tbody.innerHTML = "";
-                if(!res.data.length) { tbody.innerHTML = "<tr><td colspan='6' class='text-center p-4'>No Data</td></tr>"; return; }
-                res.data.forEach(r => {
-                    const dr = (r.debit=='-'||r.debit==0)?'-':formatMoney(r.debit);
-                    const cr = (r.credit=='-'||r.credit==0)?'-':formatMoney(r.credit);
-                    tbody.innerHTML += `<tr class="border-b"><td class="p-3">${r.date}</td><td class="p-3 text-blue-600">${r.vNo}</td><td class="p-3">${r.particulars}</td><td class="p-3 text-right text-green-600">${dr}</td><td class="p-3 text-right text-red-600">${cr}</td><td class="p-3 text-right font-bold">${formatMoney(r.balance)}</td></tr>`;
-                });
-            });
-        }
-
-        function renderVoucherTable() {
-            const tbody = document.getElementById('voucherTableBody');
-            tbody.innerHTML = "";
-            if(!appData.vouchers.length) { tbody.innerHTML = "<tr><td colspan='6' class='text-center p-4'>No Data</td></tr>"; return; }
-            
-            appData.vouchers.forEach(v => {
-                let actionHtml = `<button class="btn-icon btn-print" onclick="printVoucher('${v.id}')"><i class="fas fa-print"></i></button>`;
-                
-                // RBAC: Only Admin and Accountree can Edit/Delete
-                if (activeUser.role === 'ADMIN' || activeUser.role === 'ACCOUNTREE') {
-                    actionHtml += `<button class="btn-icon btn-edit" onclick="editVoucher('${v.id}')"><i class="fas fa-edit"></i></button>
-                                   <button class="btn-icon btn-del" onclick="deleteVoucher('${v.id}')"><i class="fas fa-trash"></i></button>`;
-                }
-
-                // If AS, hide actions column completely? For now, we just leave it empty or print-only.
-                if (activeUser.role === 'AS') {
-                    actionHtml = `<span class="text-xs text-gray-400">View Only</span>`;
-                }
-
-                tbody.innerHTML += `
-                <tr class="border-b hover:bg-gray-50">
-                    <td class="p-3 flex items-center">${actionHtml}</td>
-                    <td class="p-3 text-gray-500 text-xs">${v.id}</td>
-                    <td class="p-3">${v.date}</td>
-                    <td class="p-3"><span class="px-2 py-1 rounded text-xs bg-gray-100">${v.type}</span></td>
-                    <td class="p-3 text-right font-mono">${formatMoney(v.amount)}</td>
-                    <td class="p-3 text-gray-500 text-sm truncate max-w-xs">${v.narration}</td>
-                </tr>`;
-            });
-        }
-
-        function renderDashboard(stats) {
-            if(!stats) return;
-            document.getElementById('dashIncome').textContent = "₹ " + formatMoney(stats.income);
-            document.getElementById('dashExpense').textContent = "₹ " + formatMoney(stats.expense);
-            document.getElementById('dashBalance').textContent = "₹ " + formatMoney(stats.balance);
-        }
-
-        function renderTable(bodyId, data, keys, money=false) {
-            const tbody = document.getElementById(bodyId);
-            tbody.innerHTML = "";
-            if(!data || !data.length) { tbody.innerHTML = `<tr><td colspan="${keys.length}" class='text-center p-4'>No Data</td></tr>`; return; }
-            data.forEach(r => {
-                let tr = "<tr class='border-b'>";
-                keys.forEach(k => {
-                    let val = r[k]||'-';
-                    if(money && (k==='amount'||k==='bal')) val = `<div class="text-right font-mono">${formatMoney(val)}</div>`;
-                    tr += `<td class="p-3">${val}</td>`;
-                });
-                tbody.innerHTML += tr + "</tr>";
-            });
-        }
-
-        function populateDropdowns() {
-            const opts = appData.ledgers.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
-            ['drSelect','crSelect','reportLedgerSelect'].forEach(id => {
-                if(document.getElementById(id)) document.getElementById(id).innerHTML = '<option value="">Select...</option>' + opts;
-            });
-        }
-
-        function submitData(e, action, payload=null) {
-            if(e.preventDefault) e.preventDefault();
-            
-            let data = {};
-            if(payload) {
-                data = payload;
-                data.action = action;
-            } else {
-                const form = e.target;
-                const btn = form.querySelector('button');
-                btn.textContent = "..."; btn.disabled = true;
-                const fd = new FormData(form);
-                fd.forEach((v, k) => data[k] = v);
-                data.action = action;
-            }
-
-            fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(data) })
-            .then(res => res.json())
-            .then(res => {
-                if(res.status === "SUCCESS") {
-                    if(!payload) { e.target.reset(); closeModal(e.target.closest('.modal-overlay').id); }
-                    alert(res.message); loadAllData();
-                } else if(res.status === "DUPLICATE") {
-                    alert("⚠️ " + res.message);
-                } else { alert("Error: " + res.message); }
-            })
-            .finally(() => { if(!payload) { e.target.querySelector('button').textContent = "Save"; e.target.querySelector('button').disabled = false; }});
-        }
-    </script>
-</body>
-</html>
