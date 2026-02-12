@@ -1,41 +1,343 @@
-<div id="voucherModal" class="cmb-modal-overlay">
-    <div class="cmb-modal">
-     <div class="cmb-modal-header">
-      <h2>New Voucher</h2><button class="cmb-close-btn" onclick="closeModal('voucherModal')">×</button>
-     </div>
-     <form id="voucherForm" onsubmit="submitToSheet(event, 'voucherForm', 'saveVoucher')">
-      
-      <div class="cmb-form-group"><label>Voucher Type</label>
-          <select name="type" class="cmb-input" required>
-              <option value="Payment">Payment (Out)</option>
-              <option value="Receipt">Receipt (In)</option>
-              <option value="Journal">Journal (Adj)</option>
-              <option value="Contra">Contra (Bank/Cash)</option>
-          </select>
-      </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMB | Cloud Accounting</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --zoho-blue: #006fda;
+            --zoho-yellow: #f5ba31;
+            --zoho-bg: #f4f5f7;
+            --zoho-border: #e0e0e0;
+            --zoho-text: #333;
+        }
 
-      <div class="cmb-form-group"><label>Date</label> 
-          <input type="date" name="date" class="cmb-input" required></div>
-      
-      <div class="cmb-form-group"><label>Debit Account (Dr)</label> 
-          <select name="drLedger" id="drLedgerSelect" class="cmb-input" required> 
-              <option value="">Loading accounts...</option> 
-          </select>
-      </div>
-      
-      <div class="cmb-form-group"><label>Credit Account (Cr)</label> 
-          <select name="crLedger" id="crLedgerSelect" class="cmb-input" required> 
-              <option value="">Loading accounts...</option> 
-          </select>
-      </div>
-      
-      <div class="cmb-form-group"><label>Amount</label> 
-          <input type="number" name="amount" class="cmb-input" step="0.01" required></div>
-      
-      <div class="cmb-form-group"><label>Narration / Remarks</label> 
-          <input type="text" name="narration" class="cmb-input"></div>
-          
-      <button type="submit" class="cmb-button w-full">Save Voucher</button>
-     </form>
+        body { font-family: 'Inter', sans-serif; background-color: var(--zoho-bg); color: var(--zoho-text); overflow: hidden; }
+        
+        /* Sidebar Styling */
+        .sidebar { background-color: #1c212e; color: white; transition: all 0.3s; }
+        .nav-item { padding: 12px 20px; cursor: pointer; color: #b0b0b0; border-left: 3px solid transparent; display: flex; align-items: center; gap: 10px; font-size: 0.95rem; }
+        .nav-item:hover, .nav-item.active { background-color: rgba(255,255,255,0.05); color: #fff; border-left-color: var(--zoho-blue); }
+        
+        /* Card & Form Styling */
+        .cmb-card { background: white; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 25px; border-top: 3px solid var(--zoho-blue); }
+        .form-input { width: 100%; padding: 8px 10px; border: 1px solid var(--zoho-border); border-radius: 4px; font-size: 14px; margin-top: 5px; }
+        .form-input:focus { outline: none; border-color: var(--zoho-blue); }
+        .btn-primary { background-color: var(--zoho-yellow); color: #000; padding: 10px 20px; border-radius: 4px; font-weight: 600; font-size: 14px; transition: 0.2s; border:none; cursor: pointer;}
+        .btn-primary:hover { filter: brightness(0.95); }
+
+        /* Modal Overlay */
+        .modal-overlay { background: rgba(0,0,0,0.5); position: fixed; inset: 0; display: none; justify-content: center; align-items: center; z-index: 50; }
+        .modal-overlay.show { display: flex; }
+        
+        /* Utility */
+        .hidden-section { display: none; }
+        .active-section { display: block; }
+    </style>
+</head>
+
+<body class="flex h-screen">
+
+    <aside class="sidebar w-64 flex-shrink-0 flex flex-col pt-5">
+        <div class="px-5 mb-6">
+            <h1 class="text-xl font-bold">CMB | <span style="color:var(--zoho-yellow)">Books</span></h1>
+        </div>
+        
+        <nav class="flex-1 overflow-y-auto">
+            <div class="px-5 py-2 text-xs font-bold text-gray-500 uppercase tracking-wider">Main</div>
+            <div class="nav-item active" onclick="nav('dashboard', this)">📊 Dashboard</div>
+            <div class="nav-item" onclick="nav('company', this)">🏢 Company</div>
+            
+            <div class="px-5 py-2 mt-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Masters</div>
+            <div class="nav-item" onclick="nav('ledger', this)">📖 Ledgers</div>
+            
+            <div class="px-5 py-2 mt-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Entries</div>
+            <div class="nav-item" onclick="nav('vouchers', this)">📝 Vouchers</div>
+        </nav>
+        
+        <div class="p-4 border-t border-gray-700 bg-gray-900">
+            <div class="text-xs text-gray-400">Logged in as Admin</div>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col overflow-hidden">
+        
+        <header class="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-8 shadow-sm">
+            <h2 class="text-lg font-semibold text-gray-700" id="pageTitle">Dashboard</h2>
+            <button class="text-sm text-red-500 hover:text-red-700 font-medium">Logout</button>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-8">
+            
+            <div id="dashboard" class="active-section section">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-green-500">
+                        <div class="text-gray-500 text-sm font-medium">Total Income</div>
+                        <div class="text-2xl font-bold mt-1 text-gray-800">₹ 0.00</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-red-500">
+                        <div class="text-gray-500 text-sm font-medium">Total Expense</div>
+                        <div class="text-2xl font-bold mt-1 text-gray-800">₹ 0.00</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-blue-500">
+                        <div class="text-gray-500 text-sm font-medium">Net Balance</div>
+                        <div class="text-2xl font-bold mt-1 text-gray-800">₹ 0.00</div>
+                    </div>
+                </div>
+                <div class="cmb-card">
+                    <h3 class="font-bold text-lg mb-2 text-blue-800">Welcome to CMB Accounting</h3>
+                    <p class="text-gray-600 text-sm">Select an option from the sidebar to begin managing your accounts.</p>
+                </div>
+            </div>
+
+            <div id="company" class="hidden-section section">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-gray-700">Company Profile</h3>
+                    <button class="btn-primary" onclick="openModal('companyModal')">+ Create Company</button>
+                </div>
+                <div class="cmb-card">
+                    <p class="text-gray-500 text-sm">Company details are stored in the <b>'Settings_Company'</b> sheet.</p>
+                </div>
+            </div>
+
+            <div id="ledger" class="hidden-section section">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-gray-700">Chart of Accounts</h3>
+                    <button class="btn-primary" onclick="openModal('ledgerModal')">+ Create Ledger</button>
+                </div>
+                <div class="cmb-card">
+                    <p class="text-gray-500 text-sm">Ledgers are stored in <b>'Master_Ledgers'</b>. These appear in Voucher dropdowns.</p>
+                </div>
+            </div>
+
+            <div id="vouchers" class="hidden-section section">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-gray-700">Transaction Entries</h3>
+                    <button class="btn-primary" onclick="openVoucherModal()">+ New Voucher</button>
+                </div>
+                <div class="cmb-card">
+                    <p class="text-gray-500 text-sm">Record Payments, Receipts, and Journal entries here. Transactions are saved to <b>'Transactions_Vouchers'</b>.</p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <div id="companyModal" class="modal-overlay">
+        <div class="bg-white rounded-lg w-full max-w-2xl p-6 shadow-2xl relative">
+            <button class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl" onclick="closeModal('companyModal')">×</button>
+            <h3 class="text-xl font-bold mb-6 text-blue-700 border-b pb-2">New Company</h3>
+            
+            <form id="companyForm" onsubmit="submitData(event, 'saveCompany')">
+                <div class="grid grid-cols-2 gap-6">
+                    <div><label class="text-xs font-bold text-gray-500 uppercase">Company Name</label><input type="text" name="companyName" class="form-input" required></div>
+                    <div><label class="text-xs font-bold text-gray-500 uppercase">GST No</label><input type="text" name="gst" class="form-input"></div>
+                    
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">State</label>
+                        <select name="state" class="form-input" onchange="this.nextElementSibling.value = (this.value==='Kerala'?'32': (this.value==='Tamil Nadu'?'33':''))">
+                            <option value="">Select</option>
+                            <option value="Kerala">Kerala</option>
+                            <option value="Tamil Nadu">Tamil Nadu</option>
+                            <option value="Karnataka">Karnataka</option>
+                        </select>
+                        <input type="hidden" name="stateCode">
+                    </div>
+                    
+                    <div><label class="text-xs font-bold text-gray-500 uppercase">FY Start</label><input type="date" name="fyStart" class="form-input" required></div>
+                    <div><label class="text-xs font-bold text-gray-500 uppercase">Password</label><input type="password" name="password" class="form-input" required></div>
+                </div>
+                <div class="mt-8 text-right border-t pt-4">
+                    <button type="submit" class="btn-primary">Create Company</button>
+                </div>
+            </form>
+        </div>
     </div>
-   </div>
+
+    <div id="ledgerModal" class="modal-overlay">
+        <div class="bg-white rounded-lg w-full max-w-2xl p-6 shadow-2xl relative">
+            <button class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl" onclick="closeModal('ledgerModal')">×</button>
+            <h3 class="text-xl font-bold mb-6 text-blue-700 border-b pb-2">New Ledger Account</h3>
+            
+            <form id="ledgerForm" onsubmit="submitData(event, 'saveLedger')">
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="col-span-2"><label class="text-xs font-bold text-gray-500 uppercase">Ledger Name</label><input type="text" name="ledgerName" class="form-input" required></div>
+                    
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Category</label>
+                        <select name="category" class="form-input" required>
+                            <option value="">Select</option>
+                            <option value="Cash">Cash</option>
+                            <option value="Bank">Bank Account</option>
+                            <option value="Supplier">Supplier (Creditor)</option>
+                            <option value="Customer">Customer (Debtor)</option>
+                            <option value="Expense">Indirect Expense</option>
+                        </select>
+                    </div>
+                    
+                    <div><label class="text-xs font-bold text-gray-500 uppercase">Opening Balance</label><input type="number" name="openingBalance" class="form-input" value="0"></div>
+                    
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">GST Applicable</label>
+                        <select name="gstApplicable" class="form-input">
+                            <option value="No">No</option>
+                            <option value="Yes">Yes</option>
+                        </select>
+                    </div>
+                    
+                    <div><label class="text-xs font-bold text-gray-500 uppercase">Dr / Cr</label>
+                        <select name="drCr" class="form-input"><option value="Dr">Dr</option><option value="Cr">Cr</option></select>
+                    </div>
+                </div>
+                <div class="mt-8 text-right border-t pt-4">
+                    <button type="submit" class="btn-primary">Save Ledger</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="voucherModal" class="modal-overlay">
+        <div class="bg-white rounded-lg w-full max-w-2xl p-6 shadow-2xl relative">
+            <button class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl" onclick="closeModal('voucherModal')">×</button>
+            <h3 class="text-xl font-bold mb-6 text-blue-700 border-b pb-2">New Transaction Voucher</h3>
+            
+            <form id="voucherForm" onsubmit="submitData(event, 'saveVoucher')">
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Type</label>
+                        <select name="type" class="form-input" required>
+                            <option value="Payment">Payment (Out)</option>
+                            <option value="Receipt">Receipt (In)</option>
+                            <option value="Journal">Journal Entry</option>
+                            <option value="Contra">Contra</option>
+                        </select>
+                    </div>
+                    
+                    <div><label class="text-xs font-bold text-gray-500 uppercase">Date</label><input type="date" name="date" class="form-input" required></div>
+                    
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Debit Account (Dr)</label>
+                        <select name="drLedger" id="drSelect" class="form-input" required><option>Loading...</option></select>
+                    </div>
+                    
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Credit Account (Cr)</label>
+                        <select name="crLedger" id="crSelect" class="form-input" required><option>Loading...</option></select>
+                    </div>
+                    
+                    <div><label class="text-xs font-bold text-gray-500 uppercase">Amount</label><input type="number" name="amount" class="form-input" step="0.01" required></div>
+                    
+                    <div><label class="text-xs font-bold text-gray-500 uppercase">Narration</label><input type="text" name="narration" class="form-input"></div>
+                </div>
+                <div class="mt-8 text-right border-t pt-4">
+                    <button type="submit" class="btn-primary">Save Transaction</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // ----------------------------------------------------
+        // CONNECTED URL
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxvLVMgM4gvCHyIok6rFLW-e8FsV1Td093dwphpKLlNViqaUyjW41aYYUd3Doa3YQq4nw/exec";
+        // ----------------------------------------------------
+
+        // Navigation Logic
+        function nav(sectionId, el) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active-section'));
+            document.querySelectorAll('.section').forEach(s => s.classList.add('hidden-section'));
+            
+            // Show target section
+            document.getElementById(sectionId).classList.remove('hidden-section');
+            document.getElementById(sectionId).classList.add('active-section');
+            
+            // Highlight sidebar
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
+            
+            // Update Title
+            document.getElementById('pageTitle').textContent = el.textContent.substring(2);
+        }
+
+        // Modal Logic
+        function openModal(id) { document.getElementById(id).classList.add('show'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+        // Special Logic for Voucher Modal (Load Ledgers)
+        function openVoucherModal() {
+            openModal('voucherModal');
+            loadLedgers();
+        }
+
+        // --- API COMMUNICATION ---
+
+        // 1. Submit Forms
+        function submitData(e, action) {
+            e.preventDefault();
+            const form = e.target;
+            const btn = form.querySelector('button[type="submit"]');
+            const originalText = btn.textContent;
+            
+            btn.textContent = "Processing...";
+            btn.disabled = true;
+
+            const formData = new FormData(form);
+            const data = {};
+            formData.forEach((value, key) => data[key] = value);
+            data.action = action;
+
+            fetch(SCRIPT_URL, {
+                method: "POST",
+                body: JSON.stringify(data)
+            })
+            .then(res => res.json())
+            .then(result => {
+                if(result.status === "SUCCESS") {
+                    alert("✓ " + result.message + " | ID: " + result.id);
+                    form.reset();
+                    closeModal(form.id === 'companyForm' ? 'companyModal' : (form.id === 'ledgerForm' ? 'ledgerModal' : 'voucherModal'));
+                } else {
+                    alert("Error: " + result.message);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Connection Failed. Check your internet or Script URL.");
+            })
+            .finally(() => {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            });
+        }
+
+        // 2. Fetch Ledgers for Dropdowns
+        function loadLedgers() {
+            const dr = document.getElementById('drSelect');
+            const cr = document.getElementById('crSelect');
+            dr.innerHTML = "<option>Loading...</option>";
+            cr.innerHTML = "<option>Loading...</option>";
+            
+            fetch(SCRIPT_URL, {
+                method: "POST",
+                body: JSON.stringify({ action: "getLedgers" })
+            })
+            .then(res => res.json())
+            .then(result => {
+                if(result.status === "SUCCESS") {
+                    let html = '<option value="">Select Account</option>';
+                    result.data.forEach(l => {
+                        html += `<option value="${l.id}">${l.name} (${l.category})</option>`;
+                    });
+                    dr.innerHTML = html;
+                    cr.innerHTML = html;
+                }
+            });
+        }
+    </script>
+</body>
+</html>
