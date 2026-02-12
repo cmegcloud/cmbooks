@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#1c212e">
-    <link rel="icon" type="image/png" href="logocmbooks.png">
-    <link rel="apple-touch-icon" href="logocmbooks.png">
+    <link rel="icon" type="image/png" href="https://img.icons8.com/color/96/general-ledger.png">
     
     <title>CMB | Cloud Accounting</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -44,110 +43,143 @@
         .modal-overlay { background: rgba(0,0,0,0.6); position: fixed; inset: 0; display: none; justify-content: center; align-items: center; z-index: 50; padding: 15px; }
         .modal-overlay.show { display: flex; }
         .hidden-section { display: none; }
+        
+        /* LOGIN SCREEN STYLES */
+        #loginScreen { position: fixed; inset: 0; background: #1c212e; z-index: 100; display: flex; justify-content: center; align-items: center; }
+        .login-box { background: white; padding: 40px; border-radius: 8px; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); text-align: center; border-top: 4px solid var(--zoho-yellow); }
     </style>
 </head>
 
-<body class="flex h-screen" onload="initApp()">
+<body class="flex h-screen" onload="checkLogin()">
 
-    <div id="mobileBackdrop" class="overlay" onclick="toggleSidebar()"></div>
+    <div id="loginScreen">
+        <div class="login-box">
+            <h1 class="text-3xl font-bold mb-2">CMB <span style="color:var(--zoho-yellow)">Books</span></h1>
+            <p class="text-gray-500 mb-6 text-sm">Please login to access your account</p>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="text-left mb-4">
+                    <label class="text-xs font-bold text-gray-500 uppercase">Username</label>
+                    <select id="loginUser" class="form-input text-lg py-3">
+                        <option value="admin">Admin</option>
+                        <option value="accountree">Accountree</option>
+                        <option value="ajwa">Ajwa</option>
+                        <option value="as">AS</option>
+                    </select>
+                </div>
+                <div class="text-left mb-6">
+                    <label class="text-xs font-bold text-gray-500 uppercase">Password</label>
+                    <input type="password" id="loginPass" class="form-input text-lg py-3" required>
+                </div>
+                <button type="submit" class="btn-primary w-full py-3 text-lg">Login</button>
+            </form>
+            <p id="loginError" class="text-red-500 text-sm mt-4 hidden">Incorrect Password!</p>
+        </div>
+    </div>
 
-    <aside id="sidebar" class="sidebar w-64 flex-shrink-0 flex flex-col pt-5 h-full">
-        <div class="px-5 mb-6 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <img src="logocmbooks.png" alt="Logo" class="h-10 w-auto rounded bg-white p-1" onerror="this.style.display='none'">
+    <div id="mainApp" class="flex h-screen w-full hidden">
+        <div id="mobileBackdrop" class="overlay" onclick="toggleSidebar()"></div>
+
+        <aside id="sidebar" class="sidebar w-64 flex-shrink-0 flex flex-col pt-5 h-full">
+            <div class="px-5 mb-6 flex justify-between items-center">
                 <h1 class="text-xl font-bold">CMB | <span style="color:var(--zoho-yellow)">Books</span></h1>
+                <button class="md:hidden text-gray-400 text-2xl" onclick="toggleSidebar()">×</button>
             </div>
-            <button class="md:hidden text-gray-400 text-2xl" onclick="toggleSidebar()">×</button>
-        </div>
-        
-        <nav class="flex-1 overflow-y-auto pb-20">
-            <div class="nav-section">Main</div>
-            <div class="nav-item active" onclick="nav('dashboard', this)">📊 Dashboard</div>
-            <div class="nav-item" onclick="nav('company', this)">🏢 Company</div>
-            <div class="nav-section">Masters</div>
-            <div class="nav-item" onclick="nav('ledger', this)">📖 Ledgers</div>
-            <div class="nav-section">Entries</div>
-            <div class="nav-item" onclick="nav('vouchers', this)">📝 Vouchers</div>
-            <div class="nav-section">Analysis</div>
-            <div class="nav-item" onclick="nav('reports', this)">📈 Reports</div>
-            <div class="p-5 text-xs text-gray-500 cursor-pointer hover:text-white" onclick="initApp()">🔄 Sync Data</div>
-        </nav>
-    </aside>
-
-    <main class="flex-1 flex flex-col overflow-hidden relative w-full bg-gray-50">
-        <header class="bg-white border-b h-16 flex items-center justify-between px-4 md:px-8 shadow-sm flex-shrink-0 z-10 sticky top-0">
-            <div class="flex items-center gap-4">
-                <button class="md:hidden text-2xl text-gray-600" onclick="toggleSidebar()">☰</button>
-                <h2 class="text-lg font-semibold text-gray-700 truncate" id="pageTitle">Dashboard</h2>
-            </div>
-            <div id="loadingIndicator" class="text-blue-600 text-sm font-bold hidden flex items-center gap-2">
-                <span class="animate-spin">↻</span> <span class="hidden md:inline">Syncing...</span>
-            </div>
-        </header>
-
-        <div class="flex-1 overflow-y-auto p-4 md:p-8 pb-24">
             
-            <div id="dashboard" class="section">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                    <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-green-500">
-                        <div class="text-gray-500 text-sm font-medium">Income</div>
-                        <div class="text-2xl font-bold mt-1 text-gray-800 break-all" id="dashIncome">₹ 0.00</div>
+            <div class="px-5 mb-4 text-xs font-bold text-yellow-400 uppercase tracking-widest" id="userRoleBadge">Role</div>
+
+            <nav class="flex-1 overflow-y-auto pb-20">
+                <div class="nav-section" id="sec-main">Main</div>
+                <div class="nav-item active" id="nav-dashboard" onclick="nav('dashboard', this)">📊 Dashboard</div>
+                <div class="nav-item" id="nav-company" onclick="nav('company', this)">🏢 Company</div>
+                
+                <div class="nav-section">Masters</div>
+                <div class="nav-item" id="nav-ledger" onclick="nav('ledger', this)">📖 Ledgers</div>
+                
+                <div class="nav-section">Entries</div>
+                <div class="nav-item" id="nav-vouchers" onclick="nav('vouchers', this)">📝 Vouchers</div>
+                
+                <div class="nav-section" id="sec-analysis">Analysis</div>
+                <div class="nav-item" id="nav-reports" onclick="nav('reports', this)">📈 Reports</div>
+
+                <div class="p-5 text-xs text-gray-500 cursor-pointer hover:text-white mt-10" onclick="logout()">🚪 Logout</div>
+            </nav>
+        </aside>
+
+        <main class="flex-1 flex flex-col overflow-hidden relative w-full bg-gray-50">
+            <header class="bg-white border-b h-16 flex items-center justify-between px-4 md:px-8 shadow-sm flex-shrink-0 z-10 sticky top-0">
+                <div class="flex items-center gap-4">
+                    <button class="md:hidden text-2xl text-gray-600" onclick="toggleSidebar()">☰</button>
+                    <h2 class="text-lg font-semibold text-gray-700 truncate" id="pageTitle">Dashboard</h2>
+                </div>
+                <div id="loadingIndicator" class="text-blue-600 text-sm font-bold hidden flex items-center gap-2">
+                    <span class="animate-spin">↻</span> <span class="hidden md:inline">Syncing...</span>
+                </div>
+            </header>
+
+            <div class="flex-1 overflow-y-auto p-4 md:p-8 pb-24">
+                
+                <div id="dashboard" class="section">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                        <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-green-500">
+                            <div class="text-gray-500 text-sm font-medium">Income (Rect/Sales)</div>
+                            <div class="text-2xl font-bold mt-1 text-gray-800 break-all" id="dashIncome">₹ 0.00</div>
+                        </div>
+                        <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-red-500">
+                            <div class="text-gray-500 text-sm font-medium">Expense (Pay/Purch)</div>
+                            <div class="text-2xl font-bold mt-1 text-gray-800 break-all" id="dashExpense">₹ 0.00</div>
+                        </div>
+                        <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-blue-500">
+                            <div class="text-gray-500 text-sm font-medium">Net Balance</div>
+                            <div class="text-2xl font-bold mt-1 text-gray-800 break-all" id="dashBalance">₹ 0.00</div>
+                        </div>
                     </div>
-                    <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-red-500">
-                        <div class="text-gray-500 text-sm font-medium">Expense</div>
-                        <div class="text-2xl font-bold mt-1 text-gray-800 break-all" id="dashExpense">₹ 0.00</div>
+                </div>
+
+                <div id="company" class="section hidden-section">
+                    <button id="btn-create-company" class="btn-primary mb-4" onclick="openModal('companyModal')">+ Create Company</button>
+                    <div class="cmb-card">
+                        <table class="cmb-table">
+                            <thead><tr><th>ID</th><th>Name</th><th>GST</th><th>State</th></tr></thead>
+                            <tbody id="companyTableBody"><tr><td colspan="4" class="text-center text-gray-400 p-4">Loading...</td></tr></tbody>
+                        </table>
                     </div>
-                    <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-blue-500">
-                        <div class="text-gray-500 text-sm font-medium">Net Balance</div>
-                        <div class="text-2xl font-bold mt-1 text-gray-800 break-all" id="dashBalance">₹ 0.00</div>
+                </div>
+
+                <div id="ledger" class="section hidden-section">
+                    <button id="btn-create-ledger" class="btn-primary mb-4" onclick="openModal('ledgerModal')">+ Create Ledger</button>
+                    <div class="cmb-card">
+                        <table class="cmb-table">
+                            <thead><tr><th>ID</th><th>Name</th><th>Category</th><th class="text-right">Balance</th></tr></thead>
+                            <tbody id="ledgerTableBody"><tr><td colspan="4" class="text-center text-gray-400 p-4">Loading...</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="vouchers" class="section hidden-section">
+                    <button id="btn-create-voucher" class="btn-primary mb-4" onclick="openVoucherModal()">+ New Voucher</button>
+                    <div class="cmb-card">
+                        <table class="cmb-table">
+                            <thead><tr><th id="th-actions">Actions</th><th>ID</th><th>Date</th><th>Type</th><th class="text-right">Amount</th><th>Narration</th></tr></thead>
+                            <tbody id="voucherTableBody"><tr><td colspan="6" class="text-center text-gray-400 p-4">Loading...</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="reports" class="section hidden-section">
+                    <div class="bg-white p-4 rounded-lg shadow-sm mb-4 border border-gray-200 space-y-3">
+                        <select id="reportLedgerSelect" class="form-input"><option value="">Select Ledger...</option></select>
+                        <button class="btn-primary w-full" onclick="loadReport()">View Report</button>
+                    </div>
+                    <div class="cmb-card">
+                        <table class="cmb-table">
+                            <thead><tr><th>Date</th><th>Voucher</th><th>Particulars</th><th class="text-right">Debit</th><th class="text-right">Credit</th><th class="text-right">Balance</th></tr></thead>
+                            <tbody id="reportTableBody"><tr><td colspan="6" class="text-center text-gray-400 p-8">Select a Ledger to view details.</td></tr></tbody>
+                        </table>
                     </div>
                 </div>
             </div>
-
-            <div id="company" class="section hidden-section">
-                <button class="btn-primary mb-4" onclick="openModal('companyModal')">+ Create Company</button>
-                <div class="cmb-card">
-                    <table class="cmb-table">
-                        <thead><tr><th>ID</th><th>Name</th><th>GST</th><th>State</th></tr></thead>
-                        <tbody id="companyTableBody"><tr><td colspan="4" class="text-center text-gray-400 p-4">Loading...</td></tr></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div id="ledger" class="section hidden-section">
-                <button class="btn-primary mb-4" onclick="openModal('ledgerModal')">+ Create Ledger</button>
-                <div class="cmb-card">
-                    <table class="cmb-table">
-                        <thead><tr><th>ID</th><th>Name</th><th>Category</th><th class="text-right">Balance</th></tr></thead>
-                        <tbody id="ledgerTableBody"><tr><td colspan="4" class="text-center text-gray-400 p-4">Loading...</td></tr></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div id="vouchers" class="section hidden-section">
-                <button class="btn-primary mb-4" onclick="openVoucherModal()">+ New Voucher</button>
-                <div class="cmb-card">
-                    <table class="cmb-table">
-                        <thead><tr><th>Actions</th><th>ID</th><th>Date</th><th>Type</th><th class="text-right">Amount</th><th>Narration</th></tr></thead>
-                        <tbody id="voucherTableBody"><tr><td colspan="6" class="text-center text-gray-400 p-4">Loading...</td></tr></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div id="reports" class="section hidden-section">
-                <div class="bg-white p-4 rounded-lg shadow-sm mb-4 border border-gray-200 space-y-3">
-                    <select id="reportLedgerSelect" class="form-input"><option value="">Select Ledger...</option></select>
-                    <button class="btn-primary w-full" onclick="loadReport()">View Report</button>
-                </div>
-                <div class="cmb-card">
-                    <table class="cmb-table">
-                        <thead><tr><th>Date</th><th>Voucher</th><th>Particulars</th><th class="text-right">Debit</th><th class="text-right">Credit</th><th class="text-right">Balance</th></tr></thead>
-                        <tbody id="reportTableBody"><tr><td colspan="6" class="text-center text-gray-400 p-8">Select a Ledger to view details.</td></tr></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </main>
+        </main>
+    </div>
 
     <div id="companyModal" class="modal-overlay">
         <div class="bg-white rounded-xl w-full max-w-lg p-6 relative m-4 max-h-[90vh] overflow-y-auto shadow-2xl">
@@ -170,14 +202,7 @@
             <form onsubmit="submitData(event, 'saveLedger')">
                 <input type="text" name="ledgerName" placeholder="Name" class="form-input" required>
                 <select name="category" class="form-input" required>
-                    <option value="Cash">Cash</option>
-                    <option value="Bank">Bank</option>
-                    <option value="Customer">Customer (Debtor)</option>
-                    <option value="Supplier">Supplier (Creditor)</option>
-                    <option value="Sales">Sales Account</option>
-                    <option value="Purchase">Purchase Account</option>
-                    <option value="Expense">Indirect Expense</option>
-                    <option value="Capital">Capital Account</option>
+                    <option value="Cash">Cash</option><option value="Bank">Bank</option><option value="Customer">Customer</option><option value="Supplier">Supplier</option>
                 </select>
                 <input type="number" name="openingBalance" placeholder="Op Bal" class="form-input" value="0">
                 <select name="drCr" class="form-input"><option value="Dr">Dr</option><option value="Cr">Cr</option></select>
@@ -193,25 +218,14 @@
             <form id="voucherForm" onsubmit="submitData(event, 'saveVoucher')">
                 <input type="hidden" name="id" id="voucherId">
                 <div><label class="text-xs font-bold text-gray-500">TYPE</label>
-                    <select name="type" id="voucherType" class="form-input" onchange="updateVoucherLabels()" required>
-                        <option value="Payment">Payment</option>
-                        <option value="Receipt">Receipt</option>
-                        <option value="Sales">Sales</option>
-                        <option value="Purchase">Purchase</option>
-                        <option value="Contra">Contra</option>
+                    <select name="type" class="form-input" required>
+                        <option value="Payment">Payment</option><option value="Receipt">Receipt</option>
+                        <option value="Sales">Sales</option><option value="Purchase">Purchase</option>
                     </select>
                 </div>
                 <div><label class="text-xs font-bold text-gray-500">DATE</label><input type="date" name="date" class="form-input" required></div>
-                
-                <div>
-                    <label class="text-xs font-bold text-gray-500" id="drLabel">DEBIT (Dr)</label>
-                    <select name="drLedger" id="drSelect" class="form-input"><option>Loading...</option></select>
-                </div>
-                <div>
-                    <label class="text-xs font-bold text-gray-500" id="crLabel">CREDIT (Cr)</label>
-                    <select name="crLedger" id="crSelect" class="form-input"><option>Loading...</option></select>
-                </div>
-                
+                <div><label class="text-xs font-bold text-gray-500">DEBIT (Dr)</label><select name="drLedger" id="drSelect" class="form-input"><option>Loading...</option></select></div>
+                <div><label class="text-xs font-bold text-gray-500">CREDIT (Cr)</label><select name="crLedger" id="crSelect" class="form-input"><option>Loading...</option></select></div>
                 <div><label class="text-xs font-bold text-gray-500">AMOUNT</label><input type="number" name="amount" class="form-input" required></div>
                 <div><label class="text-xs font-bold text-gray-500">NARRATION</label><input type="text" name="narration" class="form-input"></div>
                 <button type="submit" class="btn-primary mt-6 w-full py-3">Save</button>
@@ -220,12 +234,94 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw2adpqoyF58fKIvGLkPRffhcuS0P4FieLKkQEc-J6Ew9pHbQ7CotkP7J-MaimZZyJijA/exec";
-        
-        let appData = { ledgers: [], vouchers: [] };
+        // *** REPLACE THIS WITH YOUR CURRENT APP SCRIPT URL ***
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz-9anHvoVyrJFM0xzCSMmwyPnJ1nrEF-rAeiq-egScciq-FC68BzIj4q4OftdpIO0hhA/exec";
 
-        function initApp() { console.log("Started"); loadAllData(); }
+        let appData = { ledgers: [], vouchers: [] };
         
+        // --- AUTHENTICATION LOGIC ---
+        // Format: 'username': { pass: 'password', role: 'ROLE_NAME' }
+        const USERS = {
+            'admin': { pass: '1234', role: 'ADMIN' },
+            'accountree': { pass: '1234', role: 'ACCOUNTREE' },
+            'ajwa': { pass: '1234', role: 'AJWA' },
+            'as': { pass: '1234', role: 'AS' }
+        };
+
+        let activeUser = null;
+
+        function checkLogin() {
+            // Check if logged in before
+            const savedUser = localStorage.getItem('cmb_user');
+            if (savedUser && USERS[savedUser]) {
+                activeUser = USERS[savedUser];
+                activeUser.name = savedUser;
+                showApp();
+            }
+            // Otherwise, login screen stays visible
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const user = document.getElementById('loginUser').value;
+            const pass = document.getElementById('loginPass').value;
+            const err = document.getElementById('loginError');
+
+            if (USERS[user] && USERS[user].pass === pass) {
+                activeUser = USERS[user];
+                activeUser.name = user;
+                localStorage.setItem('cmb_user', user); // Remember user
+                err.classList.add('hidden');
+                document.getElementById('loginPass').value = '';
+                showApp();
+            } else {
+                err.classList.remove('hidden');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('cmb_user');
+            activeUser = null;
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('loginScreen').classList.remove('hidden');
+        }
+
+        function showApp() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            document.getElementById('userRoleBadge').textContent = "Role: " + activeUser.role;
+            applyRolePermissions();
+            loadAllData();
+        }
+
+        function applyRolePermissions() {
+            const role = activeUser.role;
+
+            // Display Navigation items based on role
+            const showDashAndRep = (role === 'ADMIN' || role === 'AS');
+            const showCompany = (role === 'ADMIN');
+            
+            document.getElementById('nav-dashboard').style.display = showDashAndRep ? 'flex' : 'none';
+            document.getElementById('nav-reports').style.display = showDashAndRep ? 'flex' : 'none';
+            document.getElementById('sec-main').style.display = showDashAndRep ? 'block' : 'none';
+            document.getElementById('sec-analysis').style.display = showDashAndRep ? 'block' : 'none';
+            document.getElementById('nav-company').style.display = showCompany ? 'flex' : 'none';
+
+            // Display Action Buttons based on role
+            document.getElementById('btn-create-company').style.display = (role === 'ADMIN') ? 'block' : 'none';
+            document.getElementById('btn-create-ledger').style.display = (role === 'ADMIN' || role === 'ACCOUNTREE') ? 'block' : 'none';
+            document.getElementById('btn-create-voucher').style.display = (role === 'ADMIN' || role === 'ACCOUNTREE' || role === 'AJWA') ? 'block' : 'none';
+
+            // Set Default Page on Login
+            if (role === 'ACCOUNTREE' || role === 'AJWA') {
+                nav('vouchers', document.getElementById('nav-vouchers'));
+            } else {
+                nav('dashboard', document.getElementById('nav-dashboard'));
+            }
+        }
+
+        // --- END AUTHENTICATION ---
+
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('open');
             document.getElementById('mobileBackdrop').classList.toggle('active');
@@ -236,30 +332,6 @@
             let clean = amount.toString().replace(/,/g, '');
             let num = parseFloat(clean);
             return isNaN(num) ? "0.00" : num.toLocaleString('en-IN', { minimumFractionDigits: 2 });
-        }
-
-        // --- NEW: DYNAMIC LABELS FOR VOUCHERS ---
-        function updateVoucherLabels() {
-            const type = document.getElementById('voucherType').value;
-            const dr = document.getElementById('drLabel');
-            const cr = document.getElementById('crLabel');
-
-            if (type === 'Sales') {
-                dr.innerText = "CUSTOMER / CASH (Debit)";
-                cr.innerText = "SALES ACCOUNT (Credit)";
-            } else if (type === 'Purchase') {
-                dr.innerText = "PURCHASE ACCOUNT (Debit)";
-                cr.innerText = "SUPPLIER / CASH (Credit)";
-            } else if (type === 'Payment') {
-                dr.innerText = "PAID TO (Debit)";
-                cr.innerText = "PAID FROM (Credit)";
-            } else if (type === 'Receipt') {
-                dr.innerText = "RECEIVED IN (Debit)";
-                cr.innerText = "RECEIVED FROM (Credit)";
-            } else {
-                dr.innerText = "DEBIT ACCOUNT (Dr)";
-                cr.innerText = "CREDIT ACCOUNT (Cr)";
-            }
         }
 
         function nav(sectionId, el) {
@@ -278,7 +350,6 @@
             document.getElementById('voucherForm').reset();
             document.getElementById('voucherId').value = ""; 
             document.getElementById('voucherModalTitle').textContent = "New Voucher";
-            updateVoucherLabels(); // Reset labels
             openModal('voucherModal');
         }
 
@@ -288,16 +359,9 @@
             openModal('voucherModal');
             document.getElementById('voucherModalTitle').textContent = "Edit Voucher " + id;
             const f = document.getElementById('voucherForm');
-            f.id.value = v.id;
-            f.date.value = v.date;
-            f.type.value = v.type;
-            f.amount.value = v.amount;
-            f.narration.value = v.narration;
-            updateVoucherLabels();
-            setTimeout(() => {
-                f.drLedger.value = v.dr;
-                f.crLedger.value = v.cr;
-            }, 100);
+            f.id.value = v.id; f.date.value = v.date; f.type.value = v.type;
+            f.amount.value = v.amount; f.narration.value = v.narration;
+            setTimeout(() => { f.drLedger.value = v.dr; f.crLedger.value = v.cr; }, 100);
         }
 
         function deleteVoucher(id) {
@@ -318,27 +382,29 @@
                 <style>
                     body { font-family: sans-serif; padding: 40px; }
                     .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
-                    .title { font-size: 24px; font-weight: bold; text-transform: uppercase; }
                     .row { display: flex; justify-content: space-between; margin-bottom: 10px; }
                     .box { border: 1px solid #ccc; padding: 20px; margin-bottom: 30px; }
                     .amount { font-size: 20px; font-weight: bold; text-align: right; }
                     .footer { margin-top: 50px; display: flex; justify-content: space-between; }
+                    .sign { border-top: 1px solid #333; width: 200px; text-align: center; padding-top: 5px; }
                 </style>
                 </head><body>
-                <div class="header"><h1>${companyName}</h1><div class="title">${v.type.toUpperCase()} VOUCHER</div></div>
+                <div class="header"><h1>${companyName}</h1><h2>${v.type.toUpperCase()} VOUCHER</h2></div>
                 <div class="row"><div><strong>Voucher No:</strong> ${v.id}</div><div><strong>Date:</strong> ${v.date}</div></div>
                 <div class="box">
-                    <div class="row"><div><strong>Debit:</strong> ${drName}</div><div><strong>Credit:</strong> ${crName}</div></div>
-                    <hr style="margin: 15px 0; border: 0; border-top: 1px dashed #ccc;">
-                    <div class="row"><div><strong>Narration:</strong> ${v.narration}</div></div>
+                    <div class="row"><div><strong>Debit:</strong></div><div>${drName}</div></div>
+                    <div class="row"><div><strong>Credit:</strong></div><div>${crName}</div></div>
+                    <hr><div class="row"><div><strong>Narration:</strong></div><div>${v.narration}</div></div>
                 </div>
                 <div class="amount">Amount: ₹ ${formatMoney(v.amount)}</div>
+                <div class="footer"><div class="sign">Prepared By</div><div class="sign">Authorized Signatory</div></div>
                 <script>window.print();<\/script>
                 </body></html>
             `);
             win.document.close();
         }
 
+        // --- DATA ENGINE ---
         function loadAllData() {
             document.getElementById('loadingIndicator').classList.remove('hidden');
             fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "getAllData" }) })
@@ -346,7 +412,6 @@
             .then(result => {
                 if(result.status === "SUCCESS") {
                     appData = result.data;
-                    appData.companies = result.data.companies || []; 
                     renderDashboard(result.data.stats);
                     renderTable('companyTableBody', result.data.companies, ['id','name','gst','state']);
                     renderTable('ledgerTableBody', result.data.ledgers, ['id','name','category','bal'], true);
@@ -379,14 +444,24 @@
             const tbody = document.getElementById('voucherTableBody');
             tbody.innerHTML = "";
             if(!appData.vouchers.length) { tbody.innerHTML = "<tr><td colspan='6' class='text-center p-4'>No Data</td></tr>"; return; }
+            
             appData.vouchers.forEach(v => {
+                let actionHtml = `<button class="btn-icon btn-print" onclick="printVoucher('${v.id}')"><i class="fas fa-print"></i></button>`;
+                
+                // RBAC: Only Admin and Accountree can Edit/Delete
+                if (activeUser.role === 'ADMIN' || activeUser.role === 'ACCOUNTREE') {
+                    actionHtml += `<button class="btn-icon btn-edit" onclick="editVoucher('${v.id}')"><i class="fas fa-edit"></i></button>
+                                   <button class="btn-icon btn-del" onclick="deleteVoucher('${v.id}')"><i class="fas fa-trash"></i></button>`;
+                }
+
+                // If AS, hide actions column completely? For now, we just leave it empty or print-only.
+                if (activeUser.role === 'AS') {
+                    actionHtml = `<span class="text-xs text-gray-400">View Only</span>`;
+                }
+
                 tbody.innerHTML += `
                 <tr class="border-b hover:bg-gray-50">
-                    <td class="p-3 flex">
-                        <button class="btn-icon btn-print" onclick="printVoucher('${v.id}')"><i class="fas fa-print"></i></button>
-                        <button class="btn-icon btn-edit" onclick="editVoucher('${v.id}')"><i class="fas fa-edit"></i></button>
-                        <button class="btn-icon btn-del" onclick="deleteVoucher('${v.id}')"><i class="fas fa-trash"></i></button>
-                    </td>
+                    <td class="p-3 flex items-center">${actionHtml}</td>
                     <td class="p-3 text-gray-500 text-xs">${v.id}</td>
                     <td class="p-3">${v.date}</td>
                     <td class="p-3"><span class="px-2 py-1 rounded text-xs bg-gray-100">${v.type}</span></td>
@@ -427,8 +502,12 @@
 
         function submitData(e, action, payload=null) {
             if(e.preventDefault) e.preventDefault();
+            
             let data = {};
-            if(payload) { data = payload; data.action = action; } else {
+            if(payload) {
+                data = payload;
+                data.action = action;
+            } else {
                 const form = e.target;
                 const btn = form.querySelector('button');
                 btn.textContent = "..."; btn.disabled = true;
@@ -436,17 +515,18 @@
                 fd.forEach((v, k) => data[k] = v);
                 data.action = action;
             }
+
             fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(data) })
             .then(res => res.json())
             .then(res => {
                 if(res.status === "SUCCESS") {
                     if(!payload) { e.target.reset(); closeModal(e.target.closest('.modal-overlay').id); }
-                    alert(res.message);
-                    loadAllData();
-                } else if(res.status === "DUPLICATE") { alert("⚠️ " + res.message); } 
-                else { alert("Error: " + res.message); }
+                    alert(res.message); loadAllData();
+                } else if(res.status === "DUPLICATE") {
+                    alert("⚠️ " + res.message);
+                } else { alert("Error: " + res.message); }
             })
-            .finally(() => { if(!payload) { const btn = e.target.querySelector('button'); btn.textContent = "Save"; btn.disabled = false; } });
+            .finally(() => { if(!payload) { e.target.querySelector('button').textContent = "Save"; e.target.querySelector('button').disabled = false; }});
         }
     </script>
 </body>
