@@ -1,348 +1,41 @@
-<!doctype html>
-<html lang="en">
- <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CMB | Accounting Cloud Based WebApp</title>
-  <link href="https://cdn.tailwindcss.com/3.4.17" rel="stylesheet">
-  <style>
-        :root {
-            --zoho-blue: #006fda;
-            --zoho-yellow: #f5ba31;
-            --zoho-red: #f24638;
-            --zoho-dark: #1c212e;
-            --zoho-text: #333333;
-            --zoho-grey: #666666;
-            --zoho-bg: #f4f5f7;
-            --zoho-border: #e0e0e0;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body, #app { height: 100%; width: 100%; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--zoho-bg); color: var(--zoho-text); }
-
-        /* --- ZOHO STYLE UTILITIES --- */
-        .cmb-header { background: linear-gradient(135deg, var(--zoho-blue) 0%, #004ba0 100%); color: white; padding: 1rem; box-shadow: 0 2px 8px rgba(0, 111, 218, 0.15); display: flex; justify-content: space-between; align-items: center; }
-        .cmb-sidebar { background-color: #4a5568; color: white; width: 280px; overflow-y: auto; box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15); border-right: 1px solid #2d3748; transition: transform 0.3s ease; }
-        .cmb-sidebar-item { padding: 0.85rem 1.5rem; cursor: pointer; border-left: 3px solid transparent; transition: all 0.3s ease; display: flex; align-items: center; gap: 0.75rem; font-size: 0.95rem; color: #e2e8f0; }
-        .cmb-sidebar-item:hover { background-color: #5a6b7f; border-left-color: var(--zoho-blue); color: white; }
-        .cmb-sidebar-item.active { background-color: var(--zoho-blue); color: white; border-left-color: #f5ba31; font-weight: 600; }
-        .cmb-sidebar-label { padding: 1rem 1.5rem 0.5rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: #cbd5e0; font-weight: 600; }
-        
-        /* Buttons & Inputs */
-        .cmb-button { background-color: var(--zoho-yellow); color: var(--zoho-dark); padding: 0.75rem 1.5rem; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.3s ease; font-size: 0.95rem; }
-        .cmb-button:hover { background-color: #e6a819; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(245, 186, 49, 0.3); }
-        .cmb-button:disabled { background-color: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
-        .cmb-button-secondary { background-color: var(--zoho-blue); color: white; }
-        .cmb-input { width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--zoho-border); border-radius: 6px; font-size: 1rem; transition: border-color 0.3s ease; }
-        .cmb-input:focus { outline: none; border-color: var(--zoho-blue); box-shadow: 0 0 0 3px rgba(0, 111, 218, 0.1); }
-        
-        /* Cards & Layout */
-        .cmb-card { background: white; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08); border: 1px solid var(--zoho-border); margin-bottom: 1rem; }
-        .cmb-stat-card { background: white; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08); border-left: 4px solid; }
-        .cmb-stat-card.income { border-left-color: #28a745; }
-        .cmb-stat-card.expense { border-left-color: var(--zoho-red); }
-        .cmb-stat-card.balance { border-left-color: var(--zoho-blue); }
-        .cmb-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
-        
-        /* Tables */
-        .cmb-table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
-        .cmb-table thead { background-color: var(--zoho-blue); color: white; }
-        .cmb-table th { padding: 1rem; text-align: left; font-weight: 600; font-size: 0.9rem; }
-        .cmb-table td { padding: 1rem; border-bottom: 1px solid var(--zoho-border); font-size: 0.9rem; }
-        .cmb-badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600; }
-        .cmb-badge.success { background-color: #d4edda; color: #155724; }
-        .cmb-badge.warning { background-color: #fff3cd; color: #856404; }
-
-        /* Modals */
-        .cmb-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
-        .cmb-modal-overlay.show { display: flex; }
-        .cmb-modal { background: white; border-radius: 8px; padding: 2rem; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); }
-        .cmb-modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 2px solid var(--zoho-border); padding-bottom: 1rem; }
-        .cmb-close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--zoho-grey); }
-        .cmb-form-group { margin-bottom: 1.5rem; }
-        .cmb-form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: var(--zoho-text); }
-        
-        /* Alerts */
-        .cmb-alert { padding: 1rem; border-radius: 6px; margin-bottom: 1rem; display: none; font-size: 0.95rem; }
-        .cmb-alert.show { display: block; }
-        .cmb-alert.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        .cmb-alert.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-
-        /* Layout Helpers */
-        .app-container { display: flex; height: 100%; flex-direction: row; }
-        .app-content { flex: 1; overflow-y: auto; padding: 1rem; background-color: #f4f5f7; }
-        .hidden { display: none !important; }
-        .cmb-tab { padding: 0.75rem 1.5rem; cursor: pointer; background: none; border: none; font-size: 1rem; font-weight: 500; color: var(--zoho-grey); border-bottom: 3px solid transparent; }
-        .cmb-tab.active { color: var(--zoho-blue); border-bottom-color: var(--zoho-blue); }
-
-        /* Mobile Responsive */
-        @media (max-width: 768px) {
-            .app-container { flex-direction: column; }
-            .cmb-sidebar { position: fixed; left: 0; top: 60px; height: calc(100% - 60px); z-index: 999; transform: translateX(-100%); width: 75vw; }
-            .cmb-sidebar.show { transform: translateX(0); }
-            .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 998; }
-            .sidebar-overlay.show { display: block; }
-            .cmb-menu-toggle { display: block; background: none; border: none; font-size: 1.5rem; color: white; cursor: pointer; }
-            .header-content h1 { font-size: 1.1rem; } 
-        }
-        @media (min-width: 769px) { .cmb-menu-toggle { display: none; } }
-    </style>
- </head>
- <body>
-  <div id="app" class="w-full h-full flex flex-col">
-   
-   <div id="loginScreen" class="w-full h-full flex items-center justify-center" style="background: linear-gradient(135deg, #006fda 0%, #004ba0 100%);">
-    <div class="cmb-card w-96">
-     <div style="text-align: center; margin-bottom: 2rem;">
-      <h1 style="font-size: 1.8rem; color: #006fda; font-weight: 700;">CMB</h1>
-      <p style="color: #666; margin-top: 0.5rem;">Accounting Cloud Based WebApp</p>
-     </div>
-     <div id="loginAlert" class="cmb-alert"></div>
-     <form id="loginForm" onsubmit="handleLogin(event)">
-      <div class="cmb-form-group"><label>Username</label> <input type="text" id="loginUsername" class="cmb-input" value="admin" required></div>
-      <div class="cmb-form-group"><label>Password</label> <input type="password" id="loginPassword" class="cmb-input" value="admin" required></div>
-      <button type="submit" class="cmb-button w-full" style="margin-top: 1rem;">Login</button>
-     </form>
-    </div>
-   </div>
-
-   <div id="mainApp" class="w-full h-full flex flex-col hidden">
-    <header class="cmb-header">
-     <button class="cmb-menu-toggle" id="menuToggle" onclick="toggleSidebar()">☰</button>
-     <div class="header-content" style="display: flex; gap: 1rem; align-items: center;">
-      <h1 style="font-size: 1.3rem; font-weight: 700;">CMB</h1>
-      <span id="userGreeting" style="font-size: 0.9rem; opacity: 0.9;"></span>
-     </div>
-     <div class="header-right"><button onclick="handleLogout()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); color: white; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">Logout</button></div>
-    </header>
-
-    <div class="app-container">
-     <aside id="sidebar" class="cmb-sidebar">
-      <div style="padding: 1rem 1.5rem; border-bottom: 1px solid #2d3748; margin-bottom: 0.5rem;">
-       <h3 style="font-size: 0.9rem; color: white; font-weight: 600;">Navigation</h3>
-      </div>
-      <nav>
-       <div class="cmb-sidebar-item active" data-section="dashboard"><span style="font-size: 1.2rem;">📊</span> <span>Dashboard</span></div>
-       <div class="cmb-sidebar-item" data-section="company"><span style="font-size: 1.2rem;">🏢</span> <span>Company</span></div>
-       <div class="cmb-sidebar-label">Create Masters</div>
-       <div class="cmb-sidebar-item" data-section="ledger"><span style="font-size: 1.2rem;">📖</span> <span>Ledger</span></div>
-       <div class="cmb-sidebar-item" onclick="alert('Module Coming Soon')"><span style="font-size: 1.2rem;">🏗️</span> <span>Project</span></div>
-       <div class="cmb-sidebar-item" onclick="alert('Module Coming Soon')"><span style="font-size: 1.2rem;">📝</span> <span>Vouchers</span></div>
-      </nav>
-     </aside>
-     <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
-
-     <main class="app-content">
-      
-      <section id="dashboardSection" class="cmb-section">
-       <div class="cmb-section-header"><h2>Dashboard Overview</h2></div>
-       <div class="cmb-grid">
-        <div class="cmb-stat-card income">
-         <p style="color: #666; font-size: 0.9rem;">Total Income</p>
-         <h3 style="font-size: 1.8rem; color: #28a745; font-weight: 700;">₹ 0.00</h3>
-        </div>
-        <div class="cmb-stat-card expense">
-         <p style="color: #666; font-size: 0.9rem;">Total Expense</p>
-         <h3 style="font-size: 1.8rem; color: #f24638; font-weight: 700;">₹ 0.00</h3>
-        </div>
-       </div>
-       <div class="cmb-card">Welcome to CMB Accounting v1.0. Use the sidebar to set up your Company.</div>
-      </section>
-
-      <section id="companySection" class="cmb-section hidden">
-       <div class="cmb-section-header">
-        <h2>Company Setup</h2>
-        <button class="cmb-button" onclick="openModal('companyModal')">+ New Company</button>
-       </div>
-       <div class="cmb-card">
-        <p>Companies created here will appear in your Google Sheet.</p>
-       </div>
-      </section>
-
-      <section id="ledgerSection" class="cmb-section hidden">
-       <div class="cmb-section-header">
-        <h2>Chart of Accounts</h2>
-        <button class="cmb-button" onclick="openModal('ledgerModal')">+ New Ledger</button>
-       </div>
-       <div class="cmb-card">
-        <p>Ledgers created here will appear in the 'Master_Ledgers' tab.</p>
-       </div>
-      </section>
-
-     </main>
-    </div>
-   </div>
-
-   <div id="companyModal" class="cmb-modal-overlay">
+<div id="voucherModal" class="cmb-modal-overlay">
     <div class="cmb-modal">
      <div class="cmb-modal-header">
-      <h2>New Company</h2><button class="cmb-close-btn" onclick="closeModal('companyModal')">×</button>
+      <h2>New Voucher</h2><button class="cmb-close-btn" onclick="closeModal('voucherModal')">×</button>
      </div>
-     <form id="companyForm" onsubmit="submitToSheet(event, 'companyForm', 'saveCompany')">
-      <div class="cmb-form-group"><label>Company Name *</label> 
-          <input type="text" name="companyName" class="cmb-input" required></div>
+     <form id="voucherForm" onsubmit="submitToSheet(event, 'voucherForm', 'saveVoucher')">
       
-      <div class="cmb-form-group"><label>GST Number</label> 
-          <input type="text" name="gst" class="cmb-input"></div>
-      
-      <div class="cmb-form-group"><label>State *</label> 
-          <select name="state" class="cmb-input" required onchange="updateStateCode(this)"> 
-              <option value="">Select State</option> 
-              <option value="Kerala">Kerala</option> 
-              <option value="Tamil Nadu">Tamil Nadu</option> 
-              <option value="Karnataka">Karnataka</option> 
+      <div class="cmb-form-group"><label>Voucher Type</label>
+          <select name="type" class="cmb-input" required>
+              <option value="Payment">Payment (Out)</option>
+              <option value="Receipt">Receipt (In)</option>
+              <option value="Journal">Journal (Adj)</option>
+              <option value="Contra">Contra (Bank/Cash)</option>
           </select>
-          <input type="hidden" name="stateCode">
+      </div>
+
+      <div class="cmb-form-group"><label>Date</label> 
+          <input type="date" name="date" class="cmb-input" required></div>
+      
+      <div class="cmb-form-group"><label>Debit Account (Dr)</label> 
+          <select name="drLedger" id="drLedgerSelect" class="cmb-input" required> 
+              <option value="">Loading accounts...</option> 
+          </select>
       </div>
       
-      <div class="cmb-form-group"><label>FY Start Date *</label> 
-          <input type="date" name="fyStart" class="cmb-input" required></div>
+      <div class="cmb-form-group"><label>Credit Account (Cr)</label> 
+          <select name="crLedger" id="crLedgerSelect" class="cmb-input" required> 
+              <option value="">Loading accounts...</option> 
+          </select>
+      </div>
       
-      <div class="cmb-form-group"><label>Admin Password *</label> 
-          <input type="password" name="password" class="cmb-input" required></div>
+      <div class="cmb-form-group"><label>Amount</label> 
+          <input type="number" name="amount" class="cmb-input" step="0.01" required></div>
+      
+      <div class="cmb-form-group"><label>Narration / Remarks</label> 
+          <input type="text" name="narration" class="cmb-input"></div>
           
-      <button type="submit" class="cmb-button w-full">Create Company</button>
+      <button type="submit" class="cmb-button w-full">Save Voucher</button>
      </form>
     </div>
    </div>
-
-   <div id="ledgerModal" class="cmb-modal-overlay">
-    <div class="cmb-modal">
-     <div class="cmb-modal-header">
-      <h2>New Ledger</h2><button class="cmb-close-btn" onclick="closeModal('ledgerModal')">×</button>
-     </div>
-     <form id="ledgerForm" onsubmit="submitToSheet(event, 'ledgerForm', 'saveLedger')">
-      <div class="cmb-form-group"><label>Ledger Name *</label> 
-          <input type="text" name="ledgerName" class="cmb-input" required></div>
-      
-      <div class="cmb-form-group"><label>Category *</label> 
-          <select name="category" class="cmb-input" required> 
-              <option value="">Select Category</option> 
-              <option value="Cash">Cash</option> 
-              <option value="Bank">Bank</option> 
-              <option value="Supplier">Supplier</option> 
-              <option value="Customer">Customer</option> 
-          </select>
-      </div>
-      
-      <div class="cmb-form-group"><label>Opening Balance</label> 
-          <input type="number" name="openingBalance" class="cmb-input" step="0.01" value="0"></div>
-          
-      <div class="cmb-form-group"><label>Dr / Cr</label> 
-          <select name="drCr" class="cmb-input"> 
-              <option value="Dr">Dr</option> 
-              <option value="Cr">Cr</option> 
-          </select>
-      </div>
-      
-      <div class="cmb-form-group"><label>GST Applicable</label> 
-          <select name="gstApplicable" class="cmb-input"> 
-              <option value="No">No</option> 
-              <option value="Yes">Yes</option> 
-          </select>
-      </div>
-      
-      <button type="submit" class="cmb-button w-full">Create Ledger</button>
-     </form>
-    </div>
-   </div>
-
-  </div>
-
-  <script>
-    // -------------------------------------------------------------
-    // IMPORTANT: PASTE YOUR GOOGLE SCRIPT URL HERE
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyRF0QKWWtCeHkHxP-XGMoEEN854Gm7jyhSUVwmmEOcE2qiXxooS0fHbI5eCCuoH_a80g/exec";
-    // -------------------------------------------------------------
-
-    // 1. Sidebar Navigation Logic
-    document.addEventListener('DOMContentLoaded', () => {
-        const sidebarItems = document.querySelectorAll('.cmb-sidebar-item[data-section]');
-        sidebarItems.forEach(item => {
-            item.addEventListener('click', () => {
-                // Highlight Menu
-                sidebarItems.forEach(i => i.classList.remove('active'));
-                item.classList.add('active');
-                
-                // Show Section
-                document.querySelectorAll('.cmb-section').forEach(sec => sec.classList.add('hidden'));
-                const sectionId = item.dataset.section + 'Section';
-                const target = document.getElementById(sectionId);
-                if(target) target.classList.remove('hidden');
-
-                // Close Mobile Sidebar
-                if (window.innerWidth <= 768) toggleSidebar();
-            });
-        });
-    });
-
-    function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('show');
-        document.getElementById('sidebarOverlay').classList.toggle('show');
-    }
-
-    // 2. Login Simulation
-    function handleLogin(e) {
-        e.preventDefault();
-        document.getElementById('loginScreen').classList.add('hidden');
-        document.getElementById('mainApp').classList.remove('hidden');
-        document.getElementById('userGreeting').textContent = "Welcome, Admin";
-    }
-
-    function handleLogout() {
-        location.reload();
-    }
-
-    // 3. Modal Logic
-    function openModal(id) { document.getElementById(id).classList.add('show'); }
-    function closeModal(id) { document.getElementById(id).classList.remove('show'); }
-
-    // 4. State Code Helper
-    function updateStateCode(selectObj) {
-        const codes = { "Kerala": "32", "Tamil Nadu": "33", "Karnataka": "29" };
-        const form = selectObj.closest('form');
-        form.querySelector('[name="stateCode"]').value = codes[selectObj.value] || "";
-    }
-
-    // 5. DATA SUBMISSION LOGIC (The Connection to Google)
-    function submitToSheet(e, formId, action) {
-        e.preventDefault();
-        const form = document.getElementById(formId);
-        const btn = form.querySelector('button[type="submit"]');
-        const originalText = btn.textContent;
-
-        btn.textContent = "Saving...";
-        btn.disabled = true;
-
-        const formData = new FormData(form);
-        const data = {};
-        formData.forEach((value, key) => data[key] = value);
-        data.action = action; // "saveCompany" or "saveLedger"
-
-        fetch(SCRIPT_URL, {
-            method: "POST",
-            body: JSON.stringify(data)
-        })
-        .then(res => res.json())
-        .then(response => {
-            if(response.status === "SUCCESS") {
-                alert("✓ Saved Successfully! ID: " + response.id);
-                form.reset();
-                closeModal(formId === 'companyForm' ? 'companyModal' : 'ledgerModal');
-            } else {
-                alert("Error: " + response.message);
-            }
-        })
-        .catch(err => {
-            alert("Connection Error. Check console.");
-            console.error(err);
-        })
-        .finally(() => {
-            btn.textContent = originalText;
-            btn.disabled = false;
-        });
-    }
-  </script>
- </body>
-</html>
