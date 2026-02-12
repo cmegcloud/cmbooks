@@ -3,38 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#1c212e">
+    
+    <link rel="icon" type="image/png" href="logocmbooks.png">
+    <link rel="apple-touch-icon" href="logocmbooks.png">
+    
     <title>CMB | Cloud Accounting</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
         :root { --zoho-blue: #006fda; --zoho-yellow: #f5ba31; --zoho-bg: #f4f5f7; }
         body { font-family: 'Inter', sans-serif; background-color: var(--zoho-bg); color: #333; overflow: hidden; }
         
-        /* Sidebar & Layout */
         .sidebar { background-color: #1c212e; color: white; transition: transform 0.3s ease-in-out; }
         .nav-item { padding: 12px 20px; cursor: pointer; color: #b0b0b0; border-left: 3px solid transparent; display: flex; gap: 10px; font-size: 0.95rem; align-items: center; }
         .nav-item:hover, .nav-item.active { background-color: rgba(255,255,255,0.05); color: #fff; border-left-color: var(--zoho-blue); }
         .nav-section { padding: 15px 20px 5px; font-size: 0.75rem; font-weight: bold; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; }
 
-        /* Mobile Sidebar Toggle */
         @media (max-width: 768px) {
-            .sidebar { position: fixed; z-index: 40; height: 100%; width: 260px; transform: translateX(-100%); }
+            .sidebar { position: fixed; z-index: 40; height: 100%; width: 260px; transform: translateX(-100%); box-shadow: 2px 0 10px rgba(0,0,0,0.5); }
             .sidebar.open { transform: translateX(0); }
             .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 30; }
             .overlay.active { display: block; }
         }
 
-        /* Cards & Tables */
-        .cmb-card { background: white; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 20px; border-top: 3px solid var(--zoho-blue); margin-bottom: 20px; overflow-x: auto; }
-        .cmb-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; min-width: 600px; /* Force scroll on mobile */ }
+        .cmb-card { background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); padding: 15px; border-top: 3px solid var(--zoho-blue); margin-bottom: 15px; overflow-x: auto; }
+        .cmb-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; min-width: 600px; }
         .cmb-table th { text-align: left; padding: 12px; background: #f8f9fa; color: #666; font-weight: 600; border-bottom: 2px solid #eee; white-space: nowrap; }
         .cmb-table td { padding: 12px; border-bottom: 1px solid #eee; white-space: nowrap; }
         
-        /* Form Elements */
-        .form-input { width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 16px; margin-top: 5px; background: #fff; } /* Larger font for mobile inputs */
-        .btn-primary { background-color: var(--zoho-yellow); padding: 10px 20px; border-radius: 6px; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s; border:none; white-space: nowrap; }
-        
-        .modal-overlay { background: rgba(0,0,0,0.5); position: fixed; inset: 0; display: none; justify-content: center; align-items: center; z-index: 50; padding: 10px; }
+        .form-input { width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 14px; margin-top: 5px; background: #fff; }
+        .btn-primary { background-color: var(--zoho-yellow); padding: 10px 20px; border-radius: 6px; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s; border:none; }
+        .btn-icon { padding: 6px 10px; border-radius: 4px; font-size: 12px; cursor: pointer; margin-right: 4px; }
+        .btn-edit { background: #e3f2fd; color: #1565c0; }
+        .btn-del { background: #ffebee; color: #c62828; }
+        .btn-print { background: #e8f5e9; color: #2e7d32; }
+
+        .modal-overlay { background: rgba(0,0,0,0.6); position: fixed; inset: 0; display: none; justify-content: center; align-items: center; z-index: 50; padding: 15px; }
         .modal-overlay.show { display: flex; }
         .hidden-section { display: none; }
     </style>
@@ -46,31 +54,31 @@
 
     <aside id="sidebar" class="sidebar w-64 flex-shrink-0 flex flex-col pt-5 h-full">
         <div class="px-5 mb-6 flex justify-between items-center">
-            <h1 class="text-xl font-bold">CMB | <span style="color:var(--zoho-yellow)">Books</span></h1>
-            <button class="md:hidden text-gray-400" onclick="toggleSidebar()">✕</button>
+            <div class="flex items-center gap-3">
+                <img src="logocmbooks.png" alt="Logo" class="h-10 w-auto rounded bg-white p-1">
+                <h1 class="text-xl font-bold">CMB | <span style="color:var(--zoho-yellow)">Books</span></h1>
+            </div>
+            <button class="md:hidden text-gray-400 text-2xl" onclick="toggleSidebar()">×</button>
         </div>
+        
         <nav class="flex-1 overflow-y-auto pb-20">
             <div class="nav-section">Main</div>
             <div class="nav-item active" onclick="nav('dashboard', this)">📊 Dashboard</div>
             <div class="nav-item" onclick="nav('company', this)">🏢 Company</div>
-            
             <div class="nav-section">Masters</div>
             <div class="nav-item" onclick="nav('ledger', this)">📖 Ledgers</div>
-            
             <div class="nav-section">Entries</div>
             <div class="nav-item" onclick="nav('vouchers', this)">📝 Vouchers</div>
-            
             <div class="nav-section">Analysis</div>
             <div class="nav-item" onclick="nav('reports', this)">📈 Reports</div>
-
             <div class="p-5 text-xs text-gray-500 cursor-pointer hover:text-white" onclick="initApp()">🔄 Sync Data</div>
         </nav>
     </aside>
 
-    <main class="flex-1 flex flex-col overflow-hidden relative w-full">
-        <header class="bg-white border-b h-16 flex items-center justify-between px-4 md:px-8 shadow-sm flex-shrink-0 z-10">
-            <div class="flex items-center gap-3">
-                <button class="md:hidden text-2xl text-gray-600 focus:outline-none" onclick="toggleSidebar()">☰</button>
+    <main class="flex-1 flex flex-col overflow-hidden relative w-full bg-gray-50">
+        <header class="bg-white border-b h-16 flex items-center justify-between px-4 md:px-8 shadow-sm flex-shrink-0 z-10 sticky top-0">
+            <div class="flex items-center gap-4">
+                <button class="md:hidden text-2xl text-gray-600" onclick="toggleSidebar()">☰</button>
                 <h2 class="text-lg font-semibold text-gray-700 truncate" id="pageTitle">Dashboard</h2>
             </div>
             <div id="loadingIndicator" class="text-blue-600 text-sm font-bold hidden flex items-center gap-2">
@@ -78,16 +86,16 @@
             </div>
         </header>
 
-        <div class="flex-1 overflow-y-auto p-4 md:p-8 bg-gray-50">
+        <div class="flex-1 overflow-y-auto p-4 md:p-8 pb-24">
             
             <div id="dashboard" class="section">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                     <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-green-500">
-                        <div class="text-gray-500 text-sm font-medium">Total Income</div>
+                        <div class="text-gray-500 text-sm font-medium">Income (Rect/Sales)</div>
                         <div class="text-2xl font-bold mt-1 text-gray-800 break-all" id="dashIncome">₹ 0.00</div>
                     </div>
                     <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-red-500">
-                        <div class="text-gray-500 text-sm font-medium">Total Expense</div>
+                        <div class="text-gray-500 text-sm font-medium">Expense (Pay/Purch)</div>
                         <div class="text-2xl font-bold mt-1 text-gray-800 break-all" id="dashExpense">₹ 0.00</div>
                     </div>
                     <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-blue-500">
@@ -98,10 +106,7 @@
             </div>
 
             <div id="company" class="section hidden-section">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                    <h3 class="text-xl font-bold text-gray-700">Company List</h3>
-                    <button class="btn-primary w-full md:w-auto" onclick="openModal('companyModal')">+ Create Company</button>
-                </div>
+                <button class="btn-primary mb-4" onclick="openModal('companyModal')">+ Create Company</button>
                 <div class="cmb-card">
                     <table class="cmb-table">
                         <thead><tr><th>ID</th><th>Name</th><th>GST</th><th>State</th></tr></thead>
@@ -111,10 +116,7 @@
             </div>
 
             <div id="ledger" class="section hidden-section">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                    <h3 class="text-xl font-bold text-gray-700">Chart of Accounts</h3>
-                    <button class="btn-primary w-full md:w-auto" onclick="openModal('ledgerModal')">+ Create Ledger</button>
-                </div>
+                <button class="btn-primary mb-4" onclick="openModal('ledgerModal')">+ Create Ledger</button>
                 <div class="cmb-card">
                     <table class="cmb-table">
                         <thead><tr><th>ID</th><th>Name</th><th>Category</th><th class="text-right">Balance</th></tr></thead>
@@ -124,140 +126,102 @@
             </div>
 
             <div id="vouchers" class="section hidden-section">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                    <h3 class="text-xl font-bold text-gray-700">Transactions</h3>
-                    <button class="btn-primary w-full md:w-auto" onclick="openModal('voucherModal')">+ New Voucher</button>
-                </div>
+                <button class="btn-primary mb-4" onclick="openVoucherModal()">+ New Voucher</button>
                 <div class="cmb-card">
                     <table class="cmb-table">
-                        <thead><tr><th>ID</th><th>Date</th><th>Type</th><th class="text-right">Amount</th><th>Narration</th></tr></thead>
-                        <tbody id="voucherTableBody"><tr><td colspan="5" class="text-center text-gray-400 p-4">Loading...</td></tr></tbody>
+                        <thead><tr><th>Actions</th><th>ID</th><th>Date</th><th>Type</th><th class="text-right">Amount</th><th>Narration</th></tr></thead>
+                        <tbody id="voucherTableBody"><tr><td colspan="6" class="text-center text-gray-400 p-4">Loading...</td></tr></tbody>
                     </table>
                 </div>
             </div>
 
             <div id="reports" class="section hidden-section">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                    <h3 class="text-xl font-bold text-gray-700">Ledger Statement</h3>
+                <div class="bg-white p-4 rounded-lg shadow-sm mb-4 border border-gray-200 space-y-3">
+                    <select id="reportLedgerSelect" class="form-input"><option value="">Select Ledger...</option></select>
+                    <button class="btn-primary w-full" onclick="loadReport()">View Report</button>
                 </div>
-                <div class="bg-white p-4 rounded-lg shadow-sm mb-4 border border-gray-200">
-                    <div class="flex flex-col md:flex-row gap-3">
-                        <select id="reportLedgerSelect" class="form-input md:w-64">
-                            <option value="">Select Ledger...</option>
-                        </select>
-                        <button class="btn-primary" onclick="loadReport()">View Report</button>
-                    </div>
-                </div>
-                
                 <div class="cmb-card">
                     <table class="cmb-table">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Voucher</th>
-                                <th>Particulars</th>
-                                <th class="text-right">Debit</th>
-                                <th class="text-right">Credit</th>
-                                <th class="text-right">Balance</th>
-                            </tr>
-                        </thead>
-                        <tbody id="reportTableBody">
-                            <tr><td colspan="6" class="text-center text-gray-400 p-8">Select a Ledger to view details.</td></tr>
-                        </tbody>
+                        <thead><tr><th>Date</th><th>Voucher</th><th>Particulars</th><th class="text-right">Debit</th><th class="text-right">Credit</th><th class="text-right">Balance</th></tr></thead>
+                        <tbody id="reportTableBody"><tr><td colspan="6" class="text-center text-gray-400 p-8">Select a Ledger to view details.</td></tr></tbody>
                     </table>
                 </div>
             </div>
-
         </div>
     </main>
 
     <div id="companyModal" class="modal-overlay">
-        <div class="bg-white rounded-lg w-full max-w-lg p-6 relative m-4 max-h-[90vh] overflow-y-auto">
+        <div class="bg-white rounded-xl w-full max-w-lg p-6 relative m-4 max-h-[90vh] overflow-y-auto shadow-2xl">
             <button class="absolute top-4 right-4 text-2xl text-gray-400" onclick="closeModal('companyModal')">×</button>
             <h3 class="text-xl font-bold mb-4 text-blue-700">New Company</h3>
             <form onsubmit="submitData(event, 'saveCompany')">
-                <div class="space-y-4">
-                    <div><label class="text-xs font-bold text-gray-500">COMPANY NAME</label><input type="text" name="companyName" class="form-input" required></div>
-                    <div><label class="text-xs font-bold text-gray-500">GST NO</label><input type="text" name="gst" class="form-input"></div>
-                    <div><label class="text-xs font-bold text-gray-500">STATE</label>
-                        <select name="state" class="form-input"><option value="Kerala">Kerala</option><option value="Karnataka">Karnataka</option></select>
-                    </div>
-                    <div><label class="text-xs font-bold text-gray-500">FY START</label><input type="date" name="fyStart" class="form-input" required></div>
-                </div>
-                <button type="submit" class="btn-primary mt-6 w-full py-3">Create Company</button>
+                <input type="text" name="companyName" placeholder="Company Name" class="form-input" required>
+                <input type="text" name="gst" placeholder="GST No" class="form-input">
+                <select name="state" class="form-input"><option value="Kerala">Kerala</option><option value="Karnataka">Karnataka</option></select>
+                <input type="date" name="fyStart" class="form-input" required>
+                <button type="submit" class="btn-primary mt-6 w-full py-3">Create</button>
             </form>
         </div>
     </div>
 
     <div id="ledgerModal" class="modal-overlay">
-        <div class="bg-white rounded-lg w-full max-w-lg p-6 relative m-4 max-h-[90vh] overflow-y-auto">
+        <div class="bg-white rounded-xl w-full max-w-lg p-6 relative m-4 max-h-[90vh] overflow-y-auto shadow-2xl">
             <button class="absolute top-4 right-4 text-2xl text-gray-400" onclick="closeModal('ledgerModal')">×</button>
             <h3 class="text-xl font-bold mb-4 text-blue-700">New Ledger</h3>
             <form onsubmit="submitData(event, 'saveLedger')">
-                <div class="space-y-4">
-                    <div><label class="text-xs font-bold text-gray-500">LEDGER NAME</label><input type="text" name="ledgerName" class="form-input" required></div>
-                    <div><label class="text-xs font-bold text-gray-500">CATEGORY</label>
-                        <select name="category" class="form-input" required>
-                            <option value="Cash">Cash</option><option value="Bank">Bank</option><option value="Customer">Customer</option><option value="Supplier">Supplier</option>
-                        </select>
-                    </div>
-                    <div><label class="text-xs font-bold text-gray-500">OPENING BALANCE</label><input type="number" name="openingBalance" class="form-input" value="0"></div>
-                    <div><label class="text-xs font-bold text-gray-500">TYPE</label><select name="drCr" class="form-input"><option value="Dr">Dr</option><option value="Cr">Cr</option></select></div>
-                </div>
-                <button type="submit" class="btn-primary mt-6 w-full py-3">Create Ledger</button>
+                <input type="text" name="ledgerName" placeholder="Name" class="form-input" required>
+                <select name="category" class="form-input" required>
+                    <option value="Cash">Cash</option><option value="Bank">Bank</option><option value="Customer">Customer</option><option value="Supplier">Supplier</option>
+                </select>
+                <input type="number" name="openingBalance" placeholder="Op Bal" class="form-input" value="0">
+                <select name="drCr" class="form-input"><option value="Dr">Dr</option><option value="Cr">Cr</option></select>
+                <button type="submit" class="btn-primary mt-6 w-full py-3">Create</button>
             </form>
         </div>
     </div>
 
     <div id="voucherModal" class="modal-overlay">
-        <div class="bg-white rounded-lg w-full max-w-lg p-6 relative m-4 max-h-[90vh] overflow-y-auto">
+        <div class="bg-white rounded-xl w-full max-w-lg p-6 relative m-4 max-h-[90vh] overflow-y-auto shadow-2xl">
             <button class="absolute top-4 right-4 text-2xl text-gray-400" onclick="closeModal('voucherModal')">×</button>
-            <h3 class="text-xl font-bold mb-4 text-blue-700">New Voucher</h3>
-            <form onsubmit="submitData(event, 'saveVoucher')">
-                <div class="space-y-4">
-                    <div><label class="text-xs font-bold text-gray-500">VOUCHER TYPE</label>
-                        <select name="type" class="form-input" required><option value="Payment">Payment</option><option value="Receipt">Receipt</option></select>
-                    </div>
-                    <div><label class="text-xs font-bold text-gray-500">DATE</label><input type="date" name="date" class="form-input" required></div>
-                    <div><label class="text-xs font-bold text-gray-500">DEBIT ACCOUNT (Dr)</label><select name="drLedger" id="drSelect" class="form-input"><option>Loading...</option></select></div>
-                    <div><label class="text-xs font-bold text-gray-500">CREDIT ACCOUNT (Cr)</label><select name="crLedger" id="crSelect" class="form-input"><option>Loading...</option></select></div>
-                    <div><label class="text-xs font-bold text-gray-500">AMOUNT</label><input type="number" name="amount" class="form-input" required></div>
-                    <div><label class="text-xs font-bold text-gray-500">NARRATION</label><input type="text" name="narration" class="form-input"></div>
+            <h3 class="text-xl font-bold mb-4 text-blue-700" id="voucherModalTitle">New Voucher</h3>
+            <form id="voucherForm" onsubmit="submitData(event, 'saveVoucher')">
+                <input type="hidden" name="id" id="voucherId">
+                <div><label class="text-xs font-bold text-gray-500">TYPE</label>
+                    <select name="type" class="form-input" required>
+                        <option value="Payment">Payment</option>
+                        <option value="Receipt">Receipt</option>
+                        <option value="Sales">Sales</option>
+                        <option value="Purchase">Purchase</option>
+                    </select>
                 </div>
-                <button type="submit" class="btn-primary mt-6 w-full py-3">Save Voucher</button>
+                <div><label class="text-xs font-bold text-gray-500">DATE</label><input type="date" name="date" class="form-input" required></div>
+                <div><label class="text-xs font-bold text-gray-500">DEBIT (Dr)</label><select name="drLedger" id="drSelect" class="form-input"><option>Loading...</option></select></div>
+                <div><label class="text-xs font-bold text-gray-500">CREDIT (Cr)</label><select name="crLedger" id="crSelect" class="form-input"><option>Loading...</option></select></div>
+                <div><label class="text-xs font-bold text-gray-500">AMOUNT</label><input type="number" name="amount" class="form-input" required></div>
+                <div><label class="text-xs font-bold text-gray-500">NARRATION</label><input type="text" name="narration" class="form-input"></div>
+                <button type="submit" class="btn-primary mt-6 w-full py-3">Save</button>
             </form>
         </div>
     </div>
 
     <script>
-        // *** YOUR DEPLOYMENT URL ***
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz-9anHvoVyrJFM0xzCSMmwyPnJ1nrEF-rAeiq-egScciq-FC68BzIj4q4OftdpIO0hhA/exec";
+        // *** FINAL SCRIPT URL ***
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw2adpqoyF58fKIvGLkPRffhcuS0P4FieLKkQEc-J6Ew9pHbQ7CotkP7J-MaimZZyJijA/exec";
+        
+        let appData = { ledgers: [], vouchers: [] };
 
-        let appData = { ledgers: [] };
-
-        function initApp() {
-            console.log("App Started.");
-            loadAllData();
-        }
-
-        // --- MOBILE TOGGLES ---
+        function initApp() { console.log("Started"); loadAllData(); }
+        
         function toggleSidebar() {
-            const sb = document.getElementById('sidebar');
-            const bg = document.getElementById('mobileBackdrop');
-            sb.classList.toggle('open');
-            bg.classList.toggle('active');
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('mobileBackdrop').classList.toggle('active');
         }
 
-        // --- SAFE FORMATTER ---
         function formatMoney(amount) {
-            if (amount === undefined || amount === null || amount === "") return "0.00";
+            if (!amount) return "0.00";
             let clean = amount.toString().replace(/,/g, '');
             let num = parseFloat(clean);
-            if (isNaN(num)) return "0.00";
-            return num.toLocaleString('en-IN', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            });
+            return isNaN(num) ? "0.00" : num.toLocaleString('en-IN', { minimumFractionDigits: 2 });
         }
 
         function nav(sectionId, el) {
@@ -266,76 +230,154 @@
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             el.classList.add('active');
             document.getElementById('pageTitle').textContent = el.textContent.substring(2);
-            
-            // Auto close sidebar on mobile after selection
             if(window.innerWidth < 768) toggleSidebar();
         }
 
         function openModal(id) { document.getElementById(id).classList.add('show'); populateDropdowns(); }
         function closeModal(id) { document.getElementById(id).classList.remove('show'); }
 
+        // VOUCHER ACTIONS
+        function openVoucherModal() {
+            document.getElementById('voucherForm').reset();
+            document.getElementById('voucherId').value = ""; 
+            document.getElementById('voucherModalTitle').textContent = "New Voucher";
+            openModal('voucherModal');
+        }
+
+        function editVoucher(id) {
+            const v = appData.vouchers.find(x => x.id === id);
+            if(!v) return;
+            openModal('voucherModal');
+            document.getElementById('voucherModalTitle').textContent = "Edit Voucher " + id;
+            const f = document.getElementById('voucherForm');
+            f.id.value = v.id;
+            f.date.value = v.date;
+            f.type.value = v.type;
+            f.amount.value = v.amount;
+            f.narration.value = v.narration;
+            setTimeout(() => {
+                f.drLedger.value = v.dr;
+                f.crLedger.value = v.cr;
+            }, 100);
+        }
+
+        function deleteVoucher(id) {
+            if(!confirm("Are you sure you want to delete " + id + "?")) return;
+            submitData({ preventDefault:()=>{}, target: { closest: ()=>({}) } }, 'deleteItem', { type:'voucher', id: id });
+        }
+
+        function printVoucher(id) {
+            const v = appData.vouchers.find(x => x.id === id);
+            if(!v) return;
+            const drName = appData.ledgers.find(l=>l.id==v.dr)?.name || v.dr;
+            const crName = appData.ledgers.find(l=>l.id==v.cr)?.name || v.cr;
+            const companyName = (appData.companies && appData.companies[0]) ? appData.companies[0].name : "CM Books";
+
+            const win = window.open('', '', 'width=800,height=600');
+            win.document.write(`
+                <html><head><title>Voucher ${id}</title>
+                <style>
+                    body { font-family: sans-serif; padding: 40px; }
+                    .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
+                    .title { font-size: 24px; font-weight: bold; text-transform: uppercase; }
+                    .row { display: flex; justify-content: space-between; margin-bottom: 10px; }
+                    .box { border: 1px solid #ccc; padding: 20px; margin-bottom: 30px; }
+                    .amount { font-size: 20px; font-weight: bold; text-align: right; }
+                    .footer { margin-top: 50px; display: flex; justify-content: space-between; }
+                    .sign { border-top: 1px solid #333; width: 200px; text-align: center; padding-top: 5px; }
+                </style>
+                </head><body>
+                <div class="header">
+                    <h1>${companyName}</h1>
+                    <div class="title">${v.type.toUpperCase()} VOUCHER</div>
+                </div>
+                <div class="row">
+                    <div><strong>Voucher No:</strong> ${v.id}</div>
+                    <div><strong>Date:</strong> ${v.date}</div>
+                </div>
+                <div class="box">
+                    <div class="row">
+                        <div><strong>Debit Account:</strong></div>
+                        <div>${drName}</div>
+                    </div>
+                    <div class="row">
+                        <div><strong>Credit Account:</strong></div>
+                        <div>${crName}</div>
+                    </div>
+                    <hr style="margin: 15px 0; border: 0; border-top: 1px dashed #ccc;">
+                    <div class="row">
+                        <div><strong>Narration:</strong></div>
+                        <div>${v.narration}</div>
+                    </div>
+                </div>
+                <div class="amount">Amount: ₹ ${formatMoney(v.amount)}</div>
+                
+                <div class="footer">
+                    <div class="sign">Prepared By</div>
+                    <div class="sign">Authorized Signatory</div>
+                </div>
+                <script>window.print();<\/script>
+                </body></html>
+            `);
+            win.document.close();
+        }
+
+        // --- DATA ENGINE ---
         function loadAllData() {
-            const indicator = document.getElementById('loadingIndicator');
-            indicator.classList.remove('hidden');
-            
-            fetch(SCRIPT_URL, {
-                method: "POST",
-                body: JSON.stringify({ action: "getAllData" })
-            })
+            document.getElementById('loadingIndicator').classList.remove('hidden');
+            fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "getAllData" }) })
             .then(res => res.json())
             .then(result => {
                 if(result.status === "SUCCESS") {
                     appData = result.data;
+                    appData.companies = result.data.companies || []; 
                     renderDashboard(result.data.stats);
-                    
                     renderTable('companyTableBody', result.data.companies, ['id','name','gst','state']);
                     renderTable('ledgerTableBody', result.data.ledgers, ['id','name','category','bal'], true);
-                    renderTable('voucherTableBody', result.data.vouchers, ['id','date','type','amount','narration'], true);
-                    
+                    renderVoucherTable(); 
                     populateDropdowns();
-                } else {
-                    console.error("API Error", result);
                 }
             })
-            .catch(err => console.error("Fetch Error", err))
-            .finally(() => indicator.classList.add('hidden'));
+            .finally(() => document.getElementById('loadingIndicator').classList.add('hidden'));
         }
 
         function loadReport() {
             const ledgerId = document.getElementById('reportLedgerSelect').value;
-            if(!ledgerId) { alert("Please select a ledger"); return; }
-            
+            if(!ledgerId) return alert("Select Ledger");
             const tbody = document.getElementById('reportTableBody');
-            tbody.innerHTML = "<tr><td colspan='6' class='text-center p-4'>Fetching Report...</td></tr>";
-
-            fetch(SCRIPT_URL, {
-                method: "POST",
-                body: JSON.stringify({ action: "getReport", ledgerId: ledgerId })
-            })
+            tbody.innerHTML = "<tr><td colspan='6' class='text-center p-4'>Loading...</td></tr>";
+            fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "getReport", ledgerId: ledgerId }) })
             .then(res => res.json())
-            .then(result => {
-                if(result.status === "SUCCESS") {
-                    tbody.innerHTML = "";
-                    if(result.data.length === 0) {
-                        tbody.innerHTML = "<tr><td colspan='6' class='text-center p-4'>No Transactions Found</td></tr>";
-                        return;
-                    }
-                    result.data.forEach(row => {
-                        const dr = (row.debit === '-' || row.debit === 0) ? '-' : formatMoney(row.debit);
-                        const cr = (row.credit === '-' || row.credit === 0) ? '-' : formatMoney(row.credit);
-                        
-                        const tr = `
-                            <tr class="hover:bg-gray-50 border-b">
-                                <td class="p-3">${row.date}</td>
-                                <td class="p-3 text-blue-600 font-medium">${row.vNo}</td>
-                                <td class="p-3 whitespace-normal">${row.particulars}</td>
-                                <td class="p-3 text-right text-green-600 font-medium">${dr}</td>
-                                <td class="p-3 text-right text-red-600 font-medium">${cr}</td>
-                                <td class="p-3 text-right font-bold text-gray-700">${formatMoney(row.balance)}</td>
-                            </tr>`;
-                        tbody.innerHTML += tr;
-                    });
-                }
+            .then(res => {
+                tbody.innerHTML = "";
+                if(!res.data.length) { tbody.innerHTML = "<tr><td colspan='6' class='text-center p-4'>No Data</td></tr>"; return; }
+                res.data.forEach(r => {
+                    const dr = (r.debit=='-'||r.debit==0)?'-':formatMoney(r.debit);
+                    const cr = (r.credit=='-'||r.credit==0)?'-':formatMoney(r.credit);
+                    tbody.innerHTML += `<tr class="border-b"><td class="p-3">${r.date}</td><td class="p-3 text-blue-600">${r.vNo}</td><td class="p-3">${r.particulars}</td><td class="p-3 text-right text-green-600">${dr}</td><td class="p-3 text-right text-red-600">${cr}</td><td class="p-3 text-right font-bold">${formatMoney(r.balance)}</td></tr>`;
+                });
+            });
+        }
+
+        function renderVoucherTable() {
+            const tbody = document.getElementById('voucherTableBody');
+            tbody.innerHTML = "";
+            if(!appData.vouchers.length) { tbody.innerHTML = "<tr><td colspan='6' class='text-center p-4'>No Data</td></tr>"; return; }
+            
+            appData.vouchers.forEach(v => {
+                tbody.innerHTML += `
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="p-3 flex">
+                        <button class="btn-icon btn-print" onclick="printVoucher('${v.id}')"><i class="fas fa-print"></i></button>
+                        <button class="btn-icon btn-edit" onclick="editVoucher('${v.id}')"><i class="fas fa-edit"></i></button>
+                        <button class="btn-icon btn-del" onclick="deleteVoucher('${v.id}')"><i class="fas fa-trash"></i></button>
+                    </td>
+                    <td class="p-3 text-gray-500 text-xs">${v.id}</td>
+                    <td class="p-3">${v.date}</td>
+                    <td class="p-3"><span class="px-2 py-1 rounded text-xs bg-gray-100">${v.type}</span></td>
+                    <td class="p-3 text-right font-mono">${formatMoney(v.amount)}</td>
+                    <td class="p-3 text-gray-500 text-sm truncate max-w-xs">${v.narration}</td>
+                </tr>`;
             });
         }
 
@@ -346,63 +388,66 @@
             document.getElementById('dashBalance').textContent = "₹ " + formatMoney(stats.balance);
         }
 
-        function renderTable(bodyId, data, keys, formatMoneyCol = false) {
+        function renderTable(bodyId, data, keys, money=false) {
             const tbody = document.getElementById(bodyId);
             tbody.innerHTML = "";
-            if(!data || data.length === 0) { 
-                tbody.innerHTML = "<tr><td colspan='5' class='text-center p-4 text-gray-400'>No Records Found</td></tr>"; 
-                return; 
-            }
-            data.forEach(row => {
-                let tr = "<tr class='hover:bg-gray-50 border-b'>";
-                keys.forEach((k, index) => {
-                    let val = row[k] || '-';
-                    if(formatMoneyCol && (k === 'amount' || k === 'bal')) {
-                        val = `<div class="text-right font-mono">${formatMoney(val)}</div>`;
-                    }
-                    tr += `<td class='p-3'>${val}</td>`;
+            if(!data || !data.length) { tbody.innerHTML = `<tr><td colspan="${keys.length}" class='text-center p-4'>No Data</td></tr>`; return; }
+            data.forEach(r => {
+                let tr = "<tr class='border-b'>";
+                keys.forEach(k => {
+                    let val = r[k]||'-';
+                    if(money && (k==='amount'||k==='bal')) val = `<div class="text-right font-mono">${formatMoney(val)}</div>`;
+                    tr += `<td class="p-3">${val}</td>`;
                 });
-                tr += "</tr>";
-                tbody.innerHTML += tr;
+                tbody.innerHTML += tr + "</tr>";
             });
         }
 
         function populateDropdowns() {
-            if(!appData.ledgers) return;
-            const opts = appData.ledgers.map(l => `<option value="${l.id}">${l.name} (${l.category})</option>`).join('');
-            
-            const dr = document.getElementById('drSelect');
-            const cr = document.getElementById('crSelect');
-            const rep = document.getElementById('reportLedgerSelect');
-
-            if(dr) dr.innerHTML = '<option value="">Select Account</option>' + opts;
-            if(cr) cr.innerHTML = '<option value="">Select Account</option>' + opts;
-            if(rep) rep.innerHTML = '<option value="">Select Ledger...</option>' + opts;
+            const opts = appData.ledgers.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
+            ['drSelect','crSelect','reportLedgerSelect'].forEach(id => {
+                if(document.getElementById(id)) document.getElementById(id).innerHTML = '<option value="">Select...</option>' + opts;
+            });
         }
 
-        function submitData(e, action) {
-            e.preventDefault();
-            const form = e.target;
-            const btn = form.querySelector('button');
-            const originalText = btn.textContent;
-            btn.textContent = "Processing..."; btn.disabled = true;
-
-            const formData = new FormData(form);
-            const data = {};
-            formData.forEach((v, k) => data[k] = v);
-            data.action = action;
+        function submitData(e, action, payload=null) {
+            if(e.preventDefault) e.preventDefault();
+            
+            let data = {};
+            if(payload) {
+                data = payload;
+                data.action = action;
+            } else {
+                const form = e.target;
+                const btn = form.querySelector('button');
+                btn.textContent = "..."; btn.disabled = true;
+                const fd = new FormData(form);
+                fd.forEach((v, k) => data[k] = v);
+                data.action = action;
+            }
 
             fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(data) })
             .then(res => res.json())
             .then(res => {
                 if(res.status === "SUCCESS") {
-                    alert("Success: " + res.message);
-                    form.reset();
-                    closeModal(form.closest('.modal-overlay').id);
+                    if(!payload) {
+                        e.target.reset();
+                        closeModal(e.target.closest('.modal-overlay').id);
+                    }
+                    alert(res.message);
                     loadAllData();
-                } else { alert("Error: " + res.message); }
+                } else if(res.status === "DUPLICATE") {
+                    alert("⚠️ " + res.message);
+                } else {
+                    alert("Error: " + res.message);
+                }
             })
-            .finally(() => { btn.textContent = originalText; btn.disabled = false; });
+            .finally(() => {
+                if(!payload) {
+                    const btn = e.target.querySelector('button');
+                    btn.textContent = "Save"; btn.disabled = false;
+                }
+            });
         }
     </script>
 </body>
