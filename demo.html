@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CMB | Cloud Accounting</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -10,23 +10,31 @@
         :root { --zoho-blue: #006fda; --zoho-yellow: #f5ba31; --zoho-bg: #f4f5f7; }
         body { font-family: 'Inter', sans-serif; background-color: var(--zoho-bg); color: #333; overflow: hidden; }
         
-        /* Sidebar */
-        .sidebar { background-color: #1c212e; color: white; transition: 0.3s; }
-        .nav-item { padding: 12px 20px; cursor: pointer; color: #b0b0b0; border-left: 3px solid transparent; display: flex; gap: 10px; font-size: 0.95rem; }
+        /* Sidebar & Layout */
+        .sidebar { background-color: #1c212e; color: white; transition: transform 0.3s ease-in-out; }
+        .nav-item { padding: 12px 20px; cursor: pointer; color: #b0b0b0; border-left: 3px solid transparent; display: flex; gap: 10px; font-size: 0.95rem; align-items: center; }
         .nav-item:hover, .nav-item.active { background-color: rgba(255,255,255,0.05); color: #fff; border-left-color: var(--zoho-blue); }
         .nav-section { padding: 15px 20px 5px; font-size: 0.75rem; font-weight: bold; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; }
 
-        /* UI Elements */
-        .cmb-card { background: white; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 25px; border-top: 3px solid var(--zoho-blue); margin-bottom: 20px; }
-        .cmb-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-        .cmb-table th { text-align: left; padding: 12px; background: #f8f9fa; color: #666; font-weight: 600; border-bottom: 2px solid #eee; }
-        .cmb-table td { padding: 12px; border-bottom: 1px solid #eee; }
-        .cmb-table tr:hover { background-color: #f9fbfd; }
+        /* Mobile Sidebar Toggle */
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; z-index: 40; height: 100%; width: 260px; transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 30; }
+            .overlay.active { display: block; }
+        }
+
+        /* Cards & Tables */
+        .cmb-card { background: white; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 20px; border-top: 3px solid var(--zoho-blue); margin-bottom: 20px; overflow-x: auto; }
+        .cmb-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; min-width: 600px; /* Force scroll on mobile */ }
+        .cmb-table th { text-align: left; padding: 12px; background: #f8f9fa; color: #666; font-weight: 600; border-bottom: 2px solid #eee; white-space: nowrap; }
+        .cmb-table td { padding: 12px; border-bottom: 1px solid #eee; white-space: nowrap; }
         
-        .form-input { width: 100%; padding: 8px; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 14px; margin-top: 5px; }
-        .btn-primary { background-color: var(--zoho-yellow); padding: 8px 20px; border-radius: 4px; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s; border:none; }
+        /* Form Elements */
+        .form-input { width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 16px; margin-top: 5px; background: #fff; } /* Larger font for mobile inputs */
+        .btn-primary { background-color: var(--zoho-yellow); padding: 10px 20px; border-radius: 6px; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s; border:none; white-space: nowrap; }
         
-        .modal-overlay { background: rgba(0,0,0,0.5); position: fixed; inset: 0; display: none; justify-content: center; align-items: center; z-index: 50; }
+        .modal-overlay { background: rgba(0,0,0,0.5); position: fixed; inset: 0; display: none; justify-content: center; align-items: center; z-index: 50; padding: 10px; }
         .modal-overlay.show { display: flex; }
         .hidden-section { display: none; }
     </style>
@@ -34,9 +42,14 @@
 
 <body class="flex h-screen" onload="initApp()">
 
-    <aside class="sidebar w-64 flex-shrink-0 flex flex-col pt-5">
-        <div class="px-5 mb-6"><h1 class="text-xl font-bold">CMB | <span style="color:var(--zoho-yellow)">Books</span></h1></div>
-        <nav class="flex-1 overflow-y-auto">
+    <div id="mobileBackdrop" class="overlay" onclick="toggleSidebar()"></div>
+
+    <aside id="sidebar" class="sidebar w-64 flex-shrink-0 flex flex-col pt-5 h-full">
+        <div class="px-5 mb-6 flex justify-between items-center">
+            <h1 class="text-xl font-bold">CMB | <span style="color:var(--zoho-yellow)">Books</span></h1>
+            <button class="md:hidden text-gray-400" onclick="toggleSidebar()">✕</button>
+        </div>
+        <nav class="flex-1 overflow-y-auto pb-20">
             <div class="nav-section">Main</div>
             <div class="nav-item active" onclick="nav('dashboard', this)">📊 Dashboard</div>
             <div class="nav-item" onclick="nav('company', this)">🏢 Company</div>
@@ -50,86 +63,92 @@
             <div class="nav-section">Analysis</div>
             <div class="nav-item" onclick="nav('reports', this)">📈 Reports</div>
 
-            <div class="mt-auto p-5 text-xs text-gray-500 cursor-pointer hover:text-white" onclick="initApp()">🔄 Sync Data</div>
+            <div class="p-5 text-xs text-gray-500 cursor-pointer hover:text-white" onclick="initApp()">🔄 Sync Data</div>
         </nav>
     </aside>
 
-    <main class="flex-1 flex flex-col overflow-hidden">
-        <header class="bg-white border-b h-16 flex items-center justify-between px-8 shadow-sm">
-            <h2 class="text-lg font-semibold text-gray-700" id="pageTitle">Dashboard</h2>
+    <main class="flex-1 flex flex-col overflow-hidden relative w-full">
+        <header class="bg-white border-b h-16 flex items-center justify-between px-4 md:px-8 shadow-sm flex-shrink-0 z-10">
+            <div class="flex items-center gap-3">
+                <button class="md:hidden text-2xl text-gray-600 focus:outline-none" onclick="toggleSidebar()">☰</button>
+                <h2 class="text-lg font-semibold text-gray-700 truncate" id="pageTitle">Dashboard</h2>
+            </div>
             <div id="loadingIndicator" class="text-blue-600 text-sm font-bold hidden flex items-center gap-2">
-                <span class="animate-spin">↻</span> Syncing...
+                <span class="animate-spin">↻</span> <span class="hidden md:inline">Syncing...</span>
             </div>
         </header>
 
-        <div class="flex-1 overflow-y-auto p-8">
+        <div class="flex-1 overflow-y-auto p-4 md:p-8 bg-gray-50">
             
             <div id="dashboard" class="section">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-green-500">
-                        <div class="text-gray-500 text-sm">Total Income</div>
-                        <div class="text-2xl font-bold mt-1 text-gray-800" id="dashIncome">₹ 0.00</div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-green-500">
+                        <div class="text-gray-500 text-sm font-medium">Total Income</div>
+                        <div class="text-2xl font-bold mt-1 text-gray-800 break-all" id="dashIncome">₹ 0.00</div>
                     </div>
-                    <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-red-500">
-                        <div class="text-gray-500 text-sm">Total Expense</div>
-                        <div class="text-2xl font-bold mt-1 text-gray-800" id="dashExpense">₹ 0.00</div>
+                    <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-red-500">
+                        <div class="text-gray-500 text-sm font-medium">Total Expense</div>
+                        <div class="text-2xl font-bold mt-1 text-gray-800 break-all" id="dashExpense">₹ 0.00</div>
                     </div>
-                    <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-blue-500">
-                        <div class="text-gray-500 text-sm">Net Balance</div>
-                        <div class="text-2xl font-bold mt-1 text-gray-800" id="dashBalance">₹ 0.00</div>
+                    <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-blue-500">
+                        <div class="text-gray-500 text-sm font-medium">Net Balance</div>
+                        <div class="text-2xl font-bold mt-1 text-gray-800 break-all" id="dashBalance">₹ 0.00</div>
                     </div>
                 </div>
             </div>
 
             <div id="company" class="section hidden-section">
-                <div class="flex justify-between items-center mb-6">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                     <h3 class="text-xl font-bold text-gray-700">Company List</h3>
-                    <button class="btn-primary" onclick="openModal('companyModal')">+ Create Company</button>
+                    <button class="btn-primary w-full md:w-auto" onclick="openModal('companyModal')">+ Create Company</button>
                 </div>
                 <div class="cmb-card">
                     <table class="cmb-table">
                         <thead><tr><th>ID</th><th>Name</th><th>GST</th><th>State</th></tr></thead>
-                        <tbody id="companyTableBody"><tr><td colspan="4" class="text-center text-gray-400">Loading...</td></tr></tbody>
+                        <tbody id="companyTableBody"><tr><td colspan="4" class="text-center text-gray-400 p-4">Loading...</td></tr></tbody>
                     </table>
                 </div>
             </div>
 
             <div id="ledger" class="section hidden-section">
-                <div class="flex justify-between items-center mb-6">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                     <h3 class="text-xl font-bold text-gray-700">Chart of Accounts</h3>
-                    <button class="btn-primary" onclick="openModal('ledgerModal')">+ Create Ledger</button>
+                    <button class="btn-primary w-full md:w-auto" onclick="openModal('ledgerModal')">+ Create Ledger</button>
                 </div>
                 <div class="cmb-card">
                     <table class="cmb-table">
                         <thead><tr><th>ID</th><th>Name</th><th>Category</th><th class="text-right">Balance</th></tr></thead>
-                        <tbody id="ledgerTableBody"><tr><td colspan="4" class="text-center text-gray-400">Loading...</td></tr></tbody>
+                        <tbody id="ledgerTableBody"><tr><td colspan="4" class="text-center text-gray-400 p-4">Loading...</td></tr></tbody>
                     </table>
                 </div>
             </div>
 
             <div id="vouchers" class="section hidden-section">
-                <div class="flex justify-between items-center mb-6">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                     <h3 class="text-xl font-bold text-gray-700">Transactions</h3>
-                    <button class="btn-primary" onclick="openModal('voucherModal')">+ New Voucher</button>
+                    <button class="btn-primary w-full md:w-auto" onclick="openModal('voucherModal')">+ New Voucher</button>
                 </div>
                 <div class="cmb-card">
                     <table class="cmb-table">
                         <thead><tr><th>ID</th><th>Date</th><th>Type</th><th class="text-right">Amount</th><th>Narration</th></tr></thead>
-                        <tbody id="voucherTableBody"><tr><td colspan="5" class="text-center text-gray-400">Loading...</td></tr></tbody>
+                        <tbody id="voucherTableBody"><tr><td colspan="5" class="text-center text-gray-400 p-4">Loading...</td></tr></tbody>
                     </table>
                 </div>
             </div>
 
             <div id="reports" class="section hidden-section">
-                <div class="flex justify-between items-center mb-6">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                     <h3 class="text-xl font-bold text-gray-700">Ledger Statement</h3>
-                    <div class="flex gap-2">
-                        <select id="reportLedgerSelect" class="form-input" style="width: 250px;">
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm mb-4 border border-gray-200">
+                    <div class="flex flex-col md:flex-row gap-3">
+                        <select id="reportLedgerSelect" class="form-input md:w-64">
                             <option value="">Select Ledger...</option>
                         </select>
                         <button class="btn-primary" onclick="loadReport()">View Report</button>
                     </div>
                 </div>
+                
                 <div class="cmb-card">
                     <table class="cmb-table">
                         <thead>
@@ -143,7 +162,7 @@
                             </tr>
                         </thead>
                         <tbody id="reportTableBody">
-                            <tr><td colspan="6" class="text-center text-gray-400 p-8">Select a Ledger above to view details.</td></tr>
+                            <tr><td colspan="6" class="text-center text-gray-400 p-8">Select a Ledger to view details.</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -153,56 +172,66 @@
     </main>
 
     <div id="companyModal" class="modal-overlay">
-        <div class="bg-white rounded-lg w-full max-w-lg p-6 relative">
-            <button class="absolute top-4 right-4 text-2xl" onclick="closeModal('companyModal')">×</button>
+        <div class="bg-white rounded-lg w-full max-w-lg p-6 relative m-4 max-h-[90vh] overflow-y-auto">
+            <button class="absolute top-4 right-4 text-2xl text-gray-400" onclick="closeModal('companyModal')">×</button>
             <h3 class="text-xl font-bold mb-4 text-blue-700">New Company</h3>
             <form onsubmit="submitData(event, 'saveCompany')">
-                <input type="text" name="companyName" placeholder="Company Name" class="form-input" required>
-                <input type="text" name="gst" placeholder="GST No" class="form-input">
-                <select name="state" class="form-input"><option value="Kerala">Kerala</option><option value="Karnataka">Karnataka</option></select>
-                <input type="date" name="fyStart" class="form-input" required>
-                <button type="submit" class="btn-primary mt-4 w-full">Create</button>
+                <div class="space-y-4">
+                    <div><label class="text-xs font-bold text-gray-500">COMPANY NAME</label><input type="text" name="companyName" class="form-input" required></div>
+                    <div><label class="text-xs font-bold text-gray-500">GST NO</label><input type="text" name="gst" class="form-input"></div>
+                    <div><label class="text-xs font-bold text-gray-500">STATE</label>
+                        <select name="state" class="form-input"><option value="Kerala">Kerala</option><option value="Karnataka">Karnataka</option></select>
+                    </div>
+                    <div><label class="text-xs font-bold text-gray-500">FY START</label><input type="date" name="fyStart" class="form-input" required></div>
+                </div>
+                <button type="submit" class="btn-primary mt-6 w-full py-3">Create Company</button>
             </form>
         </div>
     </div>
 
     <div id="ledgerModal" class="modal-overlay">
-        <div class="bg-white rounded-lg w-full max-w-lg p-6 relative">
-            <button class="absolute top-4 right-4 text-2xl" onclick="closeModal('ledgerModal')">×</button>
+        <div class="bg-white rounded-lg w-full max-w-lg p-6 relative m-4 max-h-[90vh] overflow-y-auto">
+            <button class="absolute top-4 right-4 text-2xl text-gray-400" onclick="closeModal('ledgerModal')">×</button>
             <h3 class="text-xl font-bold mb-4 text-blue-700">New Ledger</h3>
             <form onsubmit="submitData(event, 'saveLedger')">
-                <input type="text" name="ledgerName" placeholder="Ledger Name" class="form-input" required>
-                <select name="category" class="form-input" required>
-                    <option value="Cash">Cash</option><option value="Bank">Bank</option><option value="Customer">Customer</option><option value="Supplier">Supplier</option>
-                </select>
-                <input type="number" name="openingBalance" placeholder="Opening Balance" class="form-input" value="0">
-                <select name="drCr" class="form-input"><option value="Dr">Dr</option><option value="Cr">Cr</option></select>
-                <button type="submit" class="btn-primary mt-4 w-full">Create</button>
+                <div class="space-y-4">
+                    <div><label class="text-xs font-bold text-gray-500">LEDGER NAME</label><input type="text" name="ledgerName" class="form-input" required></div>
+                    <div><label class="text-xs font-bold text-gray-500">CATEGORY</label>
+                        <select name="category" class="form-input" required>
+                            <option value="Cash">Cash</option><option value="Bank">Bank</option><option value="Customer">Customer</option><option value="Supplier">Supplier</option>
+                        </select>
+                    </div>
+                    <div><label class="text-xs font-bold text-gray-500">OPENING BALANCE</label><input type="number" name="openingBalance" class="form-input" value="0"></div>
+                    <div><label class="text-xs font-bold text-gray-500">TYPE</label><select name="drCr" class="form-input"><option value="Dr">Dr</option><option value="Cr">Cr</option></select></div>
+                </div>
+                <button type="submit" class="btn-primary mt-6 w-full py-3">Create Ledger</button>
             </form>
         </div>
     </div>
 
     <div id="voucherModal" class="modal-overlay">
-        <div class="bg-white rounded-lg w-full max-w-lg p-6 relative">
-            <button class="absolute top-4 right-4 text-2xl" onclick="closeModal('voucherModal')">×</button>
+        <div class="bg-white rounded-lg w-full max-w-lg p-6 relative m-4 max-h-[90vh] overflow-y-auto">
+            <button class="absolute top-4 right-4 text-2xl text-gray-400" onclick="closeModal('voucherModal')">×</button>
             <h3 class="text-xl font-bold mb-4 text-blue-700">New Voucher</h3>
             <form onsubmit="submitData(event, 'saveVoucher')">
-                <select name="type" class="form-input" required><option value="Payment">Payment</option><option value="Receipt">Receipt</option></select>
-                <input type="date" name="date" class="form-input" required>
-                <select name="drLedger" id="drSelect" class="form-input"><option>Loading...</option></select>
-                <select name="crLedger" id="crSelect" class="form-input"><option>Loading...</option></select>
-                <input type="number" name="amount" placeholder="Amount" class="form-input" required>
-                <input type="text" name="narration" placeholder="Narration" class="form-input">
-                <button type="submit" class="btn-primary mt-4 w-full">Save Voucher</button>
+                <div class="space-y-4">
+                    <div><label class="text-xs font-bold text-gray-500">VOUCHER TYPE</label>
+                        <select name="type" class="form-input" required><option value="Payment">Payment</option><option value="Receipt">Receipt</option></select>
+                    </div>
+                    <div><label class="text-xs font-bold text-gray-500">DATE</label><input type="date" name="date" class="form-input" required></div>
+                    <div><label class="text-xs font-bold text-gray-500">DEBIT ACCOUNT (Dr)</label><select name="drLedger" id="drSelect" class="form-input"><option>Loading...</option></select></div>
+                    <div><label class="text-xs font-bold text-gray-500">CREDIT ACCOUNT (Cr)</label><select name="crLedger" id="crSelect" class="form-input"><option>Loading...</option></select></div>
+                    <div><label class="text-xs font-bold text-gray-500">AMOUNT</label><input type="number" name="amount" class="form-input" required></div>
+                    <div><label class="text-xs font-bold text-gray-500">NARRATION</label><input type="text" name="narration" class="form-input"></div>
+                </div>
+                <button type="submit" class="btn-primary mt-6 w-full py-3">Save Voucher</button>
             </form>
         </div>
     </div>
 
     <script>
-        // ----------------------------------------------------
-        // YOUR DEPLOYMENT URL
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx5YWsjbqZVLKpNaiAHTIuPVIv_MQbYu4fegIgDdiIx1LtF_IJ8EBY4ZU5URPiifB__/exec";
-        // ----------------------------------------------------
+        // *** YOUR DEPLOYMENT URL ***
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxENQmXapSQkxeg_duKojIJKcSdrKurBfiF-Vl0BXFViDHqhWrHRurNUCp5I-kGUjT8mQ/exec";
 
         let appData = { ledgers: [] };
 
@@ -211,9 +240,21 @@
             loadAllData();
         }
 
-        // --- FORMATTER: INDIAN CURRENCY (e.g., 1,50,000.00) ---
+        // --- MOBILE TOGGLES ---
+        function toggleSidebar() {
+            const sb = document.getElementById('sidebar');
+            const bg = document.getElementById('mobileBackdrop');
+            sb.classList.toggle('open');
+            bg.classList.toggle('active');
+        }
+
+        // --- SAFE FORMATTER ---
         function formatMoney(amount) {
-            return parseFloat(amount || 0).toLocaleString('en-IN', {
+            if (amount === undefined || amount === null || amount === "") return "0.00";
+            let clean = amount.toString().replace(/,/g, '');
+            let num = parseFloat(clean);
+            if (isNaN(num)) return "0.00";
+            return num.toLocaleString('en-IN', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
             });
@@ -225,6 +266,9 @@
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             el.classList.add('active');
             document.getElementById('pageTitle').textContent = el.textContent.substring(2);
+            
+            // Auto close sidebar on mobile after selection
+            if(window.innerWidth < 768) toggleSidebar();
         }
 
         function openModal(id) { document.getElementById(id).classList.add('show'); populateDropdowns(); }
@@ -244,10 +288,9 @@
                     appData = result.data;
                     renderDashboard(result.data.stats);
                     
-                    // Render Tables with Formatting
                     renderTable('companyTableBody', result.data.companies, ['id','name','gst','state']);
-                    renderTable('ledgerTableBody', result.data.ledgers, ['id','name','category','bal'], true); // true = format last col
-                    renderTable('voucherTableBody', result.data.vouchers, ['id','date','type','amount','narration'], true); // true = format amount
+                    renderTable('ledgerTableBody', result.data.ledgers, ['id','name','category','bal'], true);
+                    renderTable('voucherTableBody', result.data.vouchers, ['id','date','type','amount','narration'], true);
                     
                     populateDropdowns();
                 } else {
@@ -258,7 +301,6 @@
             .finally(() => indicator.classList.add('hidden'));
         }
 
-        // Report Logic
         function loadReport() {
             const ledgerId = document.getElementById('reportLedgerSelect').value;
             if(!ledgerId) { alert("Please select a ledger"); return; }
@@ -279,13 +321,16 @@
                         return;
                     }
                     result.data.forEach(row => {
+                        const dr = (row.debit === '-' || row.debit === 0) ? '-' : formatMoney(row.debit);
+                        const cr = (row.credit === '-' || row.credit === 0) ? '-' : formatMoney(row.credit);
+                        
                         const tr = `
                             <tr class="hover:bg-gray-50 border-b">
                                 <td class="p-3">${row.date}</td>
                                 <td class="p-3 text-blue-600 font-medium">${row.vNo}</td>
-                                <td class="p-3">${row.particulars}</td>
-                                <td class="p-3 text-right text-green-600 font-medium">${row.debit === '-' ? '-' : formatMoney(row.debit)}</td>
-                                <td class="p-3 text-right text-red-600 font-medium">${row.credit === '-' ? '-' : formatMoney(row.credit)}</td>
+                                <td class="p-3 whitespace-normal">${row.particulars}</td>
+                                <td class="p-3 text-right text-green-600 font-medium">${dr}</td>
+                                <td class="p-3 text-right text-red-600 font-medium">${cr}</td>
                                 <td class="p-3 text-right font-bold text-gray-700">${formatMoney(row.balance)}</td>
                             </tr>`;
                         tbody.innerHTML += tr;
@@ -294,7 +339,6 @@
             });
         }
 
-        // UI Helpers
         function renderDashboard(stats) {
             if(!stats) return;
             document.getElementById('dashIncome').textContent = "₹ " + formatMoney(stats.income);
@@ -313,7 +357,6 @@
                 let tr = "<tr class='hover:bg-gray-50 border-b'>";
                 keys.forEach((k, index) => {
                     let val = row[k] || '-';
-                    // Special logic: If this is the 'amount' or 'balance' column (usually 3rd or 4th index), format it
                     if(formatMoneyCol && (k === 'amount' || k === 'bal')) {
                         val = `<div class="text-right font-mono">${formatMoney(val)}</div>`;
                     }
