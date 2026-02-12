@@ -10,12 +10,13 @@
         :root { --zoho-blue: #006fda; --zoho-yellow: #f5ba31; --zoho-bg: #f4f5f7; }
         body { font-family: 'Inter', sans-serif; background-color: var(--zoho-bg); color: #333; overflow: hidden; }
         
-        /* Sidebar & Layout */
+        /* Sidebar */
         .sidebar { background-color: #1c212e; color: white; transition: 0.3s; }
         .nav-item { padding: 12px 20px; cursor: pointer; color: #b0b0b0; border-left: 3px solid transparent; display: flex; gap: 10px; font-size: 0.95rem; }
         .nav-item:hover, .nav-item.active { background-color: rgba(255,255,255,0.05); color: #fff; border-left-color: var(--zoho-blue); }
-        
-        /* Components */
+        .nav-section { padding: 15px 20px 5px; font-size: 0.75rem; font-weight: bold; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; }
+
+        /* UI Elements */
         .cmb-card { background: white; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 25px; border-top: 3px solid var(--zoho-blue); margin-bottom: 20px; }
         .cmb-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
         .cmb-table th { text-align: left; padding: 12px; background: #f8f9fa; color: #666; font-weight: 600; border-bottom: 2px solid #eee; }
@@ -36,10 +37,19 @@
     <aside class="sidebar w-64 flex-shrink-0 flex flex-col pt-5">
         <div class="px-5 mb-6"><h1 class="text-xl font-bold">CMB | <span style="color:var(--zoho-yellow)">Books</span></h1></div>
         <nav class="flex-1 overflow-y-auto">
+            <div class="nav-section">Main</div>
             <div class="nav-item active" onclick="nav('dashboard', this)">📊 Dashboard</div>
             <div class="nav-item" onclick="nav('company', this)">🏢 Company</div>
+            
+            <div class="nav-section">Masters</div>
             <div class="nav-item" onclick="nav('ledger', this)">📖 Ledgers</div>
+            
+            <div class="nav-section">Entries</div>
             <div class="nav-item" onclick="nav('vouchers', this)">📝 Vouchers</div>
+            
+            <div class="nav-section">Analysis</div>
+            <div class="nav-item" onclick="nav('reports', this)">📈 Reports</div>
+
             <div class="mt-auto p-5 text-xs text-gray-500 cursor-pointer hover:text-white" onclick="initApp()">🔄 Sync Data</div>
         </nav>
     </aside>
@@ -109,6 +119,36 @@
                     </table>
                 </div>
             </div>
+
+            <div id="reports" class="section hidden-section">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-gray-700">Ledger Statement</h3>
+                    <div class="flex gap-2">
+                        <select id="reportLedgerSelect" class="form-input" style="width: 250px;">
+                            <option value="">Select Ledger...</option>
+                        </select>
+                        <button class="btn-primary" onclick="loadReport()">View Report</button>
+                    </div>
+                </div>
+                <div class="cmb-card">
+                    <table class="cmb-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Voucher</th>
+                                <th>Particulars</th>
+                                <th class="text-right">Debit</th>
+                                <th class="text-right">Credit</th>
+                                <th class="text-right">Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reportTableBody">
+                            <tr><td colspan="6" class="text-center text-gray-400 p-8">Select a Ledger above to view details.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
         </div>
     </main>
 
@@ -160,8 +200,8 @@
 
     <script>
         // ----------------------------------------------------
-        // YOUR NEW DEPLOYMENT URL
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxj2HQAsOC74R_dni3KGH6Hsiq6U1UayJGJBmJIweH04o1PadD3lWFNJEwxt--GY2a-MA/exec";
+        // PASTE YOUR GOOGLE SCRIPT URL HERE
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx5YWsjbqZVLKpNaiAHTIuPVIv_MQbYu4fegIgDdiIx1LtF_IJ8EBY4ZU5URPiifB__/exec";
         // ----------------------------------------------------
 
         let appData = { ledgers: [] };
@@ -201,6 +241,7 @@
                     renderTable('companyTableBody', result.data.companies, ['id','name','gst','state']);
                     renderTable('ledgerTableBody', result.data.ledgers, ['id','name','category','bal']);
                     renderTable('voucherTableBody', result.data.vouchers, ['id','date','type','amount','narration']);
+                    populateDropdowns(); // Populate Report Dropdown too
                 } else {
                     console.error("API Error", result);
                 }
@@ -209,6 +250,43 @@
             .finally(() => indicator.classList.add('hidden'));
         }
 
+        // Report Logic
+        function loadReport() {
+            const ledgerId = document.getElementById('reportLedgerSelect').value;
+            if(!ledgerId) { alert("Please select a ledger"); return; }
+            
+            const tbody = document.getElementById('reportTableBody');
+            tbody.innerHTML = "<tr><td colspan='6' class='text-center p-4'>Fetching Report...</td></tr>";
+
+            fetch(SCRIPT_URL, {
+                method: "POST",
+                body: JSON.stringify({ action: "getReport", ledgerId: ledgerId })
+            })
+            .then(res => res.json())
+            .then(result => {
+                if(result.status === "SUCCESS") {
+                    tbody.innerHTML = "";
+                    if(result.data.length === 0) {
+                        tbody.innerHTML = "<tr><td colspan='6' class='text-center p-4'>No Transactions Found</td></tr>";
+                        return;
+                    }
+                    result.data.forEach(row => {
+                        const tr = `
+                            <tr class="hover:bg-gray-50 border-b">
+                                <td class="p-3">${row.date}</td>
+                                <td class="p-3 text-blue-600 font-medium">${row.vNo}</td>
+                                <td class="p-3">${row.particulars}</td>
+                                <td class="p-3 text-right text-green-600 font-medium">${row.debit}</td>
+                                <td class="p-3 text-right text-red-600 font-medium">${row.credit}</td>
+                                <td class="p-3 text-right font-bold text-gray-700">${row.balance}</td>
+                            </tr>`;
+                        tbody.innerHTML += tr;
+                    });
+                }
+            });
+        }
+
+        // UI Helpers
         function renderDashboard(stats) {
             if(!stats) return;
             document.getElementById('dashIncome').textContent = "₹ " + (stats.income || 0).toFixed(2);
@@ -234,10 +312,14 @@
         function populateDropdowns() {
             if(!appData.ledgers) return;
             const opts = appData.ledgers.map(l => `<option value="${l.id}">${l.name} (${l.category})</option>`).join('');
+            
             const dr = document.getElementById('drSelect');
             const cr = document.getElementById('crSelect');
+            const rep = document.getElementById('reportLedgerSelect');
+
             if(dr) dr.innerHTML = '<option value="">Select Account</option>' + opts;
             if(cr) cr.innerHTML = '<option value="">Select Account</option>' + opts;
+            if(rep) rep.innerHTML = '<option value="">Select Ledger...</option>' + opts;
         }
 
         function submitData(e, action) {
