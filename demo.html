@@ -101,7 +101,7 @@
                 </div>
                 <div class="cmb-card">
                     <table class="cmb-table">
-                        <thead><tr><th>ID</th><th>Name</th><th>Category</th><th>Balance</th></tr></thead>
+                        <thead><tr><th>ID</th><th>Name</th><th>Category</th><th class="text-right">Balance</th></tr></thead>
                         <tbody id="ledgerTableBody"><tr><td colspan="4" class="text-center text-gray-400">Loading...</td></tr></tbody>
                     </table>
                 </div>
@@ -114,7 +114,7 @@
                 </div>
                 <div class="cmb-card">
                     <table class="cmb-table">
-                        <thead><tr><th>ID</th><th>Date</th><th>Type</th><th>Amount</th><th>Narration</th></tr></thead>
+                        <thead><tr><th>ID</th><th>Date</th><th>Type</th><th class="text-right">Amount</th><th>Narration</th></tr></thead>
                         <tbody id="voucherTableBody"><tr><td colspan="5" class="text-center text-gray-400">Loading...</td></tr></tbody>
                     </table>
                 </div>
@@ -200,7 +200,7 @@
 
     <script>
         // ----------------------------------------------------
-        // PASTE YOUR GOOGLE SCRIPT URL HERE
+        // YOUR DEPLOYMENT URL
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx5YWsjbqZVLKpNaiAHTIuPVIv_MQbYu4fegIgDdiIx1LtF_IJ8EBY4ZU5URPiifB__/exec";
         // ----------------------------------------------------
 
@@ -211,7 +211,14 @@
             loadAllData();
         }
 
-        // Navigation
+        // --- FORMATTER: INDIAN CURRENCY (e.g., 1,50,000.00) ---
+        function formatMoney(amount) {
+            return parseFloat(amount || 0).toLocaleString('en-IN', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
         function nav(sectionId, el) {
             document.querySelectorAll('.section').forEach(s => s.classList.add('hidden-section'));
             document.getElementById(sectionId).classList.remove('hidden-section');
@@ -220,11 +227,9 @@
             document.getElementById('pageTitle').textContent = el.textContent.substring(2);
         }
 
-        // Modals
         function openModal(id) { document.getElementById(id).classList.add('show'); populateDropdowns(); }
         function closeModal(id) { document.getElementById(id).classList.remove('show'); }
 
-        // Core Data Engine
         function loadAllData() {
             const indicator = document.getElementById('loadingIndicator');
             indicator.classList.remove('hidden');
@@ -238,10 +243,13 @@
                 if(result.status === "SUCCESS") {
                     appData = result.data;
                     renderDashboard(result.data.stats);
+                    
+                    // Render Tables with Formatting
                     renderTable('companyTableBody', result.data.companies, ['id','name','gst','state']);
-                    renderTable('ledgerTableBody', result.data.ledgers, ['id','name','category','bal']);
-                    renderTable('voucherTableBody', result.data.vouchers, ['id','date','type','amount','narration']);
-                    populateDropdowns(); // Populate Report Dropdown too
+                    renderTable('ledgerTableBody', result.data.ledgers, ['id','name','category','bal'], true); // true = format last col
+                    renderTable('voucherTableBody', result.data.vouchers, ['id','date','type','amount','narration'], true); // true = format amount
+                    
+                    populateDropdowns();
                 } else {
                     console.error("API Error", result);
                 }
@@ -276,9 +284,9 @@
                                 <td class="p-3">${row.date}</td>
                                 <td class="p-3 text-blue-600 font-medium">${row.vNo}</td>
                                 <td class="p-3">${row.particulars}</td>
-                                <td class="p-3 text-right text-green-600 font-medium">${row.debit}</td>
-                                <td class="p-3 text-right text-red-600 font-medium">${row.credit}</td>
-                                <td class="p-3 text-right font-bold text-gray-700">${row.balance}</td>
+                                <td class="p-3 text-right text-green-600 font-medium">${row.debit === '-' ? '-' : formatMoney(row.debit)}</td>
+                                <td class="p-3 text-right text-red-600 font-medium">${row.credit === '-' ? '-' : formatMoney(row.credit)}</td>
+                                <td class="p-3 text-right font-bold text-gray-700">${formatMoney(row.balance)}</td>
                             </tr>`;
                         tbody.innerHTML += tr;
                     });
@@ -289,12 +297,12 @@
         // UI Helpers
         function renderDashboard(stats) {
             if(!stats) return;
-            document.getElementById('dashIncome').textContent = "₹ " + (stats.income || 0).toFixed(2);
-            document.getElementById('dashExpense').textContent = "₹ " + (stats.expense || 0).toFixed(2);
-            document.getElementById('dashBalance').textContent = "₹ " + (stats.balance || 0).toFixed(2);
+            document.getElementById('dashIncome').textContent = "₹ " + formatMoney(stats.income);
+            document.getElementById('dashExpense').textContent = "₹ " + formatMoney(stats.expense);
+            document.getElementById('dashBalance').textContent = "₹ " + formatMoney(stats.balance);
         }
 
-        function renderTable(bodyId, data, keys) {
+        function renderTable(bodyId, data, keys, formatMoneyCol = false) {
             const tbody = document.getElementById(bodyId);
             tbody.innerHTML = "";
             if(!data || data.length === 0) { 
@@ -303,7 +311,14 @@
             }
             data.forEach(row => {
                 let tr = "<tr class='hover:bg-gray-50 border-b'>";
-                keys.forEach(k => tr += `<td class='p-3'>${row[k] || '-'}</td>`);
+                keys.forEach((k, index) => {
+                    let val = row[k] || '-';
+                    // Special logic: If this is the 'amount' or 'balance' column (usually 3rd or 4th index), format it
+                    if(formatMoneyCol && (k === 'amount' || k === 'bal')) {
+                        val = `<div class="text-right font-mono">${formatMoney(val)}</div>`;
+                    }
+                    tr += `<td class='p-3'>${val}</td>`;
+                });
                 tr += "</tr>";
                 tbody.innerHTML += tr;
             });
