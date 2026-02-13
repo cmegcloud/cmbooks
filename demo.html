@@ -67,7 +67,7 @@
             <img src="logocmbooks.png" alt="CMB Logo" class="h-24 mx-auto mb-6 rounded-lg shadow-sm">
             <p class="text-gray-500 mb-6 text-sm">Please login to access your account</p>
             
-            <form id="loginForm">
+            <div id="loginContainer">
                 <div class="text-left mb-4">
                     <label class="text-xs font-bold text-gray-500 uppercase">Username</label>
                     <input type="text" id="loginUser" class="form-input text-lg py-3" placeholder="Enter Username (e.g. admin)">
@@ -78,9 +78,9 @@
                 </div>
                 
                 <button type="button" onclick="handleLogin()" class="btn-primary w-full py-3 text-lg">Login</button>
-            </form>
-            <p id="loginError" class="text-red-500 text-sm mt-4 hidden">Incorrect Username or Password!</p>
+            </div>
             
+            <p id="loginError" class="text-red-500 text-sm mt-4 hidden">Incorrect Username or Password!</p>
             <p class="mt-6 text-xs text-gray-400 cursor-pointer underline" onclick="logout()">Reset App / Clear Cache</p>
         </div>
     </div>
@@ -265,12 +265,17 @@
             } catch (e) { console.warn("Local storage blocked"); }
         }
 
-        // --- LOGIN HANDLER ---
         function handleLogin() {
             try {
+                // FORCE CLEAN INPUTS
                 const user = document.getElementById('loginUser').value.toLowerCase().trim();
-                const pass = document.getElementById('loginPass').value;
+                const pass = document.getElementById('loginPass').value.trim(); // FORCE TRIM PASSWORD
                 const err = document.getElementById('loginError');
+
+                if (!user || !pass) {
+                    alert("Please enter both Username and Password.");
+                    return;
+                }
 
                 if (USERS[user] && USERS[user].pass === pass) {
                     activeUser = USERS[user];
@@ -281,6 +286,8 @@
                     showApp();
                 } else {
                     err.classList.remove('hidden');
+                    // DEBUG: Remove comment below if you still can't login to see what the code sees
+                    alert("Debug: User entered '" + user + "' with password '" + pass + "'");
                 }
             } catch (error) {
                 alert("Login Error: " + error.message);
@@ -294,6 +301,7 @@
             document.getElementById('loginScreen').classList.remove('hidden');
             document.getElementById('loginUser').value = '';
             document.getElementById('loginPass').value = '';
+            window.location.reload(); // Force Refresh to clear memory
         }
 
         function showApp() {
