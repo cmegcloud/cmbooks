@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#1c212e">
-    <link rel="icon" type="image/png" href="https://img.icons8.com/color/96/general-ledger.png">
+    
+    <link rel="icon" type="image/jpeg" href="logocmbooks.jpg">
+    <link rel="apple-touch-icon" href="logocmbooks.jpg">
     <link rel="manifest" href="manifest.json">
     
     <title>CMB | Cloud Accounting</title>
@@ -49,13 +51,21 @@
         #loginScreen { position: fixed; inset: 0; background: #1c212e; z-index: 100; display: flex; justify-content: center; align-items: center; padding: 20px; }
         .login-box { background: white; padding: 40px; border-radius: 8px; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); text-align: center; border-top: 4px solid var(--zoho-yellow); }
     </style>
+    
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(err => console.log(err));
+            });
+        }
+    </script>
 </head>
 
 <body class="flex h-screen" onload="checkLogin()">
 
     <div id="loginScreen">
         <div class="login-box">
-            <h1 class="text-3xl font-bold mb-2">CMB <span style="color:var(--zoho-yellow)">Books</span></h1>
+            <img src="logocmbooks.jpg" alt="CMB Logo" class="h-24 mx-auto mb-6 rounded-lg shadow-sm">
             <p class="text-gray-500 mb-6 text-sm">Please login to access your account</p>
             
             <form id="loginForm" onsubmit="event.preventDefault(); handleLogin(); return false;">
@@ -83,7 +93,10 @@
 
         <aside id="sidebar" class="sidebar w-64 flex-shrink-0 flex flex-col pt-5 h-full">
             <div class="px-5 mb-6 flex justify-between items-center">
-                <h1 class="text-xl font-bold">CMB | <span style="color:var(--zoho-yellow)">Books</span></h1>
+                <div class="flex items-center gap-3">
+                    <img src="logocmbooks.jpg" class="h-10 rounded-md">
+                    <h1 class="text-xl font-bold">CMB</h1>
+                </div>
                 <button class="md:hidden text-gray-400 text-2xl" onclick="toggleSidebar()">×</button>
             </div>
             
@@ -236,12 +249,11 @@
     </div>
 
     <script>
-        // *** YOUR CURRENT DEPLOYMENT URL ***
+        // *** GOOGLE SCRIPT URL ***
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz-9anHvoVyrJFM0xzCSMmwyPnJ1nrEF-rAeiq-egScciq-FC68BzIj4q4OftdpIO0hhA/exec";
 
         let appData = { ledgers: [], vouchers: [] };
         
-        // --- AUTHENTICATION ---
         const USERS = {
             'admin': { pass: '1234', role: 'ADMIN' },
             'accountree': { pass: '1234', role: 'ACCOUNTREE' },
@@ -262,7 +274,6 @@
             } catch (e) { console.warn("Local storage blocked"); }
         }
 
-        // BULLETPROOF LOGIN FUNCTION
         function handleLogin() {
             try {
                 const user = document.getElementById('loginUser').value;
@@ -272,9 +283,7 @@
                 if (USERS[user] && USERS[user].pass === pass) {
                     activeUser = USERS[user];
                     activeUser.name = user;
-                    
-                    try { localStorage.setItem('cmb_user', user); } catch(e){} // Safe save
-                    
+                    try { localStorage.setItem('cmb_user', user); } catch(e){}
                     err.classList.add('hidden');
                     document.getElementById('loginPass').value = '';
                     showApp();
@@ -307,7 +316,6 @@
 
         function applyRolePermissions() {
             const role = activeUser.role;
-
             const showDashAndRep = (role === 'ADMIN' || role === 'AS');
             const showCompany = (role === 'ADMIN');
             
@@ -316,7 +324,6 @@
             document.getElementById('sec-main').style.display = showDashAndRep ? 'block' : 'none';
             document.getElementById('sec-analysis').style.display = showDashAndRep ? 'block' : 'none';
             document.getElementById('nav-company').style.display = showCompany ? 'flex' : 'none';
-
             document.getElementById('btn-create-company').style.display = (role === 'ADMIN') ? 'block' : 'none';
             document.getElementById('btn-create-ledger').style.display = (role === 'ADMIN' || role === 'ACCOUNTREE') ? 'block' : 'none';
             document.getElementById('btn-create-voucher').style.display = (role === 'ADMIN' || role === 'ACCOUNTREE' || role === 'AJWA') ? 'block' : 'none';
@@ -328,7 +335,6 @@
             }
         }
 
-        // --- UI TOGGLES ---
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('open');
             document.getElementById('mobileBackdrop').classList.toggle('active');
@@ -353,7 +359,6 @@
         function openModal(id) { document.getElementById(id).classList.add('show'); populateDropdowns(); }
         function closeModal(id) { document.getElementById(id).classList.remove('show'); }
 
-        // --- VOUCHER ACTIONS ---
         function openVoucherModal() {
             document.getElementById('voucherForm').reset();
             document.getElementById('voucherId').value = ""; 
@@ -368,11 +373,8 @@
             document.getElementById('voucherModalTitle').textContent = "Edit Voucher " + id;
             const f = document.getElementById('voucherForm');
             f.id.value = v.id; f.date.value = v.date; f.type.value = v.type;
-            
-            // Fix amount formatting for number input
             let cleanAmt = v.amount.toString().replace(/,/g, '');
             f.amount.value = parseFloat(cleanAmt); 
-            
             f.narration.value = v.narration;
             setTimeout(() => { f.drLedger.value = v.dr; f.crLedger.value = v.cr; }, 100);
         }
@@ -400,8 +402,11 @@
                     .amount { font-size: 20px; font-weight: bold; text-align: right; }
                     .footer { margin-top: 50px; display: flex; justify-content: space-between; }
                     .sign { border-top: 1px solid #333; width: 200px; text-align: center; padding-top: 5px; }
+                    .logo { text-align: center; margin-bottom: 10px; }
+                    .logo img { height: 60px; }
                 </style>
                 </head><body>
+                <div class="logo"><img src="logocmbooks.jpg"></div>
                 <div class="header"><h1>${companyName}</h1><h2>${v.type.toUpperCase()} VOUCHER</h2></div>
                 <div class="row"><div><strong>Voucher No:</strong> ${v.id}</div><div><strong>Date:</strong> ${v.date}</div></div>
                 <div class="box">
@@ -417,7 +422,6 @@
             win.document.close();
         }
 
-        // --- DATA ENGINE ---
         function loadAllData() {
             document.getElementById('loadingIndicator').classList.remove('hidden');
             fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "getAllData" }) })
@@ -525,7 +529,7 @@
                 data.action = action;
             }
 
-            fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(data) })
+            fetch(https://script.google.com/macros/s/AKfycby5Y97AGcYxn5hqqKd8dliGhj-7sJ2TMTdzXqqRTh_GFGK8G8qFzaGJLJSNgqUyxuxfaQ/exec, { method: "POST", body: JSON.stringify(data) })
             .then(res => res.json())
             .then(res => {
                 if(res.status === "SUCCESS") {
