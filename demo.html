@@ -80,6 +80,8 @@
                 <button type="button" onclick="handleLogin()" class="btn-primary w-full py-3 text-lg">Login</button>
             </form>
             <p id="loginError" class="text-red-500 text-sm mt-4 hidden">Incorrect Username or Password!</p>
+            
+            <p class="mt-6 text-xs text-gray-400 cursor-pointer underline" onclick="logout()">Reset App / Clear Cache</p>
         </div>
     </div>
 
@@ -239,7 +241,6 @@
     </div>
 
     <script>
-        // *** PASTE YOUR SCRIPT URL HERE ***
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby5Y97AGcYxn5hqqKd8dliGhj-7sJ2TMTdzXqqRTh_GFGK8G8qFzaGJLJSNgqUyxuxfaQ/exec";
 
         let appData = { ledgers: [], vouchers: [] };
@@ -264,10 +265,9 @@
             } catch (e) { console.warn("Local storage blocked"); }
         }
 
-        // --- NEW LOGIN HANDLER ---
+        // --- LOGIN HANDLER ---
         function handleLogin() {
             try {
-                // Get value from TEXT BOX, force lowercase, trim spaces
                 const user = document.getElementById('loginUser').value.toLowerCase().trim();
                 const pass = document.getElementById('loginPass').value;
                 const err = document.getElementById('loginError');
@@ -292,6 +292,8 @@
             activeUser = null;
             document.getElementById('mainApp').classList.add('hidden');
             document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('loginUser').value = '';
+            document.getElementById('loginPass').value = '';
         }
 
         function showApp() {
