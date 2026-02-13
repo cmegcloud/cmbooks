@@ -244,6 +244,7 @@
     </div>
 
     <script>
+        // *** PASTE YOUR NEW SCRIPT URL HERE (IF NOT ALREADY THERE) ***
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby5Y97AGcYxn5hqqKd8dliGhj-7sJ2TMTdzXqqRTh_GFGK8G8qFzaGJLJSNgqUyxuxfaQ/exec";
 
         let appData = { ledgers: [], vouchers: [] };
@@ -268,10 +269,11 @@
             } catch (e) { console.warn("Local storage blocked"); }
         }
 
-        // --- NEW NO-REFRESH LOGIN ---
+        // --- IMPROVED LOGIN FUNCTION (CASE INSENSITIVE) ---
         function handleLogin() {
             try {
-                const user = document.getElementById('loginUser').value;
+                // FORCE USERNAME TO LOWERCASE AND REMOVE SPACES
+                const user = document.getElementById('loginUser').value.toLowerCase().trim();
                 const pass = document.getElementById('loginPass').value;
                 const err = document.getElementById('loginError');
 
