@@ -47,8 +47,11 @@
         .modal-overlay.show { display: flex; }
         .hidden-section { display: none; }
         
-        #loginScreen { position: fixed; inset: 0; background: #1c212e; z-index: 100; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        #loginScreen { position: fixed; inset: 0; background: #1c212e; z-index: 100; display: flex; justify-content: center; align-items: center; padding: 20px; overflow-y: auto; }
         .login-box { background: white; padding: 40px; border-radius: 8px; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); text-align: center; border-top: 4px solid var(--zoho-yellow); }
+        
+        /* DEBUG BOX */
+        #debugLog { width: 100%; height: 100px; background: #000; color: #0f0; font-family: monospace; font-size: 10px; text-align: left; overflow-y: scroll; margin-top: 20px; padding: 5px; border-radius: 4px; display: block; }
     </style>
     
     <script>
@@ -82,6 +85,8 @@
             
             <p id="loginError" class="text-red-500 text-sm mt-4 hidden">Incorrect Username or Password!</p>
             <p class="mt-6 text-xs text-gray-400 cursor-pointer underline" onclick="logout()">Reset App / Clear Cache</p>
+            
+            <div id="debugLog">System Ready. Waiting for input...</div>
         </div>
     </div>
 
@@ -253,58 +258,96 @@
         };
 
         let activeUser = null;
+        
+        // DEBUGGER LOG
+        function log(msg) {
+            const box = document.getElementById('debugLog');
+            if(box) {
+                box.innerHTML += `> ${msg}<br>`;
+                box.scrollTop = box.scrollHeight;
+            }
+            console.log(msg);
+        }
 
         function checkLogin() {
+            log("Checking previous login...");
             try {
                 const savedUser = localStorage.getItem('cmb_user');
                 if (savedUser && USERS[savedUser]) {
+                    log("Found saved user: " + savedUser);
                     activeUser = USERS[savedUser];
                     activeUser.name = savedUser;
                     showApp();
+                } else {
+                    log("No saved user. Waiting for login.");
                 }
-            } catch (e) { console.warn("Local storage blocked"); }
+            } catch (e) { 
+                log("Local storage error: " + e.message); 
+            }
         }
 
+        // --- DEBUG LOGIN HANDLER ---
         function handleLogin() {
+            log("Login Button Clicked");
+            
             try {
-                // FORCE CLEAN INPUTS
-                const user = document.getElementById('loginUser').value.toLowerCase().trim();
-                const pass = document.getElementById('loginPass').value.trim(); // FORCE TRIM PASSWORD
-                const err = document.getElementById('loginError');
-
-                if (!user || !pass) {
+                // Get Raw Inputs
+                const rawUser = document.getElementById('loginUser').value;
+                const rawPass = document.getElementById('loginPass').value;
+                
+                log("Raw Inputs -> User: [" + rawUser + "] Pass: [" + rawPass + "]");
+                
+                if (!rawUser || !rawPass) {
                     alert("Please enter both Username and Password.");
+                    log("Error: Empty inputs");
                     return;
                 }
 
-                if (USERS[user] && USERS[user].pass === pass) {
-                    activeUser = USERS[user];
-                    activeUser.name = user;
-                    try { localStorage.setItem('cmb_user', user); } catch(e){}
-                    err.classList.add('hidden');
-                    document.getElementById('loginPass').value = '';
-                    showApp();
+                const user = rawUser.toLowerCase().trim();
+                const pass = rawPass.trim();
+                
+                log("Processed -> User: [" + user + "] Pass: [" + pass + "]");
+
+                const userObj = USERS[user];
+                
+                if (userObj) {
+                    log("User found in system.");
+                    if (userObj.pass === pass) {
+                        log("Password MATCH! Logging in...");
+                        activeUser = userObj;
+                        activeUser.name = user;
+                        try { localStorage.setItem('cmb_user', user); } catch(e){}
+                        document.getElementById('loginError').classList.add('hidden');
+                        showApp();
+                    } else {
+                        log("Password MISMATCH. Expected: " + userObj.pass);
+                        document.getElementById('loginError').textContent = "Incorrect Password";
+                        document.getElementById('loginError').classList.remove('hidden');
+                    }
                 } else {
-                    err.classList.remove('hidden');
-                    // DEBUG: Remove comment below if you still can't login to see what the code sees
-                    alert("Debug: User entered '" + user + "' with password '" + pass + "'");
+                    log("User NOT found in system.");
+                    document.getElementById('loginError').textContent = "User not found";
+                    document.getElementById('loginError').classList.remove('hidden');
                 }
             } catch (error) {
-                alert("Login Error: " + error.message);
+                log("CRASH: " + error.message);
+                alert("Login System Error: " + error.message);
             }
         }
 
         function logout() {
+            log("Logging out...");
             try { localStorage.removeItem('cmb_user'); } catch(e){}
             activeUser = null;
             document.getElementById('mainApp').classList.add('hidden');
             document.getElementById('loginScreen').classList.remove('hidden');
             document.getElementById('loginUser').value = '';
             document.getElementById('loginPass').value = '';
-            window.location.reload(); // Force Refresh to clear memory
+            window.location.reload(); 
         }
 
         function showApp() {
+            log("Showing App Screen...");
             try {
                 document.getElementById('loginScreen').classList.add('hidden');
                 document.getElementById('mainApp').classList.remove('hidden');
@@ -312,6 +355,7 @@
                 applyRolePermissions();
                 loadAllData();
             } catch (error) {
+                log("App Show Error: " + error.message);
                 alert("App Error: " + error.message);
             }
         }
