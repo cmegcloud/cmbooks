@@ -47,7 +47,6 @@
         .modal-overlay.show { display: flex; }
         .hidden-section { display: none; }
         
-        /* LOGIN SCREEN STYLES */
         #loginScreen { position: fixed; inset: 0; background: #1c212e; z-index: 100; display: flex; justify-content: center; align-items: center; padding: 20px; }
         .login-box { background: white; padding: 40px; border-radius: 8px; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); text-align: center; border-top: 4px solid var(--zoho-yellow); }
     </style>
@@ -68,7 +67,7 @@
             <img src="logocmbooks.jpg" alt="CMB Logo" class="h-24 mx-auto mb-6 rounded-lg shadow-sm">
             <p class="text-gray-500 mb-6 text-sm">Please login to access your account</p>
             
-            <form id="loginForm" onsubmit="event.preventDefault(); handleLogin(); return false;">
+            <form id="loginForm">
                 <div class="text-left mb-4">
                     <label class="text-xs font-bold text-gray-500 uppercase">Username</label>
                     <select id="loginUser" class="form-input text-lg py-3">
@@ -80,9 +79,10 @@
                 </div>
                 <div class="text-left mb-6">
                     <label class="text-xs font-bold text-gray-500 uppercase">Password</label>
-                    <input type="password" id="loginPass" class="form-input text-lg py-3" required>
+                    <input type="password" id="loginPass" class="form-input text-lg py-3" placeholder="Enter 1234">
                 </div>
-                <button type="submit" class="btn-primary w-full py-3 text-lg">Login</button>
+                
+                <button type="button" onclick="handleLogin()" class="btn-primary w-full py-3 text-lg">Login</button>
             </form>
             <p id="loginError" class="text-red-500 text-sm mt-4 hidden">Incorrect Password!</p>
         </div>
@@ -106,16 +106,12 @@
                 <div class="nav-section" id="sec-main">Main</div>
                 <div class="nav-item active" id="nav-dashboard" onclick="nav('dashboard', this)">📊 Dashboard</div>
                 <div class="nav-item" id="nav-company" onclick="nav('company', this)">🏢 Company</div>
-                
                 <div class="nav-section">Masters</div>
                 <div class="nav-item" id="nav-ledger" onclick="nav('ledger', this)">📖 Ledgers</div>
-                
                 <div class="nav-section">Entries</div>
                 <div class="nav-item" id="nav-vouchers" onclick="nav('vouchers', this)">📝 Vouchers</div>
-                
                 <div class="nav-section" id="sec-analysis">Analysis</div>
                 <div class="nav-item" id="nav-reports" onclick="nav('reports', this)">📈 Reports</div>
-
                 <div class="p-5 text-xs text-gray-500 cursor-pointer hover:text-white mt-10" onclick="logout()">🚪 Logout</div>
             </nav>
         </aside>
@@ -132,15 +128,14 @@
             </header>
 
             <div class="flex-1 overflow-y-auto p-4 md:p-8 pb-24">
-                
                 <div id="dashboard" class="section">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                         <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-green-500">
-                            <div class="text-gray-500 text-sm font-medium">Income (Rect/Sales)</div>
+                            <div class="text-gray-500 text-sm font-medium">Income</div>
                             <div class="text-2xl font-bold mt-1 text-gray-800 break-all" id="dashIncome">₹ 0.00</div>
                         </div>
                         <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-red-500">
-                            <div class="text-gray-500 text-sm font-medium">Expense (Pay/Purch)</div>
+                            <div class="text-gray-500 text-sm font-medium">Expense</div>
                             <div class="text-2xl font-bold mt-1 text-gray-800 break-all" id="dashExpense">₹ 0.00</div>
                         </div>
                         <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-blue-500">
@@ -249,7 +244,6 @@
     </div>
 
     <script>
-        // *** GOOGLE SCRIPT URL ***
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz-9anHvoVyrJFM0xzCSMmwyPnJ1nrEF-rAeiq-egScciq-FC68BzIj4q4OftdpIO0hhA/exec";
 
         let appData = { ledgers: [], vouchers: [] };
@@ -274,6 +268,7 @@
             } catch (e) { console.warn("Local storage blocked"); }
         }
 
+        // --- NEW NO-REFRESH LOGIN ---
         function handleLogin() {
             try {
                 const user = document.getElementById('loginUser').value;
@@ -529,7 +524,7 @@
                 data.action = action;
             }
 
-            fetch(https://script.google.com/macros/s/AKfycby5Y97AGcYxn5hqqKd8dliGhj-7sJ2TMTdzXqqRTh_GFGK8G8qFzaGJLJSNgqUyxuxfaQ/exec, { method: "POST", body: JSON.stringify(data) })
+            fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(data) })
             .then(res => res.json())
             .then(res => {
                 if(res.status === "SUCCESS") {
