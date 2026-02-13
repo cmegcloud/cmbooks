@@ -7,14 +7,14 @@
   "theme_color": "#1c212e",
   "icons": [
     {
-      "src": "logocmbooks.jpg",
+      "src": "logocmb.png",
       "sizes": "192x192",
-      "type": "image/jpeg"
+      "type": "image/png"
     },
     {
-      "src": "logocmbooks.jpg",
+      "src": "logocmb.png",
       "sizes": "512x512",
-      "type": "image/jpeg"
+      "type": "image/png"
     }
   ]
 }
