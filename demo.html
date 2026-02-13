@@ -6,8 +6,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#1c212e">
     
-    <link rel="icon" type="image/,png" href="logocmb.png">
-    <link rel="apple-touch-icon" href="logocmb.png">
+    <link rel="icon" type="image/jpeg" href="logocmbooks.jpg">
+    <link rel="apple-touch-icon" href="logocmbooks.jpg">
     <link rel="manifest" href="manifest.json">
     
     <title>CMB | Cloud Accounting</title>
@@ -64,18 +64,13 @@
 
     <div id="loginScreen">
         <div class="login-box">
-            <img src="logocmb.png" alt="CMB Logo" class="h-24 mx-auto mb-6 rounded-lg shadow-sm">
+            <img src="logocmbooks.jpg" alt="CMB Logo" class="h-24 mx-auto mb-6 rounded-lg shadow-sm">
             <p class="text-gray-500 mb-6 text-sm">Please login to access your account</p>
             
             <form id="loginForm">
                 <div class="text-left mb-4">
                     <label class="text-xs font-bold text-gray-500 uppercase">Username</label>
-                    <select id="loginUser" class="form-input text-lg py-3">
-                        <option value="admin">Admin</option>
-                        <option value="accountree">Accountree</option>
-                        <option value="ajwa">Ajwa</option>
-                        <option value="as">AS</option>
-                    </select>
+                    <input type="text" id="loginUser" class="form-input text-lg py-3" placeholder="Enter Username (e.g. admin)">
                 </div>
                 <div class="text-left mb-6">
                     <label class="text-xs font-bold text-gray-500 uppercase">Password</label>
@@ -84,7 +79,7 @@
                 
                 <button type="button" onclick="handleLogin()" class="btn-primary w-full py-3 text-lg">Login</button>
             </form>
-            <p id="loginError" class="text-red-500 text-sm mt-4 hidden">Incorrect Password!</p>
+            <p id="loginError" class="text-red-500 text-sm mt-4 hidden">Incorrect Username or Password!</p>
         </div>
     </div>
 
@@ -94,7 +89,7 @@
         <aside id="sidebar" class="sidebar w-64 flex-shrink-0 flex flex-col pt-5 h-full">
             <div class="px-5 mb-6 flex justify-between items-center">
                 <div class="flex items-center gap-3">
-                    <img src="logocmb.png" class="h-10 rounded-md">
+                    <img src="logocmbooks.jpg" class="h-10 rounded-md">
                     <h1 class="text-xl font-bold">CMB</h1>
                 </div>
                 <button class="md:hidden text-gray-400 text-2xl" onclick="toggleSidebar()">×</button>
@@ -244,7 +239,7 @@
     </div>
 
     <script>
-        // *** PASTE YOUR NEW SCRIPT URL HERE (IF NOT ALREADY THERE) ***
+        // *** PASTE YOUR SCRIPT URL HERE ***
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby5Y97AGcYxn5hqqKd8dliGhj-7sJ2TMTdzXqqRTh_GFGK8G8qFzaGJLJSNgqUyxuxfaQ/exec";
 
         let appData = { ledgers: [], vouchers: [] };
@@ -269,10 +264,10 @@
             } catch (e) { console.warn("Local storage blocked"); }
         }
 
-        // --- IMPROVED LOGIN FUNCTION (CASE INSENSITIVE) ---
+        // --- NEW LOGIN HANDLER ---
         function handleLogin() {
             try {
-                // FORCE USERNAME TO LOWERCASE AND REMOVE SPACES
+                // Get value from TEXT BOX, force lowercase, trim spaces
                 const user = document.getElementById('loginUser').value.toLowerCase().trim();
                 const pass = document.getElementById('loginPass').value;
                 const err = document.getElementById('loginError');
@@ -403,7 +398,7 @@
                     .logo img { height: 60px; }
                 </style>
                 </head><body>
-                <div class="logo"><img src="logocmb.png"></div>
+                <div class="logo"><img src="logocmbooks.jpg"></div>
                 <div class="header"><h1>${companyName}</h1><h2>${v.type.toUpperCase()} VOUCHER</h2></div>
                 <div class="row"><div><strong>Voucher No:</strong> ${v.id}</div><div><strong>Date:</strong> ${v.date}</div></div>
                 <div class="box">
