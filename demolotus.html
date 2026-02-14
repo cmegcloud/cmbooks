@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lotus Enterprises | CMB ERP</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#1e3a8a">
+    <link rel="icon" type="image/png" href="logocmb.png">
+    <link rel="apple-touch-icon" href="logocmb.png">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+
+    <style>
+        :root {
+            /* CMB Brand Colors */
+            --primary-dark: #1e3a8a; /* Blue 900 */
+            --primary-light: #1e40af; /* Blue 800 */
+            --accent-yellow: #f5ba31; /* Zoho Yellow */
+            --bg-light: #f9fafb;
+        }
+
+        html, body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-light); color: #1f2937; }
+        
+        /* Sidebar Transitions */
+        .sidebar-nav { transition: transform 0.3s ease-in-out; background: linear-gradient(180deg, var(--primary-dark) 0%, var(--primary-light) 100%); }
+        .nav-item { transition: all 0.2s ease; border-left: 4px solid transparent; }
+        .nav-item:hover { background-color: rgba(255,255,255,0.1); border-left-color: var(--accent-yellow); color: #fff; }
+        .nav-item.active { background-color: rgba(255,255,255,0.15); border-left-color: var(--accent-yellow); font-weight: 600; color: #fff; }
+        
+        /* Utilities */
+        .hidden-section { display: none; }
+        .modal-overlay { background: rgba(0,0,0,0.6); position: fixed; inset: 0; display: none; justify-content: center; align-items: center; z-index: 50; padding: 20px; }
+        .modal-overlay.show { display: flex; }
+        .ledger-balance { font-variant-numeric: tabular-nums; letter-spacing: -0.5px; }
+        
+        /* Mobile */
+        @media (max-width: 768px) {
+            .sidebar-nav { position: fixed; z-index: 50; height: 100vh; width: 260px; transform: translateX(-100%); }
+            .sidebar-nav.open { transform: translateX(0); }
+            .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 40; }
+            .overlay.active { display: block; }
+        }
+    </style>
+</head>
+<body class="h-screen flex overflow-hidden" onload="loadAllData()">
+
+    <div id="mainApp" class="flex h-screen w-full">
+        <div id="mobileBackdrop" class="overlay" onclick="toggleSidebar()"></div>
+
+        <aside id="sidebar" class="sidebar-nav w-64 flex-shrink-0 flex flex-col text-blue-100 shadow-2xl">
+            <div class="p-6 border-b border-blue-700/50">
+                <div class="flex items-center gap-3">
+                    <img src="logocmb.png" class="h-10 rounded bg-white p-1">
+                    <div>
+                        <h1 class="text-2xl font-bold text-white tracking-tight">CMB</h1>
+                        <p class="text-[10px] text-[#f5ba31] uppercase tracking-wider font-bold">Cloud ERP</p>
+                    </div>
+                </div>
+
+                <div class="mt-6 bg-blue-900/40 p-3 rounded-lg border border-blue-700/30">
+                    <p class="text-[10px] text-blue-300 uppercase mb-1">Current Company</p>
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 rounded bg-green-600 text-white flex items-center justify-center font-bold text-xs">L</div>
+                        <h2 class="font-bold text-white text-sm truncate">Lotus Enterprises</h2>
+                    </div>
+                    <p class="text-[10px] text-blue-400 mt-1 truncate">Thalassery, Kannur</p>
+                </div>
+            </div>
+
+            <nav class="flex-1 overflow-y-auto py-4 space-y-1">
+                <button onclick="nav('dashboard', this)" class="nav-item active w-full text-left px-6 py-3 flex items-center gap-3">
+                    <i class="fa-solid fa-chart-pie w-5 text-center"></i> <span>Dashboard</span>
+                </button>
+
+                <div class="pt-6 px-6 pb-2 text-[10px] font-bold text-[#f5ba31] uppercase tracking-widest">Accounting</div>
+                <button onclick="nav('vouchers', this)" class="nav-item w-full text-left px-6 py-3 flex items-center gap-3">
+                    <i class="fa-solid fa-file-invoice w-5 text-center"></i> <span>Vouchers</span>
+                </button>
+                <button onclick="nav('ledger', this)" class="nav-item w-full text-left px-6 py-3 flex items-center gap-3">
+                    <i class="fa-solid fa-book-open w-5 text-center"></i> <span>Ledgers</span>
+                </button>
+
+                <div class="pt-6 px-6 pb-2 text-[10px] font-bold text-[#f5ba31] uppercase tracking-widest">Business</div>
+                <button onclick="nav('inventory', this)" class="nav-item w-full text-left px-6 py-3 flex items-center gap-3">
+                    <i class="fa-solid fa-boxes-stacked w-5 text-center"></i> <span>Inventory</span>
+                </button>
+                <button onclick="nav('crm', this)" class="nav-item w-full text-left px-6 py-3 flex items-center gap-3">
+                    <i class="fa-solid fa-users w-5 text-center"></i> <span>CRM & Sales</span>
+                </button>
+            </nav>
+            
+            <div class="p-4 text-xs text-center text-blue-300 opacity-50">
+                Powered by CMB v1.0<br>Lotus Demo
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col h-full overflow-hidden relative">
+            
+            <header class="bg-white h-16 border-b border-gray-200 flex items-center justify-between px-6 shadow-sm z-10 flex-shrink-0">
+                <div class="flex items-center gap-4">
+                    <button class="md:hidden text-gray-600 text-xl" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+                    <div>
+                        <h2 id="pageTitle" class="text-xl font-bold text-gray-800">Dashboard</h2>
+                        <p class="text-xs text-gray-500 hidden md:block">Lotus Enterprises • Thalassery, 670101</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div id="loadingIndicator" class="text-blue-600 text-sm font-bold hidden flex items-center gap-2">
+                        <i class="fa-solid fa-spinner fa-spin"></i> Syncing...
+                    </div>
+                    <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-bold uppercase">Admin User</span>
+                </div>
+            </header>
+
+            <div class="flex-1 overflow-y-auto p-4 md:p-8 pb-20">
+                
+                <div id="dashboard" class="section">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <div class="bg-white p-6 rounded-xl border-l-4 border-green-500 shadow-sm">
+                            <p class="text-gray-500 text-xs font-bold uppercase">Total Income</p>
+                            <p class="text-2xl font-bold mt-1 text-gray-800 ledger-balance" id="dashIncome">₹ 0.00</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl border-l-4 border-red-500 shadow-sm">
+                            <p class="text-gray-500 text-xs font-bold uppercase">Total Expense</p>
+                            <p class="text-2xl font-bold mt-1 text-gray-800 ledger-balance" id="dashExpense">₹ 0.00</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl border-l-4 border-blue-500 shadow-sm">
+                            <p class="text-gray-500 text-xs font-bold uppercase">Net Balance</p>
+                            <p class="text-2xl font-bold mt-1 text-gray-800 ledger-balance" id="dashBalance">₹ 0.00</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="vouchers" class="section hidden-section">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-bold text-gray-700">Transactions</h3>
+                        <button class="bg-[#f5ba31] text-blue-900 px-4 py-2 rounded-lg font-bold text-sm shadow-sm hover:bg-yellow-400 transition" onclick="openModal('voucherModal')">+ New Voucher</button>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="bg-gray-50 text-gray-600 uppercase text-xs border-b border-gray-200">
+                                <tr>
+                                    <th class="p-4">ID</th>
+                                    <th class="p-4">Date</th>
+                                    <th class="p-4">Type</th>
+                                    <th class="p-4 text-right">Amount</th>
+                                    <th class="p-4 hidden md:table-cell">Narration</th>
+                                </tr>
+                            </thead>
+                            <tbody id="voucherTableBody">
+                                <tr><td colspan="5" class="p-4 text-center text-gray-400">Loading data...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="inventory" class="section hidden-section">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-bold text-gray-700">Stock Items</h3>
+                        <button class="bg-[#f5ba31] text-blue-900 px-4 py-2 rounded-lg font-bold text-sm shadow-sm hover:bg-yellow-400 transition" onclick="openModal('itemModal')">+ Add Item</button>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="bg-gray-50 text-gray-600 uppercase text-xs border-b border-gray-200">
+                                <tr>
+                                    <th class="p-4">Code</th>
+                                    <th class="p-4">Item Name</th>
+                                    <th class="p-4">Group</th>
+                                    <th class="p-4 text-right">Selling Price</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventoryTableBody">
+                                <tr><td colspan="4" class="p-4 text-center text-gray-400">No items found</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="crm" class="section hidden-section">
+                    <div class="bg-blue-50 p-4 rounded-lg border border-blue-100 mb-6 flex items-start gap-3">
+                        <i class="fa-solid fa-circle-info text-blue-600 mt-1"></i>
+                        <div>
+                            <h4 class="font-bold text-blue-800 text-sm">CRM Actions</h4>
+                            <p class="text-xs text-blue-600">Send payment reminders via WhatsApp, Email, or generate UPI QR codes instantly.</p>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="bg-gray-50 text-gray-600 uppercase text-xs border-b border-gray-200">
+                                <tr>
+                                    <th class="p-4">Customer</th>
+                                    <th class="p-4">Pending Invoice</th>
+                                    <th class="p-4 text-right">Due Amount</th>
+                                    <th class="p-4 text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="crmTableBody">
+                                <tr><td colspan="4" class="p-4 text-center text-gray-400">Loading customers...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="ledger" class="section hidden-section">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
+                        <i class="fa-solid fa-book-open text-4xl text-gray-300 mb-4"></i>
+                        <h3 class="text-lg font-bold text-gray-600">Ledger View</h3>
+                        <p class="text-sm text-gray-400">Select an account to view detailed transactions.</p>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <div id="voucherModal" class="modal-overlay">
+        <div class="bg-white rounded-xl w-full max-w-md p-6 relative shadow-2xl">
+            <button class="absolute top-4 right-4 text-gray-400 hover:text-gray-600" onclick="closeModal('voucherModal')"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <h3 class="font-bold text-xl text-blue-900 mb-6">New Transaction</h3>
+            <form onsubmit="submitData(event, 'saveVoucher')">
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Type</label>
+                        <select name="type" class="w-full p-3 border border-gray-300 rounded-lg bg-white"><option>Payment</option><option>Receipt</option><option>Sales</option><option>Purchase</option></select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Date</label>
+                        <input type="date" name="date" class="w-full p-3 border border-gray-300 rounded-lg" required>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Debit Account</label>
+                        <select name="drLedger" id="drSelect" class="w-full p-3 border border-gray-300 rounded-lg bg-white"><option>Loading...</option></select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Credit Account</label>
+                        <select name="crLedger" id="crSelect" class="w-full p-3 border border-gray-300 rounded-lg bg-white"><option>Loading...</option></select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Amount</label>
+                        <input type="number" name="amount" class="w-full p-3 border border-gray-300 rounded-lg" required step="0.01" placeholder="Amount">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Narration</label>
+                        <input type="text" name="narration" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="Narration">
+                    </div>
+                </div>
+                <button class="w-full mt-6 bg-[#f5ba31] text-blue-900 py-3 rounded-lg font-bold hover:bg-yellow-400 transition">Save Voucher</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="itemModal" class="modal-overlay">
+        <div class="bg-white rounded-xl w-full max-w-md p-6 relative shadow-2xl">
+            <button class="absolute top-4 right-4 text-gray-400" onclick="closeModal('itemModal')"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <h3 class="font-bold text-xl text-blue-900 mb-6">New Stock Item</h3>
+            <form onsubmit="submitData(event, 'saveInventory')">
+                <div class="space-y-4">
+                    <input type="text" name="itemCode" placeholder="Item Code" class="w-full p-3 border border-gray-300 rounded-lg" required>
+                    <input type="text" name="itemName" placeholder="Item Name" class="w-full p-3 border border-gray-300 rounded-lg" required>
+                    <select name="group" class="w-full p-3 border border-gray-300 rounded-lg bg-white"><option>General</option><option>Electronics</option><option>Services</option></select>
+                    <div class="flex gap-4">
+                        <input type="text" name="unit" placeholder="Unit (Nos)" class="w-full p-3 border border-gray-300 rounded-lg">
+                        <input type="number" name="sellPrice" placeholder="Price" class="w-full p-3 border border-gray-300 rounded-lg">
+                    </div>
+                </div>
+                <button class="w-full mt-6 bg-[#1e3a8a] text-white py-3 rounded-lg font-bold hover:bg-blue-800 transition">Save Item</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="upiModal" class="modal-overlay">
+        <div class="bg-white rounded-xl w-full max-w-xs p-6 relative text-center shadow-2xl">
+            <button class="absolute top-4 right-4 text-gray-400" onclick="closeModal('upiModal')"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="font-bold text-lg text-blue-900 mb-2">Scan to Pay</h3>
+            <div class="bg-gray-100 p-2 rounded inline-block mb-2">
+                <canvas id="qrCanvas"></canvas>
+            </div>
+            <p id="upiText" class="text-[10px] text-gray-400 break-all font-mono"></p>
+            <button class="w-full mt-4 bg-green-600 text-white py-2 rounded-lg font-bold" onclick="closeModal('upiModal')">Done</button>
+        </div>
+    </div>
+
+    <script>
+        // *** NEW SCRIPT URL ***
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzARJonG2FRrFnvqctaoNKbZabY3DoYvbUwuk8YqnCej1b9aLqPJZKmY6gRqXrIYFWM/exec";
+        
+        // Configuration
+        const MY_UPI_ID = "cmtaxexperts@oksbi"; 
+        
+        let appData = { ledgers: [], vouchers: [], inventory: [] };
+
+        // --- DATA & SYNC ---
+        function loadAllData() {
+            document.getElementById('loadingIndicator').classList.remove('hidden');
+            document.getElementById('loadingIndicator').classList.add('flex');
+
+            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'getAllData' }) })
+            .then(r => r.json())
+            .then(res => {
+                if(res.status === 'SUCCESS') {
+                    appData = res.data;
+                    renderDashboard(res.data.stats);
+                    renderVouchers(res.data.vouchers);
+                    populateDropdowns();
+                    // If CRM is active, reload it to refresh balance
+                    if(!document.getElementById('crm').classList.contains('hidden-section')) loadCRM();
+                }
+            })
+            .finally(() => {
+                document.getElementById('loadingIndicator').classList.add('hidden');
+                document.getElementById('loadingIndicator').classList.remove('flex');
+            });
+        }
+
+        function loadInventory() {
+            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'getInventory' }) })
+            .then(r => r.json())
+            .then(res => {
+                const tbody = document.getElementById('inventoryTableBody');
+                tbody.innerHTML = "";
+                if(res.data.length === 0) {
+                    tbody.innerHTML = "<tr><td colspan='4' class='p-4 text-center text-gray-400'>No items found</td></tr>";
+                    return;
+                }
+                res.data.forEach(i => {
+                    tbody.innerHTML += `<tr class="border-b hover:bg-gray-50"><td class="p-4 font-mono text-xs text-blue-600">${i.code}</td><td class="p-4">${i.name}</td><td class="p-4 text-gray-500 text-xs">${i.group}</td><td class="p-4 text-right font-bold">₹ ${i.price}</td></tr>`;
+                });
+            });
+        }
+
+        function loadCRM() {
+            const tbody = document.getElementById('crmTableBody');
+            tbody.innerHTML = "";
+            // Ideally, filter by "Sundry Debtors" from backend
+            const debtors = appData.ledgers.filter(l => (l.category === 'Customer' || l.category === 'Sundry Debtors'));
+            
+            if(debtors.length === 0) { tbody.innerHTML = "<tr><td colspan='4' class='p-4 text-center text-gray-400'>No Customers Found</td></tr>"; return; }
+
+            debtors.forEach(d => {
+                const due = d.bal || 0; 
+                const randomInv = "INV-" + Math.floor(Math.random() * 1000); 
+                tbody.innerHTML += `
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="p-4 font-medium text-gray-800">${d.name}</td>
+                    <td class="p-4 text-xs text-gray-500">${randomInv}</td>
+                    <td class="p-4 text-right font-bold text-red-600 ledger-balance">₹ ${parseFloat(due).toLocaleString()}</td>
+                    <td class="p-4 text-center flex justify-center gap-3">
+                        <button class="text-green-500 hover:text-green-600 text-lg" onclick="sendWhatsApp('${d.name}', '${due}', '${randomInv}')"><i class="fa-brands fa-whatsapp"></i></button>
+                        <button class="text-blue-500 hover:text-blue-600 text-lg" onclick="sendEmail('${d.name}', '${due}', '${randomInv}')"><i class="fa-solid fa-envelope"></i></button>
+                        <button class="text-purple-500 hover:text-purple-600 text-lg" onclick="showUPI('${d.name}', '${due}', '${randomInv}')"><i class="fa-solid fa-qrcode"></i></button>
+                    </td>
+                </tr>`;
+            });
+        }
+
+        // --- RENDERERS ---
+        function renderDashboard(stats) {
+            if(!stats) return;
+            document.getElementById('dashIncome').textContent = "₹ " + stats.income.toLocaleString('en-IN', {minimumFractionDigits: 2});
+            document.getElementById('dashExpense').textContent = "₹ " + stats.expense.toLocaleString('en-IN', {minimumFractionDigits: 2});
+            document.getElementById('dashBalance').textContent = "₹ " + stats.balance.toLocaleString('en-IN', {minimumFractionDigits: 2});
+        }
+
+        function renderVouchers(list) {
+            const tbody = document.getElementById('voucherTableBody');
+            tbody.innerHTML = "";
+            if(!list || list.length === 0) { tbody.innerHTML = "<tr><td colspan='5' class='p-4 text-center text-gray-400'>No transactions yet</td></tr>"; return; }
+            list.forEach(v => {
+                tbody.innerHTML += `
+                <tr class="border-b hover:bg-gray-50 transition">
+                    <td class="p-4 text-xs font-mono text-blue-600">${v.id}</td>
+                    <td class="p-4 text-sm text-gray-700">${v.date}</td>
+                    <td class="p-4"><span class="px-2 py-1 rounded text-xs bg-gray-100 text-gray-600 font-medium border border-gray-200">${v.type}</span></td>
+                    <td class="p-4 text-right font-bold text-gray-800 ledger-balance">₹ ${parseFloat(v.amount).toLocaleString('en-IN')}</td>
+                    <td class="p-4 text-xs text-gray-500 hidden md:table-cell truncate max-w-xs">${v.narration}</td>
+                </tr>`;
+            });
+        }
+
+        function populateDropdowns() {
+            const opts = appData.ledgers.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
+            const dr = document.getElementById('drSelect');
+            const cr = document.getElementById('crSelect');
+            if(dr && cr) {
+                dr.innerHTML = '<option value="">Select Account</option>' + opts;
+                cr.innerHTML = '<option value="">Select Account</option>' + opts;
+            }
+        }
+
+        // --- ACTIONS ---
+        function submitData(e, action) {
+            e.preventDefault();
+            const form = e.target;
+            const btn = form.querySelector('button');
+            const oldText = btn.innerText;
+            btn.innerText = "Processing..."; btn.disabled = true;
+
+            const fd = new FormData(form);
+            const data = { action: action };
+            fd.forEach((v, k) => data[k] = v);
+
+            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(data) })
+            .then(r => r.json())
+            .then(res => {
+                alert(res.message);
+                if(res.status === 'SUCCESS') {
+                    form.reset();
+                    closeModal(form.closest('.modal-overlay').id);
+                    if(action === 'saveInventory') loadInventory();
+                    else loadAllData();
+                }
+            })
+            .finally(() => { btn.innerText = oldText; btn.disabled = false; });
+        }
+
+        // --- CRM UTILS ---
+        function sendWhatsApp(name, amount, inv) {
+            const msg = `Dear ${name},%0a%0aYour payment of ₹${amount} for Invoice ${inv} is pending. Please pay at the earliest.%0a%0a- Lotus Enterprises, Thalassery`;
+            window.open(`https://wa.me/?text=${msg}`, '_blank');
+        }
+
+        function showUPI(name, amount, inv) {
+            openModal('upiModal');
+            const upiString = `upi://pay?pa=${MY_UPI_ID}&pn=LotusEnterprises&am=${amount}&tr=${inv}&tn=Payment ${inv}`;
+            const qr = new QRious({ element: document.getElementById('qrCanvas'), value: upiString, size: 200 });
+            document.getElementById('upiText').innerText = upiString;
+        }
+
+        // --- UI TOGGLES ---
+        function nav(id, el) {
+            document.querySelectorAll('.section').forEach(s => s.classList.add('hidden-section'));
+            document.getElementById(id).classList.remove('hidden-section');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('pageTitle').innerText = el.querySelector('span').innerText;
+            if(window.innerWidth < 768) toggleSidebar();
+            
+            if(id === 'inventory') loadInventory();
+            if(id === 'crm') loadCRM();
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('mobileBackdrop').classList.toggle('active');
+        }
+
+        function openModal(id) { document.getElementById(id).classList.add('show'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+    </script>
+</body>
+</html>
