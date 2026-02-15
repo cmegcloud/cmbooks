@@ -2,552 +2,372 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#1c212e">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMB ERP & CRM</title>
     
-    <link rel="icon" type="image/png" href="logocmbooks.png">
-    <link rel="apple-touch-icon" href="logocmbooks.png">
-    <link rel="manifest" href="manifest.json">
-    
-    <title>CMB | Cloud Accounting</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <style>
-        :root { --zoho-blue: #006fda; --zoho-yellow: #f5ba31; --zoho-bg: #f4f5f7; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--zoho-bg); color: #333; overflow: hidden; }
-        
-        .sidebar { background-color: #1c212e; color: white; transition: transform 0.3s ease-in-out; }
-        .nav-item { padding: 12px 20px; cursor: pointer; color: #b0b0b0; border-left: 3px solid transparent; display: flex; gap: 10px; font-size: 0.95rem; align-items: center; }
-        .nav-item:hover, .nav-item.active { background-color: rgba(255,255,255,0.05); color: #fff; border-left-color: var(--zoho-blue); }
-        .nav-section { padding: 15px 20px 5px; font-size: 0.75rem; font-weight: bold; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; }
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
-        @media (max-width: 768px) {
-            .sidebar { position: fixed; z-index: 40; height: 100%; width: 260px; transform: translateX(-100%); box-shadow: 2px 0 10px rgba(0,0,0,0.5); }
-            .sidebar.open { transform: translateX(0); }
-            .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 30; }
-            .overlay.active { display: block; }
-        }
-
-        .cmb-card { background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); padding: 15px; border-top: 3px solid var(--zoho-blue); margin-bottom: 15px; overflow-x: auto; }
-        .cmb-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; min-width: 600px; }
-        .cmb-table th { text-align: left; padding: 12px; background: #f8f9fa; color: #666; font-weight: 600; border-bottom: 2px solid #eee; white-space: nowrap; }
-        .cmb-table td { padding: 12px; border-bottom: 1px solid #eee; white-space: nowrap; }
-        
-        .form-input { width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 14px; margin-top: 5px; background: #fff; }
-        .btn-primary { background-color: var(--zoho-yellow); padding: 10px 20px; border-radius: 6px; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s; border:none; }
-        .btn-icon { padding: 6px 10px; border-radius: 4px; font-size: 12px; cursor: pointer; margin-right: 4px; }
-        .btn-edit { background: #e3f2fd; color: #1565c0; }
-        .btn-del { background: #ffebee; color: #c62828; }
-        .btn-print { background: #e8f5e9; color: #2e7d32; }
-
-        .modal-overlay { background: rgba(0,0,0,0.6); position: fixed; inset: 0; display: none; justify-content: center; align-items: center; z-index: 50; padding: 15px; }
-        .modal-overlay.show { display: flex; }
-        .hidden-section { display: none; }
-        
-        /* LOGIN SCREEN - FORCE FLEX DISPLAY INITIALLY */
-        #loginScreen { position: fixed; inset: 0; background: #1c212e; z-index: 100; display: flex; justify-content: center; align-items: center; padding: 20px; }
-        .login-box { background: white; padding: 40px; border-radius: 8px; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); text-align: center; border-top: 4px solid var(--zoho-yellow); }
-    </style>
-    
     <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').catch(err => console.log(err));
-            });
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: '#F6b936',  /* CMB Yellow */
+              secondary: '#1F70D3', /* CMB Blue */
+              danger: '#D60000',
+              zohoDark: '#1c212e',
+              zohoGray: '#f4f5f7'
+            },
+            fontFamily: {
+              poppins: ['Poppins', 'sans-serif']
+            }
+          }
         }
+      }
     </script>
+
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #f4f5f7; }
+        
+        /* Sidebar Styling */
+        .sidebar { transition: width 0.3s; width: 250px; background: #1c212e; color: #d4d6dc; height: 100vh; position: fixed; overflow-y: auto; }
+        .sidebar-header { padding: 20px; font-weight: 700; font-size: 20px; color: white; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-header span { color: #F6b936; }
+        
+        .menu-label { font-size: 11px; text-transform: uppercase; color: #6c757d; padding: 15px 20px 5px; font-weight: 700; letter-spacing: 1px; }
+        
+        .nav-item { padding: 10px 20px; display: flex; align-items: center; cursor: pointer; transition: 0.2s; font-size: 14px; border-left: 3px solid transparent; }
+        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.05); color: #fff; border-left-color: #F6b936; }
+        .nav-item i { width: 25px; }
+
+        .submenu { display: none; background: rgba(0,0,0,0.3); padding-left: 45px; }
+        .submenu a { display: block; padding: 8px 0; font-size: 13px; color: #a0a6b5; cursor: pointer; }
+        .submenu a:hover { color: #fff; }
+
+        /* Main Content */
+        .main-content { margin-left: 250px; width: calc(100% - 250px); min-height: 100vh; display: flex; flex-direction: column; }
+        .top-bar { background: white; height: 60px; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; }
+        
+        .content-area { padding: 25px; flex: 1; }
+        
+        /* Views */
+        .view-section { display: none; animation: fadeIn 0.3s; }
+        .view-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* CRM Highlight Box */
+        .crm-highlight { background: linear-gradient(135deg, #1F70D3 0%, #16509c 100%); margin: 15px; padding: 15px; border-radius: 8px; border: 1px solid #F6b936; }
+        .crm-highlight h4 { color: #F6b936; font-size: 12px; font-weight: 700; margin-bottom: 10px; }
+        .crm-btn { display: flex; align-items: center; color: white; font-size: 12px; padding: 6px 0; cursor: pointer; }
+        .crm-btn:hover { text-decoration: underline; }
+        .crm-btn i { margin-right: 8px; width: 15px; }
+
+        /* Loader */
+        .loader { display: none; border: 3px solid #f3f3f3; border-top: 3px solid #F6b936; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; margin-left: 10px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
 </head>
+<body>
 
-<body class="flex h-screen" onload="checkLogin()">
+    <aside class="sidebar">
+        <div class="sidebar-header">CMB <span>ERP</span></div>
 
-    <div id="loginScreen">
-        <div class="login-box">
-            <img src="logocmbooks.png" alt="CMB Logo" class="h-24 mx-auto mb-6 rounded-lg shadow-sm">
-            <p class="text-gray-500 mb-6 text-sm">Please login to access your account</p>
-            
-            <div id="loginContainer">
-                <div class="text-left mb-4">
-                    <label class="text-xs font-bold text-gray-500 uppercase">Username</label>
-                    <input type="text" id="loginUser" class="form-input text-lg py-3" placeholder="Enter Username (e.g. admin)">
-                </div>
-                <div class="text-left mb-6">
-                    <label class="text-xs font-bold text-gray-500 uppercase">Password</label>
-                    <input type="password" id="loginPass" class="form-input text-lg py-3" placeholder="Enter 1234">
-                </div>
-                
-                <button type="button" onclick="handleLogin()" class="btn-primary w-full py-3 text-lg">Login</button>
-            </div>
-            
-            <p id="loginError" class="text-red-500 text-sm mt-4 hidden">Incorrect Username or Password!</p>
-            <p class="mt-6 text-xs text-gray-400 cursor-pointer underline" onclick="logout()">Reset App / Clear Cache</p>
+        <div class="nav-item active" onclick="navigate('company-view', this)">
+            <i class="fa-solid fa-building"></i> Company Creation
         </div>
-    </div>
 
-    <div id="mainApp" class="flex h-screen w-full hidden">
-        <div id="mobileBackdrop" class="overlay" onclick="toggleSidebar()"></div>
+        <div class="menu-label">Create</div>
+        <div class="nav-item" onclick="toggleSub('sub-create')">
+            <i class="fa-solid fa-plus-circle"></i> Create Masters <i class="fa-solid fa-chevron-down ml-auto text-xs"></i>
+        </div>
+        <div class="submenu" id="sub-create">
+            <a onclick="navigate('ledger-view')">Ledgers</a>
+            <a onclick="navigate('placeholder-view', null, 'Project Name')">Project Name</a>
+            <a onclick="navigate('placeholder-view', null, 'Project Stage')">Project Stage</a>
+            <a onclick="navigate('placeholder-view', null, 'Stock Items')">Stock Items</a>
+        </div>
 
-        <aside id="sidebar" class="sidebar w-64 flex-shrink-0 flex flex-col pt-5 h-full">
-            <div class="px-5 mb-6 flex justify-between items-center">
-                <div class="flex items-center gap-3">
-                    <img src="logocmbooks.png" class="h-10 rounded-md">
-                    <h1 class="text-xl font-bold">CMB</h1>
-                </div>
-                <button class="md:hidden text-gray-400 text-2xl" onclick="toggleSidebar()">×</button>
+        <div class="menu-label">Transactions</div>
+        <div class="nav-item" onclick="toggleSub('sub-accounts')">
+            <i class="fa-solid fa-file-invoice-dollar"></i> Accounts Entry <i class="fa-solid fa-chevron-down ml-auto text-xs"></i>
+        </div>
+        <div class="submenu" id="sub-accounts">
+            <a onclick="navigate('placeholder-view', null, 'Cash Book')">Cash Book</a>
+            <a onclick="navigate('placeholder-view', null, 'Bank Book')">Bank Book</a>
+            <a onclick="navigate('placeholder-view', null, 'Payment Voucher')">Payment</a>
+            <a onclick="navigate('placeholder-view', null, 'Receipt Voucher')">Receipt</a>
+            <a onclick="navigate('placeholder-view', null, 'Journal')">Journal</a>
+            <a onclick="navigate('placeholder-view', null, 'Sales Invoice')">Sales / Invoice</a>
+            <a onclick="navigate('placeholder-view', null, 'Credit Note')">Sales Return</a>
+            <a onclick="navigate('placeholder-view', null, 'Debit Note')">Purchase Return</a>
+            <a onclick="navigate('placeholder-view', null, 'Estimates')">Estimates</a>
+        </div>
+
+        <div class="menu-label">Reports</div>
+        <div class="nav-item" onclick="toggleSub('sub-reports')">
+            <i class="fa-solid fa-chart-pie"></i> Financial Reports <i class="fa-solid fa-chevron-down ml-auto text-xs"></i>
+        </div>
+        <div class="submenu" id="sub-reports">
+            <a onclick="navigate('placeholder-view', null, 'Ledger Report')">Ledgerwise</a>
+            <a onclick="navigate('placeholder-view', null, 'P&L Statement')">Profit & Loss</a>
+            <a onclick="navigate('placeholder-view', null, 'Balance Sheet')">Balance Sheet</a>
+            <a onclick="navigate('placeholder-view', null, 'GST Reports')">GST Reports (R1/3B/9)</a>
+        </div>
+
+        <div class="crm-highlight">
+            <h4><i class="fa-solid fa-bolt"></i> SMART CRM / QR</h4>
+            <div class="crm-btn" onclick="navigate('crm-view')"><i class="fa-brands fa-whatsapp"></i> Send Reminders</div>
+            <div class="crm-btn" onclick="navigate('crm-view')"><i class="fa-solid fa-building-columns"></i> Send Bank Details</div>
+            <div class="crm-btn" onclick="navigate('crm-view')"><i class="fa-solid fa-qrcode"></i> Generate QR</div>
+        </div>
+
+        <div class="menu-label">Settings</div>
+        <div class="nav-item" onclick="navigate('users-view', this)">
+            <i class="fa-solid fa-users-cog"></i> User Management
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="top-bar">
+            <h2 id="page-title" class="text-lg font-semibold text-gray-700">Company Creation</h2>
+            <div class="flex items-center gap-3">
+                <span class="text-sm font-medium text-gray-500">FY: 2025-2026</span>
+                <div class="w-8 h-8 rounded-full bg-secondary text-white flex items-center justify-center font-bold">A</div>
             </div>
+        </div>
+
+        <div class="content-area">
             
-            <div class="px-5 mb-4 text-xs font-bold text-yellow-400 uppercase tracking-widest" id="userRoleBadge">Role</div>
-
-            <nav class="flex-1 overflow-y-auto pb-20">
-                <div class="nav-section" id="sec-main">Main</div>
-                <div class="nav-item active" id="nav-dashboard" onclick="nav('dashboard', this)">📊 Dashboard</div>
-                <div class="nav-item" id="nav-company" onclick="nav('company', this)">🏢 Company</div>
-                <div class="nav-section">Masters</div>
-                <div class="nav-item" id="nav-ledger" onclick="nav('ledger', this)">📖 Ledgers</div>
-                <div class="nav-section">Entries</div>
-                <div class="nav-item" id="nav-vouchers" onclick="nav('vouchers', this)">📝 Vouchers</div>
-                <div class="nav-section" id="sec-analysis">Analysis</div>
-                <div class="nav-item" id="nav-reports" onclick="nav('reports', this)">📈 Reports</div>
-                <div class="p-5 text-xs text-gray-500 cursor-pointer hover:text-white mt-10" onclick="logout()">🚪 Logout</div>
-            </nav>
-        </aside>
-
-        <main class="flex-1 flex flex-col overflow-hidden relative w-full bg-gray-50">
-            <header class="bg-white border-b h-16 flex items-center justify-between px-4 md:px-8 shadow-sm flex-shrink-0 z-10 sticky top-0">
-                <div class="flex items-center gap-4">
-                    <button class="md:hidden text-2xl text-gray-600" onclick="toggleSidebar()">☰</button>
-                    <h2 class="text-lg font-semibold text-gray-700 truncate" id="pageTitle">Dashboard</h2>
-                </div>
-                <div id="loadingIndicator" class="text-blue-600 text-sm font-bold hidden flex items-center gap-2">
-                    <span class="animate-spin">↻</span> <span class="hidden md:inline">Syncing...</span>
-                </div>
-            </header>
-
-            <div class="flex-1 overflow-y-auto p-4 md:p-8 pb-24">
-                <div id="dashboard" class="section">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                        <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-green-500">
-                            <div class="text-gray-500 text-sm font-medium">Income</div>
-                            <div class="text-2xl font-bold mt-1 text-gray-800 break-all" id="dashIncome">₹ 0.00</div>
+            <div id="company-view" class="view-section active">
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 max-w-4xl mx-auto">
+                    <h3 class="text-lg font-semibold text-secondary mb-4 border-b pb-2">Company Information</h3>
+                    <form id="form-company" onsubmit="submitData(event, 'save_company', 'form-company')">
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600 mb-1">Company Name</label>
+                                <input type="text" name="Company Name" class="w-full border p-2 rounded text-sm focus:outline-none focus:border-secondary" required>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600 mb-1">Mailing Name</label>
+                                <input type="text" name="Mailing Name" class="w-full border p-2 rounded text-sm focus:outline-none focus:border-secondary">
+                            </div>
                         </div>
-                        <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-red-500">
-                            <div class="text-gray-500 text-sm font-medium">Expense</div>
-                            <div class="text-2xl font-bold mt-1 text-gray-800 break-all" id="dashExpense">₹ 0.00</div>
+                        <div class="grid grid-cols-3 gap-4 mb-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600 mb-1">State</label>
+                                <select name="State" class="w-full border p-2 rounded text-sm focus:outline-none focus:border-secondary">
+                                    <option>Kerala</option>
+                                    <option>Tamil Nadu</option>
+                                    <option>Karnataka</option>
+                                    <option>Delhi</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600 mb-1">GSTIN</label>
+                                <input type="text" name="GSTIN" class="w-full border p-2 rounded text-sm focus:outline-none focus:border-secondary" placeholder="29ABCDE1234F1Z5">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600 mb-1">Financial Year From</label>
+                                <input type="date" name="Financial Year Beginning From" class="w-full border p-2 rounded text-sm focus:outline-none focus:border-secondary" value="2025-04-01">
+                            </div>
                         </div>
-                        <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-blue-500">
-                            <div class="text-gray-500 text-sm font-medium">Net Balance</div>
-                            <div class="text-2xl font-bold mt-1 text-gray-800 break-all" id="dashBalance">₹ 0.00</div>
+                        <div class="mb-4">
+                            <label class="block text-xs font-bold text-gray-600 mb-1">Address</label>
+                            <textarea name="Address Line 1" rows="3" class="w-full border p-2 rounded text-sm focus:outline-none focus:border-secondary"></textarea>
                         </div>
-                    </div>
-                </div>
-
-                <div id="company" class="section hidden-section">
-                    <button id="btn-create-company" class="btn-primary mb-4" onclick="openModal('companyModal')">+ Create Company</button>
-                    <div class="cmb-card">
-                        <table class="cmb-table">
-                            <thead><tr><th>ID</th><th>Name</th><th>GST</th><th>State</th></tr></thead>
-                            <tbody id="companyTableBody"><tr><td colspan="4" class="text-center text-gray-400 p-4">Loading...</td></tr></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div id="ledger" class="section hidden-section">
-                    <button id="btn-create-ledger" class="btn-primary mb-4" onclick="openModal('ledgerModal')">+ Create Ledger</button>
-                    <div class="cmb-card">
-                        <table class="cmb-table">
-                            <thead><tr><th>ID</th><th>Name</th><th>Category</th><th class="text-right">Balance</th></tr></thead>
-                            <tbody id="ledgerTableBody"><tr><td colspan="4" class="text-center text-gray-400 p-4">Loading...</td></tr></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div id="vouchers" class="section hidden-section">
-                    <button id="btn-create-voucher" class="btn-primary mb-4" onclick="openVoucherModal()">+ New Voucher</button>
-                    <div class="cmb-card">
-                        <table class="cmb-table">
-                            <thead><tr><th id="th-actions">Actions</th><th>ID</th><th>Date</th><th>Type</th><th class="text-right">Amount</th><th>Narration</th></tr></thead>
-                            <tbody id="voucherTableBody"><tr><td colspan="6" class="text-center text-gray-400 p-4">Loading...</td></tr></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div id="reports" class="section hidden-section">
-                    <div class="bg-white p-4 rounded-lg shadow-sm mb-4 border border-gray-200 space-y-3">
-                        <select id="reportLedgerSelect" class="form-input"><option value="">Select Ledger...</option></select>
-                        <button class="btn-primary w-full" onclick="loadReport()">View Report</button>
-                    </div>
-                    <div class="cmb-card">
-                        <table class="cmb-table">
-                            <thead><tr><th>Date</th><th>Voucher</th><th>Particulars</th><th class="text-right">Debit</th><th class="text-right">Credit</th><th class="text-right">Balance</th></tr></thead>
-                            <tbody id="reportTableBody"><tr><td colspan="6" class="text-center text-gray-400 p-8">Select a Ledger to view details.</td></tr></tbody>
-                        </table>
-                    </div>
+                        <div class="flex items-center">
+                            <button type="submit" class="bg-secondary text-white px-6 py-2 rounded text-sm font-semibold hover:bg-blue-700 transition">Save Company</button>
+                            <div class="loader" id="loader-form-company"></div>
+                        </div>
+                    </form>
                 </div>
             </div>
-        </main>
-    </div>
 
-    <div id="companyModal" class="modal-overlay">
-        <div class="bg-white rounded-xl w-full max-w-lg p-6 relative m-4 max-h-[90vh] overflow-y-auto shadow-2xl">
-            <button class="absolute top-4 right-4 text-2xl text-gray-400" onclick="closeModal('companyModal')">×</button>
-            <h3 class="text-xl font-bold mb-4 text-blue-700">New Company</h3>
-            <form onsubmit="submitData(event, 'saveCompany')">
-                <input type="text" name="companyName" placeholder="Company Name" class="form-input" required>
-                <input type="text" name="gst" placeholder="GST No" class="form-input">
-                <select name="state" class="form-input"><option value="Kerala">Kerala</option><option value="Karnataka">Karnataka</option></select>
-                <input type="date" name="fyStart" class="form-input" required>
-                <button type="submit" class="btn-primary mt-6 w-full py-3">Create</button>
-            </form>
-        </div>
-    </div>
-
-    <div id="ledgerModal" class="modal-overlay">
-        <div class="bg-white rounded-xl w-full max-w-lg p-6 relative m-4 max-h-[90vh] overflow-y-auto shadow-2xl">
-            <button class="absolute top-4 right-4 text-2xl text-gray-400" onclick="closeModal('ledgerModal')">×</button>
-            <h3 class="text-xl font-bold mb-4 text-blue-700">New Ledger</h3>
-            <form onsubmit="submitData(event, 'saveLedger')">
-                <input type="text" name="ledgerName" placeholder="Name" class="form-input" required>
-                <select name="category" class="form-input" required>
-                    <option value="Cash">Cash</option><option value="Bank">Bank</option><option value="Customer">Customer</option><option value="Supplier">Supplier</option>
-                </select>
-                <input type="number" name="openingBalance" placeholder="Op Bal" class="form-input" value="0">
-                <select name="drCr" class="form-input"><option value="Dr">Dr</option><option value="Cr">Cr</option></select>
-                <button type="submit" class="btn-primary mt-6 w-full py-3">Create</button>
-            </form>
-        </div>
-    </div>
-
-    <div id="voucherModal" class="modal-overlay">
-        <div class="bg-white rounded-xl w-full max-w-lg p-6 relative m-4 max-h-[90vh] overflow-y-auto shadow-2xl">
-            <button class="absolute top-4 right-4 text-2xl text-gray-400" onclick="closeModal('voucherModal')">×</button>
-            <h3 class="text-xl font-bold mb-4 text-blue-700" id="voucherModalTitle">New Voucher</h3>
-            <form id="voucherForm" onsubmit="submitData(event, 'saveVoucher')">
-                <input type="hidden" name="id" id="voucherId">
-                <div><label class="text-xs font-bold text-gray-500">TYPE</label>
-                    <select name="type" class="form-input" required>
-                        <option value="Payment">Payment</option><option value="Receipt">Receipt</option>
-                        <option value="Sales">Sales</option><option value="Purchase">Purchase</option>
-                    </select>
+            <div id="ledger-view" class="view-section">
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 max-w-2xl mx-auto">
+                    <h3 class="text-lg font-semibold text-secondary mb-4 border-b pb-2">Create Ledger</h3>
+                    <form id="form-ledger" onsubmit="submitData(event, 'save_ledger', 'form-ledger')">
+                        <div class="mb-4">
+                            <label class="block text-xs font-bold text-gray-600 mb-1">Ledger Name</label>
+                            <input type="text" name="ledgerName" class="w-full border p-2 rounded text-sm" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-xs font-bold text-gray-600 mb-1">Under Group</label>
+                            <select name="group" class="w-full border p-2 rounded text-sm">
+                                <option>Sundry Debtors</option>
+                                <option>Sundry Creditors</option>
+                                <option>Bank Accounts</option>
+                                <option>Sales Accounts</option>
+                                <option>Purchase Accounts</option>
+                                <option>Indirect Expenses</option>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600 mb-1">State</label>
+                                <input type="text" name="state" class="w-full border p-2 rounded text-sm" value="Kerala">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600 mb-1">GSTIN (If Applicable)</label>
+                                <input type="text" name="gstin" class="w-full border p-2 rounded text-sm">
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <button type="submit" class="bg-secondary text-white px-6 py-2 rounded text-sm font-semibold">Create Ledger</button>
+                            <div class="loader" id="loader-form-ledger"></div>
+                        </div>
+                    </form>
                 </div>
-                <div><label class="text-xs font-bold text-gray-500">DATE</label><input type="date" name="date" class="form-input" required></div>
-                <div><label class="text-xs font-bold text-gray-500">DEBIT (Dr)</label><select name="drLedger" id="drSelect" class="form-input"><option>Loading...</option></select></div>
-                <div><label class="text-xs font-bold text-gray-500">CREDIT (Cr)</label><select name="crLedger" id="crSelect" class="form-input"><option>Loading...</option></select></div>
-                <div><label class="text-xs font-bold text-gray-500">AMOUNT</label><input type="number" name="amount" class="form-input" step="0.01" required></div>
-                <div><label class="text-xs font-bold text-gray-500">NARRATION</label><input type="text" name="narration" class="form-input"></div>
-                <button type="submit" class="btn-primary mt-6 w-full py-3">Save</button>
-            </form>
+            </div>
+
+            <div id="crm-view" class="view-section">
+                <div class="grid grid-cols-2 gap-6 max-w-5xl mx-auto">
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                        <h3 class="text-lg font-semibold text-green-600 mb-4"><i class="fa-brands fa-whatsapp"></i> WhatsApp Communicator</h3>
+                        <div class="mb-4">
+                            <label class="block text-xs font-bold text-gray-600 mb-1">Customer Mobile (with Country Code)</label>
+                            <input type="number" id="wa-mobile" class="w-full border p-2 rounded text-sm" placeholder="919800000000">
+                        </div>
+                        <div class="flex gap-2 mb-4">
+                            <button onclick="sendWA('reminder')" class="bg-primary text-black px-4 py-2 rounded text-xs font-bold flex-1 hover:bg-yellow-400">Send Reminder</button>
+                            <button onclick="sendWA('bank')" class="bg-secondary text-white px-4 py-2 rounded text-xs font-bold flex-1 hover:bg-blue-700">Send Bank Details</button>
+                        </div>
+                        <p class="text-xs text-gray-400">Note: This opens WhatsApp Web/App to send the message.</p>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 text-center">
+                        <h3 class="text-lg font-semibold text-secondary mb-4"><i class="fa-solid fa-qrcode"></i> CMB QR Generator</h3>
+                        <div class="mb-4 text-left">
+                            <label class="block text-xs font-bold text-gray-600 mb-1">Amount (₹)</label>
+                            <input type="number" id="qr-amount" class="w-full border p-2 rounded text-sm" placeholder="e.g. 5000">
+                        </div>
+                        <button onclick="generateQR()" class="bg-gray-800 text-white px-6 py-2 rounded text-sm font-bold w-full mb-4">Generate QR</button>
+                        
+                        <div id="qrcode-container" class="flex justify-center p-4 border border-dashed rounded hidden">
+                            <div id="qrcode"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="placeholder-view" class="view-section">
+                <div class="text-center py-20 text-gray-400">
+                    <i class="fa-solid fa-person-digging text-5xl mb-4"></i>
+                    <h2 class="text-2xl font-bold text-gray-600" id="placeholder-title">Module Loading...</h2>
+                    <p>This module requires connection to the Ledger/Transaction database.</p>
+                </div>
+            </div>
+
         </div>
-    </div>
+    </main>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby5Y97AGcYxn5hqqKd8dliGhj-7sJ2TMTdzXqqRTh_GFGK8G8qFzaGJLJSNgqUyxuxfaQ/exec";
+        // --- CONFIGURATION ---
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw81BknttHKeCsDL665WrVXQMVBDNAuolWPydmNVFG7KapRU1PBR4sOoU1Zp3yRRYhF/exec"; 
 
-        let appData = { ledgers: [], vouchers: [] };
-        
-        const USERS = {
-            'admin': { pass: '1234', role: 'ADMIN' },
-            'accountree': { pass: '1234', role: 'ACCOUNTREE' },
-            'ajwa': { pass: '1234', role: 'AJWA' },
-            'as': { pass: '1234', role: 'AS' }
-        };
-
-        let activeUser = null;
-
-        function checkLogin() {
-            try {
-                const savedUser = localStorage.getItem('cmb_user');
-                if (savedUser && USERS[savedUser]) {
-                    activeUser = USERS[savedUser];
-                    activeUser.name = savedUser;
-                    showApp();
-                }
-            } catch (e) { console.warn("Local storage blocked"); }
+        // 1. Navigation Logic
+        function toggleSub(id) {
+            const el = document.getElementById(id);
+            el.style.display = el.style.display === 'block' ? 'none' : 'block';
         }
 
-        function handleLogin() {
-            try {
-                const user = document.getElementById('loginUser').value.toLowerCase().trim();
-                const pass = document.getElementById('loginPass').value.trim();
-                const err = document.getElementById('loginError');
+        function navigate(viewId, element, title) {
+            // Update Sidebar Active State
+            if(element) {
+                document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+                element.classList.add('active');
+            }
+            
+            // Show View
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
 
-                if (!user || !pass) {
-                    alert("Please enter both Username and Password.");
-                    return;
+            // Update Header Title
+            if(title) {
+                document.getElementById('page-title').innerText = title;
+                if(viewId === 'placeholder-view') {
+                    document.getElementById('placeholder-title').innerText = title;
                 }
+            } else if (element) {
+                document.getElementById('page-title').innerText = element.innerText;
+            }
+        }
 
-                if (USERS[user] && USERS[user].pass === pass) {
-                    activeUser = USERS[user];
-                    activeUser.name = user;
-                    try { localStorage.setItem('cmb_user', user); } catch(e){}
-                    err.classList.add('hidden');
-                    document.getElementById('loginPass').value = '';
-                    showApp();
+        // 2. Form Submission Logic (To Google Sheets)
+        function submitData(e, action, formId) {
+            e.preventDefault();
+            const form = document.getElementById(formId);
+            const loader = document.getElementById('loader-' + formId);
+            
+            // Show Loader
+            loader.style.display = 'inline-block';
+
+            const formData = new FormData(form);
+            const data = new URLSearchParams(formData);
+            data.append("action", action);
+
+            fetch(WEB_APP_URL, {
+                method: "POST",
+                body: data
+            })
+            .then(res => res.json())
+            .then(response => {
+                loader.style.display = 'none';
+                if(response.result === 'success') {
+                    alert(response.message);
+                    form.reset();
                 } else {
-                    err.classList.remove('hidden');
-                }
-            } catch (error) {
-                alert("Login Error: " + error.message);
-            }
-        }
-
-        function logout() {
-            try { localStorage.removeItem('cmb_user'); } catch(e){}
-            activeUser = null;
-            document.getElementById('mainApp').classList.add('hidden');
-            // FORCE RE-SHOW LOGIN SCREEN
-            const login = document.getElementById('loginScreen');
-            login.classList.remove('hidden');
-            login.style.display = 'flex'; // RESET DISPLAY STYLE
-            
-            document.getElementById('loginUser').value = '';
-            document.getElementById('loginPass').value = '';
-            window.location.reload(); 
-        }
-
-        function showApp() {
-            try {
-                // NUCLEAR OPTION TO HIDE LOGIN SCREEN
-                const login = document.getElementById('loginScreen');
-                login.classList.add('hidden');
-                login.style.display = 'none'; // DIRECT STYLE OVERRIDE
-                
-                document.getElementById('mainApp').classList.remove('hidden');
-                document.getElementById('userRoleBadge').textContent = "Role: " + activeUser.role;
-                applyRolePermissions();
-                loadAllData();
-            } catch (error) {
-                alert("App Error: " + error.message);
-            }
-        }
-
-        function applyRolePermissions() {
-            const role = activeUser.role;
-            const showDashAndRep = (role === 'ADMIN' || role === 'AS');
-            const showCompany = (role === 'ADMIN');
-            
-            document.getElementById('nav-dashboard').style.display = showDashAndRep ? 'flex' : 'none';
-            document.getElementById('nav-reports').style.display = showDashAndRep ? 'flex' : 'none';
-            document.getElementById('sec-main').style.display = showDashAndRep ? 'block' : 'none';
-            document.getElementById('sec-analysis').style.display = showDashAndRep ? 'block' : 'none';
-            document.getElementById('nav-company').style.display = showCompany ? 'flex' : 'none';
-            document.getElementById('btn-create-company').style.display = (role === 'ADMIN') ? 'block' : 'none';
-            document.getElementById('btn-create-ledger').style.display = (role === 'ADMIN' || role === 'ACCOUNTREE') ? 'block' : 'none';
-            document.getElementById('btn-create-voucher').style.display = (role === 'ADMIN' || role === 'ACCOUNTREE' || role === 'AJWA') ? 'block' : 'none';
-
-            if (role === 'ACCOUNTREE' || role === 'AJWA') {
-                nav('vouchers', document.getElementById('nav-vouchers'));
-            } else {
-                nav('dashboard', document.getElementById('nav-dashboard'));
-            }
-        }
-
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('open');
-            document.getElementById('mobileBackdrop').classList.toggle('active');
-        }
-
-        function formatMoney(amount) {
-            if (!amount) return "0.00";
-            let clean = amount.toString().replace(/,/g, '');
-            let num = parseFloat(clean);
-            return isNaN(num) ? "0.00" : num.toLocaleString('en-IN', { minimumFractionDigits: 2 });
-        }
-
-        function nav(sectionId, el) {
-            document.querySelectorAll('.section').forEach(s => s.classList.add('hidden-section'));
-            document.getElementById(sectionId).classList.remove('hidden-section');
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            el.classList.add('active');
-            document.getElementById('pageTitle').textContent = el.textContent.substring(2);
-            if(window.innerWidth < 768) toggleSidebar();
-        }
-
-        function openModal(id) { document.getElementById(id).classList.add('show'); populateDropdowns(); }
-        function closeModal(id) { document.getElementById(id).classList.remove('show'); }
-
-        function openVoucherModal() {
-            document.getElementById('voucherForm').reset();
-            document.getElementById('voucherId').value = ""; 
-            document.getElementById('voucherModalTitle').textContent = "New Voucher";
-            openModal('voucherModal');
-        }
-
-        function editVoucher(id) {
-            const v = appData.vouchers.find(x => x.id === id);
-            if(!v) return;
-            openModal('voucherModal');
-            document.getElementById('voucherModalTitle').textContent = "Edit Voucher " + id;
-            const f = document.getElementById('voucherForm');
-            f.id.value = v.id; f.date.value = v.date; f.type.value = v.type;
-            let cleanAmt = v.amount.toString().replace(/,/g, '');
-            f.amount.value = parseFloat(cleanAmt); 
-            f.narration.value = v.narration;
-            setTimeout(() => { f.drLedger.value = v.dr; f.crLedger.value = v.cr; }, 100);
-        }
-
-        function deleteVoucher(id) {
-            if(!confirm("Are you sure you want to delete " + id + "?")) return;
-            submitData({ preventDefault:()=>{}, target: { closest: ()=>({}) } }, 'deleteItem', { type:'voucher', id: id });
-        }
-
-        function printVoucher(id) {
-            const v = appData.vouchers.find(x => x.id === id);
-            if(!v) return;
-            const drName = appData.ledgers.find(l=>l.id==v.dr)?.name || v.dr;
-            const crName = appData.ledgers.find(l=>l.id==v.cr)?.name || v.cr;
-            const companyName = (appData.companies && appData.companies[0]) ? appData.companies[0].name : "CM Books";
-
-            const win = window.open('', '', 'width=800,height=600');
-            win.document.write(`
-                <html><head><title>Voucher ${id}</title>
-                <style>
-                    body { font-family: sans-serif; padding: 40px; }
-                    .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
-                    .row { display: flex; justify-content: space-between; margin-bottom: 10px; }
-                    .box { border: 1px solid #ccc; padding: 20px; margin-bottom: 30px; }
-                    .amount { font-size: 20px; font-weight: bold; text-align: right; }
-                    .footer { margin-top: 50px; display: flex; justify-content: space-between; }
-                    .sign { border-top: 1px solid #333; width: 200px; text-align: center; padding-top: 5px; }
-                    .logo { text-align: center; margin-bottom: 10px; }
-                    .logo img { height: 60px; }
-                </style>
-                </head><body>
-                <div class="logo"><img src="logocmbooks.png"></div>
-                <div class="header"><h1>${companyName}</h1><h2>${v.type.toUpperCase()} VOUCHER</h2></div>
-                <div class="row"><div><strong>Voucher No:</strong> ${v.id}</div><div><strong>Date:</strong> ${v.date}</div></div>
-                <div class="box">
-                    <div class="row"><div><strong>Debit:</strong></div><div>${drName}</div></div>
-                    <div class="row"><div><strong>Credit:</strong></div><div>${crName}</div></div>
-                    <hr><div class="row"><div><strong>Narration:</strong></div><div>${v.narration}</div></div>
-                </div>
-                <div class="amount">Amount: ₹ ${formatMoney(v.amount)}</div>
-                <div class="footer"><div class="sign">Prepared By</div><div class="sign">Authorized Signatory</div></div>
-                <script>window.print();<\/script>
-                </body></html>
-            `);
-            win.document.close();
-        }
-
-        function loadAllData() {
-            document.getElementById('loadingIndicator').classList.remove('hidden');
-            fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "getAllData" }) })
-            .then(res => res.json())
-            .then(result => {
-                if(result.status === "SUCCESS") {
-                    appData = result.data;
-                    appData.companies = result.data.companies || []; 
-                    renderDashboard(result.data.stats);
-                    renderTable('companyTableBody', result.data.companies, ['id','name','gst','state']);
-                    renderTable('ledgerTableBody', result.data.ledgers, ['id','name','category','bal'], true);
-                    renderVoucherTable(); 
-                    populateDropdowns();
+                    alert("Error: " + response.message);
                 }
             })
-            .finally(() => document.getElementById('loadingIndicator').classList.add('hidden'));
-        }
-
-        function loadReport() {
-            const ledgerId = document.getElementById('reportLedgerSelect').value;
-            if(!ledgerId) return alert("Select Ledger");
-            const tbody = document.getElementById('reportTableBody');
-            tbody.innerHTML = "<tr><td colspan='6' class='text-center p-4'>Loading...</td></tr>";
-            fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "getReport", ledgerId: ledgerId }) })
-            .then(res => res.json())
-            .then(res => {
-                tbody.innerHTML = "";
-                if(!res.data.length) { tbody.innerHTML = "<tr><td colspan='6' class='text-center p-4'>No Data</td></tr>"; return; }
-                res.data.forEach(r => {
-                    const dr = (r.debit=='-'||r.debit==0)?'-':formatMoney(r.debit);
-                    const cr = (r.credit=='-'||r.credit==0)?'-':formatMoney(r.credit);
-                    tbody.innerHTML += `<tr class="border-b"><td class="p-3">${r.date}</td><td class="p-3 text-blue-600">${r.vNo}</td><td class="p-3">${r.particulars}</td><td class="p-3 text-right text-green-600">${dr}</td><td class="p-3 text-right text-red-600">${cr}</td><td class="p-3 text-right font-bold">${formatMoney(r.balance)}</td></tr>`;
-                });
+            .catch(error => {
+                loader.style.display = 'none';
+                alert("Connection Failed! Check Web App URL.");
+                console.error(error);
             });
         }
 
-        function renderVoucherTable() {
-            const tbody = document.getElementById('voucherTableBody');
-            tbody.innerHTML = "";
-            if(!appData.vouchers.length) { tbody.innerHTML = "<tr><td colspan='6' class='text-center p-4'>No Data</td></tr>"; return; }
+        // 3. CRM Logic
+        function sendWA(type) {
+            const mobile = document.getElementById('wa-mobile').value;
+            if(!mobile) { alert("Enter Mobile Number"); return; }
             
-            appData.vouchers.forEach(v => {
-                let actionHtml = `<button class="btn-icon btn-print" onclick="printVoucher('${v.id}')"><i class="fas fa-print"></i></button>`;
-                
-                if (activeUser.role === 'ADMIN' || activeUser.role === 'ACCOUNTREE') {
-                    actionHtml += `<button class="btn-icon btn-edit" onclick="editVoucher('${v.id}')"><i class="fas fa-edit"></i></button>
-                                   <button class="btn-icon btn-del" onclick="deleteVoucher('${v.id}')"><i class="fas fa-trash"></i></button>`;
-                }
-                if (activeUser.role === 'AS') { actionHtml = `<span class="text-xs text-gray-400">View Only</span>`; }
-
-                tbody.innerHTML += `
-                <tr class="border-b hover:bg-gray-50">
-                    <td class="p-3 flex items-center">${actionHtml}</td>
-                    <td class="p-3 text-gray-500 text-xs">${v.id}</td>
-                    <td class="p-3">${v.date}</td>
-                    <td class="p-3"><span class="px-2 py-1 rounded text-xs bg-gray-100">${v.type}</span></td>
-                    <td class="p-3 text-right font-mono">${formatMoney(v.amount)}</td>
-                    <td class="p-3 text-gray-500 text-sm truncate max-w-xs">${v.narration}</td>
-                </tr>`;
-            });
-        }
-
-        function renderDashboard(stats) {
-            if(!stats) return;
-            document.getElementById('dashIncome').textContent = "₹ " + formatMoney(stats.income);
-            document.getElementById('dashExpense').textContent = "₹ " + formatMoney(stats.expense);
-            document.getElementById('dashBalance').textContent = "₹ " + formatMoney(stats.balance);
-        }
-
-        function renderTable(bodyId, data, keys, money=false) {
-            const tbody = document.getElementById(bodyId);
-            tbody.innerHTML = "";
-            if(!data || !data.length) { tbody.innerHTML = `<tr><td colspan="${keys.length}" class='text-center p-4'>No Data</td></tr>`; return; }
-            data.forEach(r => {
-                let tr = "<tr class='border-b'>";
-                keys.forEach(k => {
-                    let val = r[k]||'-';
-                    if(money && (k==='amount'||k==='bal')) val = `<div class="text-right font-mono">${formatMoney(val)}</div>`;
-                    tr += `<td class="p-3">${val}</td>`;
-                });
-                tbody.innerHTML += tr + "</tr>";
-            });
-        }
-
-        function populateDropdowns() {
-            const opts = appData.ledgers.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
-            ['drSelect','crSelect','reportLedgerSelect'].forEach(id => {
-                if(document.getElementById(id)) document.getElementById(id).innerHTML = '<option value="">Select...</option>' + opts;
-            });
-        }
-
-        function submitData(e, action, payload=null) {
-            if(e.preventDefault) e.preventDefault();
-            
-            let data = {};
-            if(payload) {
-                data = payload;
-                data.action = action;
-            } else {
-                const form = e.target;
-                const btn = form.querySelector('button');
-                btn.textContent = "..."; btn.disabled = true;
-                const fd = new FormData(form);
-                fd.forEach((v, k) => data[k] = v);
-                data.action = action;
+            let msg = "";
+            if(type === 'reminder') {
+                msg = "Hello, This is a gentle reminder regarding your outstanding payment for CMB ERP. Please clear it at the earliest.";
+            } else if (type === 'bank') {
+                msg = "Bank Details for Payment:\nBank: HDFC Bank\nAcc: 1234567890\nIFSC: HDFC000123\nUPI: cmb@upi";
             }
+            
+            window.open(`https://wa.me/${mobile}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
 
-            fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(data) })
-            .then(res => res.json())
-            .then(res => {
-                if(res.status === "SUCCESS") {
-                    if(!payload) { e.target.reset(); closeModal(e.target.closest('.modal-overlay').id); }
-                    alert(res.message); loadAllData();
-                } else if(res.status === "DUPLICATE") {
-                    alert("⚠️ " + res.message);
-                } else { alert("Error: " + res.message); }
-            })
-            .finally(() => { if(!payload) { e.target.querySelector('button').textContent = "Save"; e.target.querySelector('button').disabled = false; }});
+        function generateQR() {
+            const amount = document.getElementById('qr-amount').value;
+            const container = document.getElementById('qrcode-container');
+            const qrDiv = document.getElementById('qrcode');
+            
+            qrDiv.innerHTML = ""; // Clear old
+            container.classList.remove('hidden');
+            
+            if(!amount) { alert("Enter Amount"); return; }
+
+            // UPI String format
+            const upiString = `upi://pay?pa=yoursupi@upi&pn=CMBooks&am=${amount}&tn=Payment`;
+            
+            new QRCode(qrDiv, {
+                text: upiString,
+                width: 150,
+                height: 150,
+                colorDark : "#1F70D3",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
         }
     </script>
 </body>
