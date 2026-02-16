@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CMB ERP | Professional Cloud Accounting</title>
+    <title>CMB ERP | Professional Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -11,189 +11,162 @@
 
     <script>
       tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              brandYellow: '#F6b936', brandBlue: '#1F70D3', brandRed: '#D60000', brandDark: '#1c212e', brandGray: '#f4f5f7'
-            }
-          }
-        }
+        theme: { extend: { colors: { brandYellow: '#F6b936', brandBlue: '#1F70D3', brandDark: '#1c212e' } } }
       }
     </script>
 
     <style>
-        body { font-family: 'Poppins', sans-serif; background-color: #f4f5f7; height: 100vh; display: flex; overflow: hidden; }
+        body { font-family: 'Poppins', sans-serif; background-color: #f4f5f7; display: flex; height: 100vh; overflow: hidden; }
         .sidebar { width: 260px; background: #1c212e; color: #d4d6dc; height: 100vh; overflow-y: auto; flex-shrink: 0; }
-        .nav-item { padding: 10px 20px; cursor: pointer; display: flex; align-items: center; border-left: 3px solid transparent; font-size: 13px; transition: 0.2s; }
+        .nav-item { padding: 12px 20px; cursor: pointer; display: flex; align-items: center; border-left: 3px solid transparent; font-size: 13px; transition: 0.2s; }
         .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.05); color: white; border-left-color: #F6b936; }
         .submenu { display: none; background: rgba(0,0,0,0.3); }
         .submenu.open { display: block; }
-        .main-content { flex: 1; padding: 20px; overflow-y: auto; }
-        .card { background: white; border-radius: 8px; padding: 25px; border: 1px solid #e5e7eb; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-        .form-label { font-size: 11px; font-weight: 700; color: #374151; text-transform: uppercase; margin-bottom: 4px; display: block; }
-        .form-input { width: 100%; border: 1px solid #d1d5db; padding: 8px 12px; border-radius: 4px; font-size: 13px; outline: none; }
-        .form-input:focus { border-color: #1F70D3; box-shadow: 0 0 0 2px rgba(31,112,211,0.1); }
+        .main-content { flex: 1; padding: 25px; overflow-y: auto; }
+        .card { background: white; border-radius: 10px; padding: 25px; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01); }
+        .form-label { font-size: 10px; font-weight: 800; color: #6b7280; text-transform: uppercase; margin-bottom: 4px; display: block; }
+        .form-input { width: 100%; border: 1px solid #d1d5db; padding: 10px; border-radius: 6px; font-size: 13px; outline: none; background: white; }
         .crm-box { margin: 15px; background: linear-gradient(135deg, #1F70D3 0%, #104c94 100%); border-radius: 8px; padding: 15px; color: white; border: 1px solid #F6b936; }
-        .btn-primary { background: #1F70D3; color: white; padding: 10px 24px; border-radius: 4px; font-weight: 600; font-size: 13px; transition: 0.2s; }
-        .btn-primary:hover { background: #16509c; }
-        .stat-card { border-top: 4px solid #F6b936; }
-        .section-header { margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #f4f4f4; color: var(--brandBlue); font-weight: 700; }
+        #login-screen { position: fixed; inset: 0; background: #1c212e; z-index: 100; display: flex; align-items: center; justify-content: center; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
+    <div id="login-screen">
+        <div class="bg-white p-10 rounded-xl shadow-2xl w-full max-w-sm text-center">
+            <i class="fa-solid fa-cube text-5xl text-brandYellow mb-4"></i>
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">CMB ERP SIGN IN</h2>
+            <input type="text" id="u" class="form-input mb-4 p-3" placeholder="Username">
+            <input type="password" id="p" class="form-input mb-6 p-3" placeholder="Password">
+            <button onclick="login()" id="l-btn" class="w-full bg-brandBlue text-white py-3 rounded-lg font-bold">LOGIN</button>
+            <p id="l-err" class="text-red-500 text-xs mt-4"></p>
+        </div>
+    </div>
+
     <aside class="sidebar">
         <div class="p-6 text-xl font-bold text-white border-b border-gray-700 flex items-center gap-3">
-            <i class="fa-solid fa-cube text-brandYellow"></i> CMB ERP
+            <i class="fa-solid fa-book text-brandYellow"></i> CMB ERP
         </div>
-
-        <div class="mt-4 nav-item active" onclick="loadView('view-dash')"><i class="fa-solid fa-gauge-high mr-3"></i> Dash Board</div>
-        <div class="nav-item" onclick="loadView('view-company')"><i class="fa-solid fa-building mr-3"></i> Company</div>
-
+        <div class="mt-4 nav-item active" onclick="show('view-dash')"><i class="fa-solid fa-gauge mr-3"></i> Dashboard</div>
+        <div class="nav-item" onclick="show('view-company')"><i class="fa-solid fa-building mr-3"></i> Company Setup</div>
+        
         <div class="px-5 pt-4 pb-1 text-[10px] font-bold text-gray-500 uppercase">Masters</div>
-        <div class="nav-item" onclick="toggleMenu('sub-create')"><i class="fa-solid fa-plus-circle mr-3"></i> Create <i class="fa-solid fa-chevron-down ml-auto text-[10px]"></i></div>
-        <div class="submenu" id="sub-create">
-            <a class="nav-item" onclick="loadView('view-ledger')">Ledger</a>
-            <a class="nav-item" onclick="loadView('view-stock')">Stock Items</a>
-            <a class="nav-item">Cost Centre/Project</a>
+        <div class="nav-item" onclick="toggleMenu('sub-m')"><i class="fa-solid fa-plus-circle mr-3"></i> Create Master</div>
+        <div class="submenu" id="sub-m">
+            <a class="nav-item" onclick="show('view-ledger')">Ledgers</a>
+            <a class="nav-item" onclick="show('view-stock')">Stock Items</a>
         </div>
 
-        <div class="px-5 pt-4 pb-1 text-[10px] font-bold text-gray-500 uppercase">Transactions</div>
-        <div class="nav-item" onclick="toggleMenu('sub-acc')"><i class="fa-solid fa-receipt mr-3"></i> Accounts Entry <i class="fa-solid fa-chevron-down ml-auto text-[10px]"></i></div>
-        <div class="submenu" id="sub-acc">
-            <a class="nav-item" onclick="loadView('view-trans', 'Payment')">Payment</a>
-            <a class="nav-item" onclick="loadView('view-trans', 'Receipt')">Receipt</a>
-            <a class="nav-item" onclick="loadView('view-trans', 'Sales')">Sales</a>
-            <a class="nav-item" onclick="loadView('view-trans', 'Purchase')">Purchase</a>
+        <div class="px-5 pt-4 pb-1 text-[10px] font-bold text-gray-500 uppercase">Entries</div>
+        <div class="nav-item" onclick="toggleMenu('sub-v')"><i class="fa-solid fa-file-invoice mr-3"></i> Accounts Entry</div>
+        <div class="submenu" id="sub-v">
+            <a class="nav-item" onclick="show('view-trans', 'Payment')">Payment</a>
+            <a class="nav-item" onclick="show('view-trans', 'Receipt')">Receipt</a>
+            <a class="nav-item" onclick="show('view-trans', 'Sales')">Sales Invoice</a>
         </div>
 
         <div class="crm-box">
-            <div class="font-bold text-[11px] mb-2 flex items-center gap-2 text-brandYellow"><i class="fa-solid fa-bolt"></i> SMART CRM</div>
-            <div class="cursor-pointer text-xs mb-2 hover:underline" onclick="loadView('view-crm')"><i class="fa-brands fa-whatsapp mr-2"></i> WhatsApp Reminder</div>
-            <div class="cursor-pointer text-xs hover:underline" onclick="loadView('view-crm')"><i class="fa-solid fa-qrcode mr-2"></i> CMB QR Generator</div>
+            <div class="font-bold text-[11px] mb-2 text-brandYellow">SMART CRM</div>
+            <div class="cursor-pointer text-xs mb-2 hover:underline" onclick="show('view-crm')"><i class="fa-brands fa-whatsapp mr-2"></i> WhatsApp Tools</div>
+            <div class="cursor-pointer text-xs hover:underline" onclick="show('view-crm')"><i class="fa-solid fa-qrcode mr-2"></i> QR Generator</div>
         </div>
 
         <div class="mt-auto nav-item text-brandYellow border-t border-gray-700" onclick="location.reload()"><i class="fa-solid fa-power-off mr-3"></i> Logout</div>
     </aside>
 
     <main class="main-content">
-        <header class="flex justify-between items-center mb-6 bg-white p-4 rounded-lg border border-gray-200">
-            <h2 id="page-title" class="text-lg font-bold text-gray-700 uppercase">Dashboard</h2>
-            <div class="flex items-center gap-4">
-                <button onclick="refreshData()" class="text-brandBlue text-xs font-bold px-3 py-1 border border-brandBlue rounded hover:bg-brandBlue hover:text-white"><i class="fa-solid fa-sync mr-1"></i> Sync Data</button>
-                <div class="w-8 h-8 bg-brandBlue rounded-full flex items-center justify-center text-white font-bold text-xs">A</div>
-            </div>
+        <header class="flex justify-between items-center mb-8 bg-white p-4 rounded-lg border border-gray-200">
+            <h2 id="p-title" class="text-xl font-bold text-gray-700 uppercase">DASHBOARD</h2>
+            <button onclick="sync()" class="bg-brandBlue text-white text-xs font-bold px-4 py-2 rounded">SYNC DATA</button>
         </header>
 
         <div id="view-dash" class="view-section">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <div class="card stat-card">
-                    <h3 class="form-label">Total Income</h3>
-                    <div class="text-2xl font-bold text-green-600" id="dash-income">₹ 0.00</div>
-                </div>
-                <div class="card stat-card" style="border-top-color: #D60000;">
-                    <h3 class="form-label">Total Expenses</h3>
-                    <div class="text-2xl font-bold text-brandRed" id="dash-expense">₹ 0.00</div>
-                </div>
-                <div class="card stat-card" style="border-top-color: #1F70D3;">
-                    <h3 class="form-label">Net Balance</h3>
-                    <div class="text-2xl font-bold text-brandBlue" id="dash-balance">₹ 0.00</div>
-                </div>
-                <div class="card stat-card" style="border-top-color: #6b7280;">
-                    <h3 class="form-label">Cash In Hand</h3>
-                    <div class="text-2xl font-bold text-gray-700">₹ 0.00</div>
-                </div>
-            </div>
-            <div class="card">
-                <h3 class="font-bold text-gray-700 mb-4">Recent Transactions</h3>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs">
-                        <thead class="bg-gray-50 text-gray-500 uppercase">
-                            <tr><th class="p-3">Date</th><th class="p-3">Voucher</th><th class="p-3">Ledger</th><th class="p-3 text-right">Amount</th></tr>
-                        </thead>
-                        <tbody id="recent-trans-body">
-                            <tr><td colspan="4" class="p-4 text-center text-gray-400 italic">No recent entries. Click 'Sync' to load.</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 text-center">
+                <div class="card border-t-4 border-green-500"><label class="form-label">Income</label><div class="text-2xl font-bold text-green-600" id="d-inc">₹ 0</div></div>
+                <div class="card border-t-4 border-red-500"><label class="form-label">Expense</label><div class="text-2xl font-bold text-red-600" id="d-exp">₹ 0</div></div>
+                <div class="card border-t-4 border-brandBlue"><label class="form-label">Net Balance</label><div class="text-2xl font-bold text-brandBlue" id="d-bal">₹ 0</div></div>
             </div>
         </div>
 
         <div id="view-company" class="view-section hidden">
             <div class="card max-w-5xl mx-auto">
-                <h3 class="section-header">Company Creation / Alteration</h3>
-                <form id="form-company" onsubmit="submitForm(event, 'COMPANY', 'form-company')">
+                <h3 class="text-brandBlue font-bold mb-6 border-b pb-2 text-lg">Full Company Information</h3>
+                <form id="f-comp" onsubmit="handle(event, 'COMPANY', 'f-comp')">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                         <div class="space-y-4">
                             <div><label class="form-label">Company Name</label><input name="Company Name" class="form-input" required></div>
-                            <div><label class="form-label">Mailing Name</label><input name="Mailing Name" class="form-input"></div>
                             <div><label class="form-label">Address Line 1</label><input name="Address Line 1" class="form-input"></div>
                             <div><label class="form-label">Address Line 2</label><input name="Address Line 2" class="form-input"></div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div><label class="form-label">State</label><input name="State" class="form-input" placeholder="e.g. Kerala"></div>
-                                <div><label class="form-label">Pincode</label><input name="Pincode" class="form-input"></div>
-                            </div>
-                            <div><label class="form-label">Country</label><input name="Country" class="form-input" value="India"></div>
-                        </div>
-
-                        <div class="space-y-4">
-                            <div class="grid grid-cols-2 gap-2">
-                                <div><label class="form-label">Telephone</label><input name="Telephone" class="form-input"></div>
-                                <div><label class="form-label">Mobile</label><input name="Mobile" class="form-input" required></div>
-                            </div>
-                            <div><label class="form-label">Fax</label><input name="Fax" class="form-input"></div>
+                            <div><label class="form-label">State</label><select name="State" class="form-input sel-state"></select></div>
+                            <div><label class="form-label">GSTIN</label><input name="GSTIN" class="form-input"></div>
                             <div><label class="form-label">Email</label><input name="Email" type="email" class="form-input"></div>
+                        </div>
+                        <div class="space-y-4">
+                            <div><label class="form-label">Telephone</label><input name="Telephone" class="form-input"></div>
+                            <div><label class="form-label">Mobile</label><input name="Mobile" class="form-input" required></div>
                             <div><label class="form-label">Website</label><input name="Website" class="form-input"></div>
-                            <div><label class="form-label">GSTIN</label><input name="GSTIN" class="form-input" placeholder="32AAAAA0000A1Z5"></div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div><label class="form-label">FY Beginning</label><input type="date" name="Financial Year Beginning From" class="form-input" value="2025-04-01"></div>
-                                <div><label class="form-label">Books Beginning</label><input type="date" name="Books Beginning From" class="form-input" value="2025-04-01"></div>
-                            </div>
+                            <div><label class="form-label">FY Beginning</label><input type="date" name="Financial Year Beginning From" class="form-input" value="2025-04-01"></div>
+                            <div><label class="form-label">Currency Symbol</label><input name="Base Currency Symbol" class="form-input" value="₹"></div>
+                            <div><label class="form-label">Formal Name</label><input name="Formal Name" class="form-input" value="INR"></div>
                         </div>
                     </div>
+                    <button type="submit" class="mt-8 bg-brandBlue text-white px-10 py-2 rounded font-bold">SAVE PROFILE</button>
+                </form>
+            </div>
+        </div>
 
-                    <div class="mt-8 pt-4 border-t flex items-center justify-between">
-                        <div class="flex gap-4">
-                            <div><label class="form-label">Currency Symbol</label><input name="Base Currency Symbol" class="form-input w-16" value="₹"></div>
-                            <div><label class="form-label">Formal Name</label><input name="Formal Name" class="form-input w-24" value="INR"></div>
-                        </div>
-                        <button type="submit" class="btn-primary">Save Company Profile</button>
+        <div id="view-ledger" class="view-section hidden">
+            <div class="card max-w-xl mx-auto"><h3 class="text-brandBlue font-bold mb-4 border-b pb-2">Create Ledger</h3>
+                <form id="f-ledg" onsubmit="handle(event, 'LEDGER', 'f-ledg')">
+                    <label class="form-label">Ledger Name</label><input name="Ledger Name" class="form-input mb-4" required>
+                    <label class="form-label">Under Group</label><select name="Under" class="form-input mb-6 sel-group"></select>
+                    <button type="submit" class="w-full bg-brandBlue text-white py-2 rounded font-bold">SAVE</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="view-stock" class="view-section hidden">
+            <div class="card max-w-2xl mx-auto"><h3 class="text-brandBlue font-bold mb-4 border-b pb-2">Stock Master</h3>
+                <form id="f-stok" onsubmit="handle(event, 'STOCK', 'f-stok')">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="form-label">Name</label><input name="Name" class="form-input" required></div>
+                        <div><label class="form-label">Units (UQC)</label><select name="Units" class="form-input sel-uqc"></select></div>
+                        <div><label class="form-label">HSN/SAC</label><input name="HSN" class="form-input"></div>
+                        <div><label class="form-label">GST Rate %</label><input name="GST Rate" type="number" class="form-input"></div>
                     </div>
+                    <button type="submit" class="mt-4 bg-brandBlue text-white px-8 py-2 rounded font-bold">SAVE ITEM</button>
                 </form>
             </div>
         </div>
 
         <div id="view-trans" class="view-section hidden">
-            <div class="card max-w-3xl mx-auto">
-                <h3 class="section-header" id="trans-title">Accounting Entry</h3>
-                <form onsubmit="submitForm(event, 'TRANSACTION', 'form-trans')" id="form-trans">
-                    <input type="hidden" name="Voucher Type" id="v-type">
+            <div class="card max-w-2xl mx-auto"><h3 class="text-brandBlue font-bold mb-6 border-b pb-2" id="t-t">Entry</h3>
+                <form id="f-trans" onsubmit="handle(event, 'TRANSACTION', 'f-trans')">
+                    <input type="hidden" name="Voucher Type" id="v-t">
                     <div class="grid grid-cols-2 gap-4 mb-4">
                         <div><label class="form-label">Date</label><input type="date" name="Date" class="form-input" value="2025-02-16"></div>
-                        <div><label class="form-label">Ledger Name</label><input name="Ledger Name" class="form-input" required placeholder="Search Ledger..."></div>
+                        <div><label class="form-label">Ledger Name</label><input name="Ledger Name" class="form-input" required></div>
                     </div>
-                    <div class="mb-4"><label class="form-label">Total Amount (₹)</label><input type="number" name="Amount" class="form-input text-right font-bold text-lg" required></div>
-                    <div class="mb-4"><label class="form-label">Narration</label><input name="Narration" class="form-input" placeholder="Remarks"></div>
-                    <button type="submit" class="btn-primary w-full">Post Transaction</button>
+                    <label class="form-label">Amount (₹)</label><input type="number" name="Amount" class="form-input mb-4 text-right font-bold text-lg" required>
+                    <label class="form-label">Narration</label><input name="Narration" class="form-input mb-6">
+                    <button type="submit" class="w-full bg-brandBlue text-white py-3 rounded font-bold">SAVE VOUCHER</button>
                 </form>
             </div>
         </div>
 
         <div id="view-crm" class="view-section hidden">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-                <div class="card">
-                    <h3 class="text-green-600 font-bold mb-4 flex items-center gap-2"><i class="fa-brands fa-whatsapp"></i> CRM Tools</h3>
-                    <label class="form-label">Customer Mobile</label>
-                    <input type="number" id="wa-num" class="form-input mb-4" placeholder="919800000000">
+                <div class="card"><h3 class="text-green-600 font-bold mb-4"><i class="fa-brands fa-whatsapp"></i> WhatsApp</h3>
+                    <input type="number" id="wa-n" class="form-input mb-4" placeholder="91...">
                     <div class="flex gap-2">
-                        <button onclick="sendWA('reminder')" class="bg-brandYellow text-black px-4 py-2 rounded text-xs font-bold flex-1">Payment Reminder</button>
-                        <button onclick="sendWA('bank')" class="bg-brandBlue text-white px-4 py-2 rounded text-xs font-bold flex-1">Bank Details</button>
+                        <button onclick="wa('rem')" class="bg-brandYellow p-2 rounded text-xs font-bold flex-1">Reminder</button>
+                        <button onclick="wa('bank')" class="bg-brandBlue text-white p-2 rounded text-xs font-bold flex-1">Bank Details</button>
                     </div>
                 </div>
-                <div class="card text-center">
-                    <h3 class="text-brandBlue font-bold mb-4">Payment QR Generator</h3>
-                    <input type="number" id="qr-amt" class="form-input mb-4 text-center" placeholder="Amount (₹)">
-                    <button onclick="generateQR()" class="bg-gray-800 text-white w-full py-2 rounded text-sm font-bold">Generate QR</button>
+                <div class="card text-center"><h3 class="text-brandBlue font-bold mb-4">CMB QR Generator</h3>
+                    <input type="number" id="qr-a" class="form-input mb-4 text-center" placeholder="Amount">
+                    <button onclick="genQR()" class="bg-gray-800 text-white w-full py-2 rounded font-bold">GENERATE</button>
                     <div id="qrcode" class="flex justify-center mt-4"></div>
                 </div>
             </div>
@@ -201,85 +174,45 @@
     </main>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbytdWNPhkrGxVHCcZhqW0js45B0uQ44aE5OZaXf9RGZP4Y23F-kULrq0BCRn-fxVYM-/exec";
+        const API = "https://script.google.com/macros/s/AKfycbz5KZF1m9ZiKkLt3BtNj1mtupyWyaDkVUkeZIK0UqvT_qwHatu-cxyEv-M2kAcHwAvw/exec";
 
-        function toggleMenu(id) { document.getElementById(id).classList.toggle('open'); }
-
-        function loadView(id, type = null) {
-            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
-            document.getElementById(id).classList.remove('hidden');
-            if(type) {
-                document.getElementById('trans-title').innerText = type + ' Entry';
-                document.getElementById('v-type').value = type;
-            }
-        }
-
-        function submitForm(e, sheet, formId) {
-            e.preventDefault();
-            const btn = e.target.querySelector('button');
-            const originalBtnText = btn.innerText;
-            btn.innerText = "Processing..."; btn.disabled = true;
-
-            const formData = new FormData(document.getElementById(formId));
-            const params = new URLSearchParams();
-            params.append("action", "save_data");
-            params.append("sheet_name", sheet);
-            for(const pair of formData) params.append(pair[0], pair[1]);
-
-            fetch(API_URL, { method: "POST", body: params })
-            .then(res => res.json()).then(data => {
-                alert(data.message); 
-                document.getElementById(formId).reset(); 
-                refreshData(); 
-            }).catch(() => alert("Error Connecting Database"))
-            .finally(() => { btn.innerText = originalBtnText; btn.disabled = false; });
-        }
-
-        function refreshData() {
-            // Fetch TRANSACTION data to update Dashboard
-            const params = new URLSearchParams({ action: "get_data", sheet_name: "TRANSACTION" });
-            fetch(API_URL + "?" + params.toString())
-            .then(res => res.json()).then(resp => {
-                if(resp.result === "success") {
-                    let income = 0, expense = 0;
-                    const tbody = document.getElementById('recent-trans-body');
-                    tbody.innerHTML = "";
-                    
-                    // Simple calculation: Receipt/Sales = Income, Payment/Purchase = Expense
-                    resp.data.slice(-10).reverse().forEach(row => {
-                        const amt = parseFloat(row.Amount || 0);
-                        const type = row['Voucher Type'];
-                        if(type === 'Receipt' || type === 'Sales') income += amt;
-                        if(type === 'Payment' || type === 'Purchase') expense += amt;
-                        
-                        tbody.innerHTML += `<tr><td class="p-3 border-b">${row.Date || ''}</td><td class="p-3 border-b">${type || ''}</td><td class="p-3 border-b">${row['Ledger Name'] || ''}</td><td class="p-3 border-b text-right font-bold">₹${amt.toLocaleString()}</td></tr>`;
-                    });
-                    
-                    document.getElementById('dash-income').innerText = "₹ " + income.toLocaleString();
-                    document.getElementById('dash-expense').innerText = "₹ " + expense.toLocaleString();
-                    document.getElementById('dash-balance').innerText = "₹ " + (income - expense).toLocaleString();
-                }
+        function login() {
+            const user = document.getElementById('u').value, pass = document.getElementById('p').value, btn = document.getElementById('l-btn');
+            btn.innerText = "Verifying..."; btn.disabled = true;
+            fetch(`${API}?action=login&username=${user}&password=${pass}`).then(r => r.json()).then(d => {
+                if(d.result === "success") { document.getElementById('login-screen').classList.add('hidden'); sync(); }
+                else { document.getElementById('l-err').innerText = d.message; btn.innerText = "LOGIN"; btn.disabled = false; }
             });
         }
 
-        function sendWA(type) {
-            const num = document.getElementById('wa-num').value;
-            if(!num) return alert("Enter Mobile Number");
-            let msg = type === 'reminder' ? "Gentle Reminder for Payment. - CM Books" : "Bank Details: HDFC A/c 123456789 IFSC HDFC000123";
-            window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`, '_blank');
+        function sync() {
+            fetch(API + "?action=get_dropdowns").then(r => r.json()).then(d => {
+                fill('.sel-state', d.states); fill('.sel-group', d.groups); fill('.sel-uqc', d.uqc);
+            });
+            fetch(API + "?action=get_dashboard").then(r => r.json()).then(d => {
+                document.getElementById('d-inc').innerText = "₹ " + d.income.toLocaleString();
+                document.getElementById('d-exp').innerText = "₹ " + d.expense.toLocaleString();
+                document.getElementById('d-bal').innerText = "₹ " + d.balance.toLocaleString();
+            });
         }
 
-        function generateQR() {
-            const amt = document.getElementById('qr-amt').value;
-            const qrBox = document.getElementById('qrcode');
-            qrBox.innerHTML = "";
-            if(!amt) return alert("Enter Amount");
-            new QRCode(qrBox, { text: `upi://pay?pa=cmb@upi&am=${amt}&tn=Payment`, width: 140, height: 140 });
+        function fill(s, a) { document.querySelectorAll(s).forEach(el => el.innerHTML = a.map(i => `<option value="${i}">${i}</option>`).join('')); }
+        function toggleMenu(id) { document.getElementById(id).classList.toggle('open'); }
+        function show(id, t = null) {
+            document.querySelectorAll('.view-section').forEach(v => v.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+            if(t) { document.getElementById('t-t').innerText = t + " Voucher"; document.getElementById('v-t').value = t; }
         }
-
-        // Initialize Dashboard on load
-        loadView('view-dash');
-        refreshData();
+        function handle(e, s, fId) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button'); btn.innerText = "Saving..."; btn.disabled = true;
+            const p = new URLSearchParams(new FormData(document.getElementById(fId)));
+            p.append("action", "save_data"); p.append("sheet_name", s);
+            fetch(API, { method: "POST", body: p }).then(r => r.json()).then(d => { alert(d.message); document.getElementById(fId).reset(); sync(); })
+            .finally(() => { btn.innerText = "SUBMIT"; btn.disabled = false; });
+        }
+        function wa(t) { window.open(`https://wa.me/${document.getElementById('wa-n').value}?text=${encodeURIComponent(t === 'rem' ? "Reminder" : "Bank Details")}`); }
+        function genQR() { const a = document.getElementById('qr-a').value; document.getElementById('qrcode').innerHTML = ""; if(a) new QRCode(document.getElementById('qrcode'), { text: `upi://pay?pa=id@upi&am=${a}`, width: 140, height: 140 }); }
     </script>
 </body>
 </html>
