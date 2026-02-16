@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CMB ERP | Dashboard</title>
+    <title>CMB ERP | Cloud Accounting & CRM</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -28,22 +28,19 @@
     <style>
         body { font-family: 'Poppins', sans-serif; background-color: #f4f5f7; }
         .sidebar { width: 260px; background: #1c212e; color: #d4d6dc; height: 100vh; position: fixed; overflow-y: auto; z-index: 40; }
-        .main-content { margin-left: 260px; padding: 25px; min-height: 100vh; display: flex; flex-direction: column; }
-        .nav-item { padding: 12px 20px; cursor: pointer; display: flex; align-items: center; border-left: 3px solid transparent; font-size: 13px; transition: 0.2s; }
+        .main-content { margin-left: 260px; padding: 20px; min-height: 100vh; }
+        .nav-item { padding: 10px 20px; cursor: pointer; display: flex; align-items: center; border-left: 3px solid transparent; font-size: 13px; transition: 0.2s; }
         .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.05); color: white; border-left-color: #F6b936; }
         .nav-item i { width: 25px; }
-        .submenu { display: none; background: rgba(0,0,0,0.3); padding-left: 10px; }
+        .submenu { display: none; background: rgba(0,0,0,0.3); }
         .submenu.open { display: block; }
         .card { background: white; border-radius: 10px; padding: 25px; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01); }
-        .form-input { width: 100%; border: 1px solid #d1d5db; padding: 10px; border-radius: 6px; font-size: 13px; margin-top: 5px; outline: none; }
+        .form-input { width: 100%; border: 1px solid #d1d5db; padding: 8px; border-radius: 6px; font-size: 13px; margin-top: 4px; outline: none; }
         .form-label { font-size: 11px; font-weight: 700; color: #374151; text-transform: uppercase; }
-        
-        /* CRM Highlight Section */
         .crm-box { margin: 15px; background: linear-gradient(135deg, #1F70D3 0%, #104c94 100%); border-radius: 8px; padding: 15px; color: white; border: 1px solid #F6b936; }
         .crm-link { display: flex; align-items: center; gap: 10px; padding: 8px; font-size: 12px; cursor: pointer; transition: 0.2s; border-radius: 4px; }
         .crm-link:hover { background: rgba(255,255,255,0.1); }
-        
-        .btn-primary { background: #1F70D3; color: white; padding: 10px 25px; border-radius: 6px; font-weight: 500; font-size: 14px; }
+        .btn-primary { background: #1F70D3; color: white; padding: 8px 20px; border-radius: 6px; font-weight: 500; font-size: 13px; }
         .hidden { display: none; }
     </style>
 </head>
@@ -51,110 +48,142 @@
 
     <aside class="sidebar">
         <div class="p-6 text-xl font-bold text-white border-b border-gray-700 flex items-center gap-3">
-            <i class="fa-solid fa-book-open text-brandYellow"></i> CMB ERP
+            <i class="fa-solid fa-cube text-brandYellow"></i> CMB ERP
         </div>
 
         <div class="mt-4 nav-item active" onclick="loadView('view-company')"><i class="fa-solid fa-building"></i> Company Profile</div>
 
-        <div class="px-5 pt-4 pb-2 text-[10px] font-bold text-gray-500 uppercase">Accounting</div>
-        <div class="nav-item" onclick="toggleMenu('sub-create')"><i class="fa-solid fa-circle-plus"></i> Create Master <i class="fa-solid fa-chevron-down ml-auto text-[10px]"></i></div>
+        <div class="px-5 pt-4 pb-1 text-[10px] font-bold text-gray-500 uppercase">Masters</div>
+        <div class="nav-item" onclick="toggleMenu('sub-create')"><i class="fa-solid fa-plus-circle"></i> Create <i class="fa-solid fa-chevron-down ml-auto text-[10px]"></i></div>
         <div class="submenu" id="sub-create">
             <a class="nav-item" onclick="loadView('view-ledger')">Ledgers</a>
-            <a class="nav-item">Project Names</a>
-            <a class="nav-item">Project Stages</a>
+            <a class="nav-item" onclick="loadView('view-stock')">Stock Items</a>
+            <a class="nav-item" onclick="loadView('view-project')">Project Name</a>
+            <a class="nav-item" onclick="loadView('view-project-stage')">Project Stage</a>
         </div>
 
-        <div class="nav-item" onclick="toggleMenu('sub-accounts')"><i class="fa-solid fa-calculator"></i> Accounts Entry <i class="fa-solid fa-chevron-down ml-auto text-[10px]"></i></div>
+        <div class="px-5 pt-4 pb-1 text-[10px] font-bold text-gray-500 uppercase">Vouchers</div>
+        <div class="nav-item" onclick="toggleMenu('sub-accounts')"><i class="fa-solid fa-file-invoice-dollar"></i> Accounts Entry <i class="fa-solid fa-chevron-down ml-auto text-[10px]"></i></div>
         <div class="submenu" id="sub-accounts">
             <a class="nav-item" onclick="loadView('view-transaction', 'Payment')">Payment</a>
             <a class="nav-item" onclick="loadView('view-transaction', 'Receipt')">Receipt</a>
-            <a class="nav-item" onclick="loadView('view-transaction', 'Sales')">Sales / Invoice</a>
-            <a class="nav-item">Journal</a>
-            <a class="nav-item">Cash/Bank Book</a>
+            <a class="nav-item" onclick="loadView('view-transaction', 'Sales')">Sales Invoice</a>
+            <a class="nav-item" onclick="loadView('view-transaction', 'Cash Book')">Cash Book</a>
+            <a class="nav-item" onclick="loadView('view-transaction', 'Bank Book')">Bank Book</a>
+            <a class="nav-item" onclick="loadView('view-transaction', 'Journal')">Journal</a>
+            <a class="nav-item" onclick="loadView('view-transaction', 'Credit Note')">Sales Return</a>
+            <a class="nav-item" onclick="loadView('view-transaction', 'Debit Note')">Purchase Return</a>
+            <a class="nav-item" onclick="loadView('view-transaction', 'Estimate')">Estimates</a>
+            <a class="nav-item" onclick="loadView('view-transaction', 'Check Move')">Check Movement</a>
         </div>
 
-        <div class="px-5 pt-4 pb-2 text-[10px] font-bold text-gray-500 uppercase">Intelligence</div>
-        <div class="nav-item" onclick="toggleMenu('sub-reports')"><i class="fa-solid fa-chart-line"></i> Reports <i class="fa-solid fa-chevron-down ml-auto text-[10px]"></i></div>
+        <div class="px-5 pt-4 pb-1 text-[10px] font-bold text-gray-500 uppercase">Intelligence</div>
+        <div class="nav-item" onclick="toggleMenu('sub-reports')"><i class="fa-solid fa-chart-pie"></i> Reports <i class="fa-solid fa-chevron-down ml-auto text-[10px]"></i></div>
         <div class="submenu" id="sub-reports">
+            <a class="nav-item">Ledgerwise</a>
             <a class="nav-item">P&L / Balance Sheet</a>
-            <a class="nav-item">GST (R1/3B/9)</a>
-            <a class="nav-item">HSN-wise Report</a>
+            <a class="nav-item">Projectwise Report</a>
+            <div class="nav-item" onclick="toggleMenu('sub-gst')">GST Reports <i class="fa-solid fa-chevron-down ml-auto text-[8px]"></i></div>
+            <div class="submenu" id="sub-gst">
+                <a class="nav-item">GSTR 1</a><a class="nav-item">GSTR 3B</a><a class="nav-item">HSN Report</a>
+            </div>
         </div>
 
         <div class="crm-box">
-            <div class="font-bold text-[11px] mb-3 flex items-center gap-2"><i class="fa-solid fa-bolt text-brandYellow"></i> SMART CRM / QR</div>
+            <div class="font-bold text-[11px] mb-3 flex items-center gap-2"><i class="fa-solid fa-bolt text-brandYellow"></i> SMART CRM</div>
             <div class="crm-link" onclick="loadView('view-crm')"><i class="fa-brands fa-whatsapp"></i> Send Reminders</div>
             <div class="crm-link" onclick="loadView('view-crm')"><i class="fa-solid fa-building-columns"></i> Bank Details</div>
-            <div class="crm-link" onclick="loadView('view-crm')"><i class="fa-solid fa-qrcode"></i> Generate QR</div>
+            <div class="crm-link" onclick="loadView('view-crm')"><i class="fa-solid fa-qrcode"></i> CMB QR</div>
         </div>
 
-        <div class="nav-item mt-auto border-t border-gray-700" onclick="loadView('view-users')"><i class="fa-solid fa-users-gear"></i> User Settings</div>
+        <div class="nav-item mt-auto border-t border-gray-700" onclick="loadView('view-users')"><i class="fa-solid fa-users-gear"></i> User Management</div>
         <div class="nav-item text-brandYellow" onclick="location.reload()"><i class="fa-solid fa-power-off"></i> Logout</div>
     </aside>
 
     <main class="main-content">
-        <header class="flex justify-between items-center mb-8 bg-white p-4 rounded-lg border border-gray-200">
-            <h2 id="page-title" class="text-xl font-bold text-gray-700">Company Creation</h2>
-            <div class="flex items-center gap-4">
-                <span class="text-sm font-medium text-gray-500">FY: 2025-26</span>
-                <div class="w-10 h-10 bg-brandBlue rounded-full flex items-center justify-center text-white font-bold">A</div>
+        <header class="flex justify-between items-center mb-6 bg-white p-4 rounded-lg border border-gray-200">
+            <h2 id="page-title" class="text-lg font-bold text-gray-700 uppercase tracking-tight">Company Profile</h2>
+            <div class="flex items-center gap-4 text-xs font-medium text-gray-500">
+                FY: 2025-26 | Admin <div class="w-8 h-8 bg-brandBlue rounded-full flex items-center justify-center text-white font-bold">A</div>
             </div>
         </header>
 
         <div id="view-company" class="view-section">
             <div class="card max-w-5xl mx-auto">
-                <h3 class="text-lg font-bold text-brandBlue mb-6 border-b pb-2">Full Company Information</h3>
                 <form onsubmit="submitForm(event, 'COMPANY', 'form-company')" id="form-company">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                        <div><label class="form-label">Company Name</label><input name="Company Name" class="form-input" required placeholder="Legal Name"></div>
-                        <div><label class="form-label">Mailing Name</label><input name="Mailing Name" class="form-input" placeholder="Display Name"></div>
-                        <div><label class="form-label">GSTIN</label><input name="GSTIN" class="form-input" placeholder="e.g. 32AAAAA0000A1Z5"></div>
-                        <div><label class="form-label">State</label>
-                            <select name="State" class="form-input bg-white"><option>Kerala</option><option>Tamil Nadu</option><option>Karnataka</option></select>
-                        </div>
-                        <div><label class="form-label">Financial Year (FY)</label>
-                            <select name="Financial Year Beginning From" class="form-input bg-white"><option>2025-04-01</option><option>2026-04-01</option></select>
-                        </div>
-                        <div><label class="form-label">Mobile / Contact</label><input name="Mobile" class="form-input" placeholder="91..."></div>
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div><label class="form-label">Company Name</label><input name="Company Name" class="form-input" required></div>
+                        <div><label class="form-label">GSTIN</label><input name="GSTIN" class="form-input"></div>
                     </div>
-                    <div class="mb-6"><label class="form-label">Full Address</label><textarea name="Address Line 1" rows="3" class="form-input" placeholder="Enter Full Office Address"></textarea></div>
-                    <button type="submit" class="btn-primary">Create Company Profile</button>
+                    <div class="grid grid-cols-3 gap-4 mb-4">
+                        <div><label class="form-label">State</label><input name="State" class="form-input" value="Kerala"></div>
+                        <div><label class="form-label">Financial Year</label><input name="FY" class="form-input" value="2025-26"></div>
+                        <div><label class="form-label">Contact No</label><input name="Mobile" class="form-input"></div>
+                    </div>
+                    <button type="submit" class="btn-primary">Save Company Info</button>
                 </form>
             </div>
         </div>
 
-        <div id="view-crm" class="view-section hidden">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-                <div class="card">
-                    <h3 class="text-green-600 font-bold mb-4 flex items-center gap-2"><i class="fa-brands fa-whatsapp"></i> CRM Tools</h3>
-                    <label class="form-label">Customer Mobile</label>
-                    <input type="number" id="wa-num" class="form-input mb-4" placeholder="919800000000">
-                    <div class="flex gap-2">
-                        <button onclick="sendWA('reminder')" class="bg-brandYellow text-black px-4 py-2 rounded text-xs font-bold flex-1">Payment Reminder</button>
-                        <button onclick="sendWA('bank')" class="bg-brandBlue text-white px-4 py-2 rounded text-xs font-bold flex-1">Bank Details</button>
+        <div id="view-stock" class="view-section hidden">
+            <div class="card max-w-4xl mx-auto">
+                <h3 class="text-brandBlue font-bold mb-4 border-b pb-2">Inventory - Create Stock Item</h3>
+                <form onsubmit="submitForm(event, 'STOCK', 'form-stock')" id="form-stock">
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div><label class="form-label">Item Name</label><input name="Name" class="form-input" required></div>
+                        <div><label class="form-label">Under Group</label><input name="Under" class="form-input" placeholder="Primary"></div>
+                        <div><label class="form-label">Units (UQC)</label><input name="Units" class="form-input" placeholder="NOS/KGS"></div>
+                        <div><label class="form-label">HSN/SAC</label><input name="HSN/SAC Details" class="form-input"></div>
+                        <div><label class="form-label">GST Rate (%)</label><input name="GST Rate" type="number" class="form-input"></div>
+                        <div><label class="form-label">Opening Qty</label><input name="Opening Balance" type="number" class="form-input"></div>
                     </div>
-                </div>
-                <div class="card text-center">
-                    <h3 class="text-brandBlue font-bold mb-4">Payment QR Generator</h3>
-                    <input type="number" id="qr-amt" class="form-input mb-4 text-center" placeholder="Amount (₹)">
-                    <button onclick="generateQR()" class="bg-gray-800 text-white w-full py-2 rounded text-sm font-bold">Generate QR</button>
-                    <div id="qrcode" class="flex justify-center mt-4"></div>
-                </div>
+                    <button type="submit" class="btn-primary">Add to Inventory</button>
+                </form>
             </div>
         </div>
 
         <div id="view-transaction" class="view-section hidden">
             <div class="card max-w-3xl mx-auto">
-                <h3 class="text-lg font-bold text-brandBlue mb-6 border-b pb-2" id="trans-title">Accounting Entry</h3>
+                <h3 class="text-brandBlue font-bold mb-4 border-b pb-2" id="trans-title">Entry</h3>
                 <form onsubmit="submitForm(event, 'TRANSACTION', 'form-trans')" id="form-trans">
                     <input type="hidden" name="Voucher Type" id="v-type">
                     <div class="grid grid-cols-2 gap-4 mb-4">
                         <div><label class="form-label">Date</label><input type="date" name="Date" class="form-input"></div>
-                        <div><label class="form-label">Ledger Name</label><input name="Ledger Name" class="form-input" placeholder="Search Ledger..."></div>
+                        <div><label class="form-label">Ledger Account</label><input name="Ledger Name" class="form-input" required></div>
                     </div>
-                    <div class="mb-4"><label class="form-label">Total Amount</label><input type="number" name="Amount" class="form-input text-right font-bold text-lg" required></div>
-                    <div class="mb-4"><label class="form-label">Narration</label><input name="Narration" class="form-input" placeholder="Enter remarks"></div>
-                    <button type="submit" class="btn-primary">Post Entry</button>
+                    <div class="mb-4"><label class="form-label">Amount (₹)</label><input type="number" name="Amount" class="form-input text-right font-bold text-lg"></div>
+                    <div class="mb-4"><label class="form-label">Narration</label><input name="Narration" class="form-input"></div>
+                    <button type="submit" class="btn-primary">Post Voucher</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="view-crm" class="view-section hidden">
+            <div class="grid grid-cols-2 gap-4 max-w-4xl mx-auto">
+                <div class="card">
+                    <h3 class="text-green-600 font-bold mb-4"><i class="fa-brands fa-whatsapp"></i> WhatsApp Tools</h3>
+                    <input type="number" id="wa-num" class="form-input mb-4" placeholder="91...">
+                    <button onclick="sendWA('reminder')" class="w-full bg-brandYellow py-2 rounded text-xs font-bold mb-2">Send Payment Reminder</button>
+                    <button onclick="sendWA('bank')" class="w-full bg-brandBlue text-white py-2 rounded text-xs font-bold">Send Bank Details</button>
+                </div>
+                <div class="card text-center">
+                    <h3 class="text-brandBlue font-bold mb-4">CMB QR Generator</h3>
+                    <input type="number" id="qr-amt" class="form-input mb-4" placeholder="Amount">
+                    <button onclick="generateQR()" class="w-full bg-gray-800 text-white py-2 rounded text-xs font-bold">Generate QR</button>
+                    <div id="qrcode" class="flex justify-center mt-2"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-users" class="view-section hidden">
+            <div class="card max-w-xl mx-auto">
+                <h3 class="font-bold mb-4">Manage Users</h3>
+                <form onsubmit="submitForm(event, 'USERS', 'form-u')" id="form-u">
+                    <label class="form-label">Username</label><input name="User Name" class="form-input mb-4">
+                    <label class="form-label">Password</label><input name="Password" type="password" class="form-input mb-4">
+                    <label class="form-label">Role</label>
+                    <select name="Role" class="form-input mb-4"><option>Admin</option><option>Accountant</option><option>Sales</option></select>
+                    <button type="submit" class="btn-primary w-full">Save User</button>
                 </form>
             </div>
         </div>
@@ -163,15 +192,13 @@
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbytdWNPhkrGxVHCcZhqW0js45B0uQ44aE5OZaXf9RGZP4Y23F-kULrq0BCRn-fxVYM-/exec";
 
-        function toggleMenu(id) {
-            document.getElementById(id).classList.toggle('open');
-        }
+        function toggleMenu(id) { document.getElementById(id).classList.toggle('open'); }
 
         function loadView(id, type = null) {
             document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
             if(type) {
-                document.getElementById('trans-title').innerText = type + ' Entry';
+                document.getElementById('trans-title').innerText = type + ' Voucher';
                 document.getElementById('v-type').value = type;
             }
         }
@@ -180,7 +207,6 @@
             e.preventDefault();
             const btn = e.target.querySelector('button');
             btn.innerText = "Saving..."; btn.disabled = true;
-
             const formData = new FormData(document.getElementById(formId));
             const params = new URLSearchParams();
             params.append("action", "save_data");
@@ -188,25 +214,23 @@
             for(const pair of formData) params.append(pair[0], pair[1]);
 
             fetch(API_URL, { method: "POST", body: params })
-            .then(res => res.json()).then(data => {
-                alert(data.message); document.getElementById(formId).reset();
-            }).catch(() => alert("Error Connecting Database"))
+            .then(res => res.json()).then(data => { alert(data.message); document.getElementById(formId).reset(); })
+            .catch(() => alert("Network Error"))
             .finally(() => { btn.innerText = "Submit"; btn.disabled = false; });
         }
 
         function sendWA(type) {
             const num = document.getElementById('wa-num').value;
-            if(!num) return alert("Enter Mobile Number");
-            let msg = type === 'reminder' ? "Gentle Reminder for Payment. - CM Books" : "Our Bank Details: HDFC Account 123456789 IFSC HDFC000123";
-            window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`, '_blank');
+            if(!num) return alert("Enter No");
+            let msg = type === 'reminder' ? "Payment Reminder from CM Books" : "HDFC A/c: 12345678 IFSC: HDFC0001";
+            window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`);
         }
 
         function generateQR() {
             const amt = document.getElementById('qr-amt').value;
             const qrBox = document.getElementById('qrcode');
             qrBox.innerHTML = "";
-            if(!amt) return alert("Enter Amount");
-            new QRCode(qrBox, { text: `upi://pay?pa=yours@upi&am=${amt}&tn=Payment`, width: 140, height: 140 });
+            new QRCode(qrBox, { text: `upi://pay?pa=yours@upi&am=${amt}`, width: 120, height: 120 });
         }
     </script>
 </body>
