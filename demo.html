@@ -17,11 +17,11 @@
         theme: {
           extend: {
             colors: {
-              primary: '#F6b936',   /* CMB Yellow */
-              secondary: '#1F70D3', /* CMB Blue */
-              danger: '#D60000',
-              darkbg: '#1c212e',
-              lightbg: '#f4f5f7'
+              brandYellow: '#F6b936',
+              brandBlue: '#1F70D3',
+              brandRed: '#D60000',
+              brandDark: '#1c212e',
+              brandGray: '#f4f5f7'
             },
             fontFamily: {
               poppins: ['Poppins', 'sans-serif']
@@ -32,445 +32,357 @@
     </script>
 
     <style>
-        body { font-family: 'Poppins', sans-serif; background-color: #f4f5f7; overflow: hidden; }
+        body { font-family: 'Poppins', sans-serif; background-color: #f4f5f7; }
         
-        /* SIDEBAR TRANSITIONS */
-        .sidebar { width: 250px; background: #1c212e; color: #cfd0d4; height: 100vh; display: flex; flex-direction: column; flex-shrink: 0; transition: width 0.3s; z-index: 50; }
-        .sidebar.collapsed { width: 70px; }
-        .sidebar.collapsed .brand-text, .sidebar.collapsed .menu-text, .sidebar.collapsed .menu-label, .sidebar.collapsed .crm-box { display: none; }
-        .sidebar.collapsed .nav-item { justify-content: center; padding: 15px 0; }
-        .sidebar.collapsed .nav-arrow { display: none; }
-
-        /* NAVIGATION */
-        .nav-item { padding: 10px 20px; cursor: pointer; display: flex; align-items: center; font-size: 13px; border-left: 3px solid transparent; transition: 0.2s; color: #cfd0d4; }
+        /* SIDEBAR */
+        .sidebar { width: 260px; background: #1c212e; color: #d4d6dc; height: 100vh; position: fixed; overflow-y: auto; transition: 0.3s; z-index: 50; }
+        .brand-header { padding: 20px; font-size: 20px; font-weight: 700; color: white; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 10px; }
+        
+        .menu-cat { font-size: 11px; text-transform: uppercase; color: #6c757d; padding: 15px 20px 5px; font-weight: 700; letter-spacing: 1px; }
+        
+        .nav-item { padding: 12px 20px; display: flex; align-items: center; cursor: pointer; transition: 0.2s; font-size: 13px; border-left: 3px solid transparent; }
         .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.05); color: #fff; border-left-color: #F6b936; }
-        .nav-item i { width: 24px; font-size: 16px; text-align: center; }
-        .submenu { display: none; background: rgba(0,0,0,0.2); }
-        .submenu a { display: block; padding: 8px 20px 8px 54px; font-size: 12px; color: #a0a6b5; cursor: pointer; }
+        .nav-item i { width: 25px; font-size: 15px; }
+        
+        .submenu { display: none; background: rgba(0,0,0,0.3); }
+        .submenu a { display: block; padding: 10px 20px 10px 50px; font-size: 12px; color: #a0a6b5; cursor: pointer; text-decoration: none; }
         .submenu a:hover { color: #fff; }
 
-        /* CRM BOX */
-        .crm-box { margin: 15px; background: linear-gradient(135deg, #1F70D3 0%, #10488d 100%); padding: 15px; border-radius: 8px; color: white; border: 1px solid #F6b936; position: relative; overflow: hidden; }
+        /* CONTENT */
+        .main { margin-left: 260px; padding: 20px; }
+        .header { background: white; padding: 15px 25px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.02); margin-bottom: 25px; }
         
-        /* FORMS */
-        .zoho-form { background: white; padding: 25px; border-radius: 8px; border: 1px solid #e5e7eb; max-width: 900px; margin: 0 auto; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-        .form-header { font-size: 18px; font-weight: 600; color: #1F70D3; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; }
-        .form-input { width: 100%; border: 1px solid #d1d5db; padding: 8px 12px; border-radius: 4px; font-size: 13px; outline: none; transition: 0.2s; }
+        /* CARDS & FORMS */
+        .card { background: white; border-radius: 8px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); border: 1px solid #e5e7eb; }
+        .form-input { width: 100%; border: 1px solid #d1d5db; padding: 10px; border-radius: 6px; font-size: 14px; margin-top: 5px; outline: none; }
         .form-input:focus { border-color: #1F70D3; box-shadow: 0 0 0 2px rgba(31,112,211,0.1); }
-        .form-label { display: block; font-size: 12px; font-weight: 600; color: #4b5563; margin-bottom: 4px; }
+        .form-label { font-size: 12px; font-weight: 600; color: #374151; }
         
-        /* VIEWS & ANIMATION */
-        .view-section { display: none; animation: fadeIn 0.3s; height: 100%; }
-        .view-section.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* CRM HIGHLIGHT */
+        .crm-box { margin: 15px; background: linear-gradient(135deg, #1F70D3 0%, #104c94 100%); border-radius: 8px; padding: 15px; color: white; border: 1px solid #F6b936; }
+        .crm-link { display: flex; align-items: center; gap: 10px; padding: 8px; font-size: 12px; cursor: pointer; transition: 0.2s; border-radius: 4px; }
+        .crm-link:hover { background: rgba(255,255,255,0.1); }
 
         /* UTILS */
-        .loader { border: 2px solid #f3f3f3; border-top: 2px solid #1F70D3; border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; display: inline-block; margin-left: 8px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .custom-scroll::-webkit-scrollbar { width: 6px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #888; border-radius: 3px; }
-        
-        /* PRINT STYLES */
-        @media print {
-            body * { visibility: hidden; }
-            #invoice-print-area, #invoice-print-area * { visibility: visible; }
-            #invoice-print-area { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 20px; }
-        }
+        .btn { padding: 10px 25px; border-radius: 6px; font-weight: 500; font-size: 14px; cursor: pointer; transition: 0.2s; border: none; }
+        .btn-primary { background: #1F70D3; color: white; }
+        .btn-primary:hover { background: #16509c; }
+        .hidden { display: none; }
     </style>
 </head>
-<body onload="initApp()">
+<body>
 
-    <div id="login-overlay" class="fixed inset-0 bg-darkbg bg-opacity-95 z-[100] flex items-center justify-center">
-        <div class="bg-white p-8 rounded-lg shadow-2xl w-96 border-t-4 border-primary">
-            <div class="text-center mb-8">
-                <div class="w-14 h-14 bg-secondary rounded mx-auto flex items-center justify-center text-white font-bold text-2xl mb-3 shadow-lg">C</div>
-                <h2 class="text-2xl font-bold text-gray-800">CMB ERP</h2>
-                <p class="text-xs text-gray-500 uppercase tracking-widest mt-1">Secure Workspace</p>
-            </div>
-            <form onsubmit="handleLogin(event)">
+<aside class="sidebar" id="sidebar">
+    <div class="brand-header">
+        <i class="fa-solid fa-cube text-brandYellow"></i> &nbsp; CMB ERP
+    </div>
+
+    <div class="nav-item active" onclick="loadView('view-company')">
+        <i class="fa-solid fa-building"></i> Company Profile
+    </div>
+
+    <div class="menu-cat">Masters</div>
+    <div class="nav-item" onclick="toggleMenu('sub-create')">
+        <i class="fa-solid fa-folder-plus"></i> Create <i class="fa-solid fa-chevron-down ml-auto text-xs"></i>
+    </div>
+    <div class="submenu" id="sub-create">
+        <a onclick="loadView('view-ledger')">Ledgers</a>
+        <a onclick="alert('Module under construction')">Project Name</a>
+        <a onclick="alert('Module under construction')">Project Stage</a>
+    </div>
+
+    <div class="menu-cat">Transactions</div>
+    <div class="nav-item" onclick="toggleMenu('sub-accounts')">
+        <i class="fa-solid fa-file-invoice-dollar"></i> Accounts Entry <i class="fa-solid fa-chevron-down ml-auto text-xs"></i>
+    </div>
+    <div class="submenu" id="sub-accounts">
+        <a onclick="loadView('view-transaction', 'Payment')">Payment</a>
+        <a onclick="loadView('view-transaction', 'Receipt')">Receipt</a>
+        <a onclick="loadView('view-transaction', 'Sales')">Sales / Invoice</a>
+        <a onclick="loadView('view-transaction', 'Purchase')">Purchase</a>
+        <a>Cash Book</a>
+        <a>Bank Book</a>
+    </div>
+
+    <div class="menu-cat">Reports</div>
+    <div class="nav-item" onclick="toggleMenu('sub-reports')">
+        <i class="fa-solid fa-chart-pie"></i> Financial Reports <i class="fa-solid fa-chevron-down ml-auto text-xs"></i>
+    </div>
+    <div class="submenu" id="sub-reports">
+        <a>Profit & Loss</a>
+        <a>Balance Sheet</a>
+        <a>GST Reports (3B/R1)</a>
+        <a>Ledgerwise Report</a>
+    </div>
+
+    <div class="crm-box">
+        <div class="font-bold text-xs mb-2 flex items-center gap-2"><i class="fa-solid fa-bolt text-brandYellow"></i> SMART CRM</div>
+        <div class="crm-link" onclick="loadView('view-crm')"><i class="fa-brands fa-whatsapp"></i> Send Reminders</div>
+        <div class="crm-link" onclick="loadView('view-crm')"><i class="fa-solid fa-qrcode"></i> Generate QR</div>
+        <div class="crm-link" onclick="loadView('view-crm')"><i class="fa-solid fa-users"></i> Customer Updates</div>
+    </div>
+
+    <div class="menu-cat">Settings</div>
+    <div class="nav-item" onclick="loadView('view-users')">
+        <i class="fa-solid fa-users-gear"></i> User Roles
+    </div>
+</aside>
+
+<div class="main">
+    <div class="header">
+        <h2 id="page-title" class="text-xl font-bold text-gray-700">Company Creation</h2>
+        <div class="flex items-center gap-4">
+            <span class="text-sm text-gray-500 font-medium">FY: 2025-2026</span>
+            <div class="w-8 h-8 rounded-full bg-brandBlue text-white flex items-center justify-center font-bold text-xs">CM</div>
+        </div>
+    </div>
+
+    <div id="view-company" class="view-section">
+        <div class="card max-w-4xl mx-auto">
+            <h3 class="text-lg font-bold text-brandBlue mb-4 border-b pb-2">Company Details</h3>
+            <form id="form-company" onsubmit="submitForm(event, 'COMPANY', 'form-company')">
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="form-label">Company Name</label>
+                        <input type="text" name="Company Name" class="form-input" required placeholder="Enter Company Name">
+                    </div>
+                    <div>
+                        <label class="form-label">Mailing Name</label>
+                        <input type="text" name="Mailing Name" class="form-input">
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <label class="form-label">State</label>
+                        <select name="State" class="form-input">
+                            <option>Kerala</option>
+                            <option>Tamil Nadu</option>
+                            <option>Karnataka</option>
+                            <option>Maharashtra</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">GSTIN</label>
+                        <input type="text" name="GSTIN" class="form-input" placeholder="29ABCDE1234F1Z5">
+                    </div>
+                    <div>
+                        <label class="form-label">Financial Year From</label>
+                        <input type="date" name="Financial Year Beginning From" class="form-input" value="2025-04-01">
+                    </div>
+                </div>
                 <div class="mb-4">
-                    <label class="block text-xs font-bold text-gray-600 mb-1 uppercase">Username</label>
-                    <input type="text" id="login-user" class="form-input bg-gray-50" placeholder="admin">
+                    <label class="form-label">Address</label>
+                    <textarea name="Address Line 1" rows="3" class="form-input"></textarea>
                 </div>
-                <div class="mb-6">
-                    <label class="block text-xs font-bold text-gray-600 mb-1 uppercase">Password</label>
-                    <input type="password" id="login-pass" class="form-input bg-gray-50" placeholder="1234">
-                </div>
-                <button type="submit" class="w-full bg-secondary text-white py-2.5 rounded font-bold hover:bg-blue-800 transition shadow-lg flex justify-center items-center gap-2">
-                    <span>Login</span>
-                </button>
+                <button type="submit" class="btn btn-primary">Save Company</button>
             </form>
         </div>
     </div>
 
-    <div class="flex h-screen">
-        <aside class="sidebar" id="sidebar">
-            <div class="brand p-5 flex items-center gap-3 border-b border-gray-700">
-                <div class="w-8 h-8 bg-primary rounded flex items-center justify-center text-white font-bold shrink-0">C</div>
-                <div class="brand-text">
-                    <h1 class="font-bold text-white text-lg leading-none">CMB ERP</h1>
-                    <p class="text-[10px] text-gray-400">Alpha 1.0</p>
+    <div id="view-ledger" class="view-section hidden">
+        <div class="card max-w-2xl mx-auto">
+            <h3 class="text-lg font-bold text-brandBlue mb-4 border-b pb-2">Create Ledger</h3>
+            <form id="form-ledger" onsubmit="submitForm(event, 'LEDGER', 'form-ledger')">
+                <div class="mb-4">
+                    <label class="form-label">Ledger Name</label>
+                    <input type="text" name="Ledger Name" class="form-input" required>
                 </div>
-            </div>
-
-            <div class="flex-1 overflow-y-auto py-4 custom-scroll">
-                <div class="menu-label mt-2">Main</div>
-                <div class="nav-item active" onclick="showView('view-dashboard', this)"><i class="fa-solid fa-grid-2"></i> <span class="menu-text ml-2">Dashboard</span></div>
-                <div class="nav-item" onclick="showView('view-company', this)"><i class="fa-solid fa-building"></i> <span class="menu-text ml-2">Company</span></div>
-
-                <div class="menu-label mt-4">Accounting</div>
-                <div class="nav-item" onclick="toggleSub('sub-create')"><i class="fa-solid fa-folder-plus"></i> <span class="menu-text ml-2 flex-1">Create</span> <i class="fa-solid fa-chevron-down text-[10px] nav-arrow"></i></div>
-                <div class="submenu" id="sub-create">
-                    <a onclick="showView('view-ledger', null, 'Ledger')">Ledger</a>
-                    <a onclick="showView('view-stock', null, 'Stock')">Stock</a>
-                    <a onclick="showView('view-project', null, 'Projects')">Projects</a>
+                <div class="mb-4">
+                    <label class="form-label">Under Group</label>
+                    <select name="Under" class="form-input">
+                        <option>Sundry Debtors</option>
+                        <option>Sundry Creditors</option>
+                        <option>Bank Accounts</option>
+                        <option>Sales Accounts</option>
+                        <option>Indirect Expenses</option>
+                    </select>
                 </div>
-
-                <div class="nav-item" onclick="toggleSub('sub-trans')"><i class="fa-solid fa-file-invoice-dollar"></i> <span class="menu-text ml-2 flex-1">Transactions</span> <i class="fa-solid fa-chevron-down text-[10px] nav-arrow"></i></div>
-                <div class="submenu" id="sub-trans">
-                    <a onclick="showView('view-voucher', null, 'Sales')">Sales / Invoice</a>
-                    <a onclick="showView('view-voucher', null, 'Estimate')">Estimate / Quote</a>
-                    <a onclick="showView('view-voucher', null, 'Purchase')">Purchase</a>
-                    <a onclick="showView('view-voucher', null, 'Payment')">Payment</a>
-                    <a onclick="showView('view-voucher', null, 'Receipt')">Receipt</a>
-                </div>
-
-                <div class="menu-label mt-4">Reports</div>
-                <div class="nav-item" onclick="toggleSub('sub-reports')"><i class="fa-solid fa-chart-pie"></i> <span class="menu-text ml-2 flex-1">Financials</span> <i class="fa-solid fa-chevron-down text-[10px] nav-arrow"></i></div>
-                <div class="submenu" id="sub-reports">
-                    <a onclick="loadFinancials()">P&L Statement</a>
-                    <a onclick="showView('view-report', null, 'TRANSACTION')">Day Book</a>
-                    <a onclick="showView('view-report', null, 'LEDGER')">Ledger Report</a>
-                    <a onclick="showView('view-report', null, 'STOCK')">Stock Summary</a>
-                </div>
-
-                <div class="px-4 mt-6 menu-text">
-                    <div class="crm-box cursor-pointer hover:shadow-lg transition" onclick="showView('view-crm')">
-                        <h4 class="font-bold text-sm mb-1 flex items-center gap-2"><i class="fa-solid fa-bolt text-primary"></i> Smart CRM</h4>
-                        <p class="text-[10px] opacity-80 mb-3">Customer Updates & QR</p>
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="form-label">Opening Balance</label>
+                        <input type="number" name="Opening Balance" class="form-input" value="0">
+                    </div>
+                    <div>
+                        <label class="form-label">Cr/Dr</label>
+                        <select name="Cr/Dr" class="form-input">
+                            <option>Dr</option>
+                            <option>Cr</option>
+                        </select>
                     </div>
                 </div>
-                <div class="mt-auto border-t border-gray-700 pt-2">
-                    <div class="nav-item" onclick="showView('view-users', this)"><i class="fa-solid fa-users-gear"></i> <span class="menu-text ml-2">User Roles</span></div>
-                    <div class="nav-item text-danger hover:bg-red-900/20" onclick="location.reload()"><i class="fa-solid fa-power-off"></i> <span class="menu-text ml-2">Logout</span></div>
-                </div>
-            </div>
-        </aside>
-
-        <main class="flex-1 flex flex-col bg-lightbg transition-all duration-300">
-            <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 shadow-sm sticky top-0 z-40">
-                <div class="flex items-center gap-4">
-                    <button onclick="document.getElementById('sidebar').classList.toggle('collapsed')" class="text-gray-500 hover:text-secondary"><i class="fa-solid fa-bars text-lg"></i></button>
-                    <h2 class="font-semibold text-gray-700 text-lg" id="page-title">Dashboard</h2>
-                </div>
-                <div class="flex items-center gap-4">
-                    <div class="text-right hidden md:block">
-                        <p class="text-xs font-bold text-secondary" id="user-display-name">Guest</p>
-                        <p class="text-[10px] text-gray-500" id="user-role">Viewer</p>
-                    </div>
-                    <div class="w-9 h-9 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-secondary font-bold">U</div>
-                </div>
-            </header>
-
-            <div class="flex-1 overflow-y-auto p-6 custom-scroll">
-
-                <div id="view-dashboard" class="view-section active">
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-8">
-                        <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-secondary"><p class="text-[10px] font-bold text-gray-400 uppercase">Receivables</p><h3 class="text-xl font-bold text-gray-800" id="stat-receivables">...</h3></div>
-                        <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-primary"><p class="text-[10px] font-bold text-gray-400 uppercase">Payables</p><h3 class="text-xl font-bold text-gray-800" id="stat-payables">...</h3></div>
-                        <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-green-500"><p class="text-[10px] font-bold text-gray-400 uppercase">Cash</p><h3 class="text-xl font-bold text-gray-800" id="stat-cash">...</h3></div>
-                        <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-indigo-500"><p class="text-[10px] font-bold text-gray-400 uppercase">Bank</p><h3 class="text-xl font-bold text-gray-800" id="stat-bank">...</h3></div>
-                    </div>
-                    <h3 class="font-bold text-gray-700 mb-4">Shortcuts</h3>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <button class="p-4 bg-white rounded border hover:shadow hover:text-secondary transition" onclick="showView('view-voucher',null,'Sales')"><i class="fa-solid fa-plus-circle text-2xl mb-1"></i><p class="text-xs font-bold">Sales Invoice</p></button>
-                        <button class="p-4 bg-white rounded border hover:shadow hover:text-secondary transition" onclick="showView('view-voucher',null,'Estimate')"><i class="fa-solid fa-file-invoice text-2xl mb-1"></i><p class="text-xs font-bold">Estimate</p></button>
-                        <button class="p-4 bg-white rounded border hover:shadow hover:text-secondary transition" onclick="showView('view-voucher',null,'Receipt')"><i class="fa-solid fa-receipt text-2xl mb-1"></i><p class="text-xs font-bold">Receipt</p></button>
-                        <button class="p-4 bg-white rounded border hover:shadow hover:text-green-600 transition" onclick="showView('view-crm')"><i class="fa-brands fa-whatsapp text-2xl mb-1"></i><p class="text-xs font-bold">CRM</p></button>
-                    </div>
-                </div>
-
-                <div id="view-company" class="view-section hidden">
-                    <div class="zoho-form">
-                        <div class="form-header">Company Information</div>
-                        <form id="form-company" onsubmit="submitData(event, 'save_company', 'form-company')">
-                            <div class="grid grid-cols-2 gap-6 mb-4">
-                                <div><label class="form-label">Name</label><input type="text" name="companyName" class="form-input" required></div>
-                                <div><label class="form-label">GSTIN</label><input type="text" name="gstin" class="form-input"></div>
-                            </div>
-                            <div class="mb-4"><label class="form-label">Address</label><textarea name="address" rows="2" class="form-input"></textarea></div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div><label class="form-label">State</label><input type="text" name="state" class="form-input"></div>
-                                <div><label class="form-label">FY From</label><input type="date" name="fy" class="form-input"></div>
-                            </div>
-                            <button type="submit" class="bg-secondary text-white px-6 py-2 mt-4 rounded font-bold text-sm">Save</button>
-                        </form>
-                    </div>
-                </div>
-
-                <div id="view-ledger" class="view-section hidden">
-                    <div class="zoho-form">
-                        <div class="form-header">Create Ledger</div>
-                        <form id="form-ledger" onsubmit="submitData(event, 'save_ledger', 'form-ledger')">
-                            <div class="mb-4"><label class="form-label">Name</label><input type="text" name="ledgerName" class="form-input" required></div>
-                            <div class="mb-4"><label class="form-label">Group</label><select name="group" class="form-input"><option>Sundry Debtors</option><option>Sundry Creditors</option><option>Sales Accounts</option><option>Purchase Accounts</option><option>Indirect Expenses</option><option>Bank Accounts</option></select></div>
-                            <div class="grid grid-cols-2 gap-4 mb-4">
-                                <div><label class="form-label">State</label><input type="text" name="state" class="form-input" value="Kerala"></div>
-                                <div><label class="form-label">Op. Balance</label><input type="number" name="openingBal" class="form-input" placeholder="0"></div>
-                            </div>
-                            <button type="submit" class="bg-secondary text-white px-6 py-2 rounded font-bold text-sm">Create</button>
-                        </form>
-                    </div>
-                </div>
-
-                <div id="view-stock" class="view-section hidden">
-                    <div class="zoho-form">
-                        <div class="form-header">Stock Item</div>
-                        <form id="form-stock" onsubmit="submitData(event, 'save_stock', 'form-stock')">
-                            <div class="grid grid-cols-2 gap-4 mb-4">
-                                <div><label class="form-label">Name</label><input type="text" name="itemName" class="form-input" required></div>
-                                <div><label class="form-label">Unit</label><select name="unit" class="form-input"><option>Nos</option><option>Kgs</option></select></div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-4 mb-4">
-                                <div><label class="form-label">GST %</label><select name="gstRate" class="form-input"><option>18</option><option>12</option><option>5</option></select></div>
-                                <div><label class="form-label">Op. Qty</label><input type="number" name="openingBal" class="form-input" placeholder="0"></div>
-                            </div>
-                            <button type="submit" class="bg-secondary text-white px-6 py-2 rounded font-bold text-sm">Save Item</button>
-                        </form>
-                    </div>
-                </div>
-
-                <div id="view-project" class="view-section hidden">
-                    <div class="zoho-form">
-                        <div class="form-header">Project Master</div>
-                        <form id="form-project" onsubmit="submitData(event, 'save_project', 'form-project')">
-                            <div class="mb-4"><label class="form-label">Project Name</label><input type="text" name="projectName" class="form-input" required></div>
-                            <div class="mb-4"><label class="form-label">Stage</label><select name="stage" class="form-input"><option>Planning</option><option>Execution</option></select></div>
-                            <button type="submit" class="bg-secondary text-white px-6 py-2 rounded font-bold text-sm">Save</button>
-                        </form>
-                    </div>
-                </div>
-
-                <div id="view-voucher" class="view-section hidden">
-                    <div class="zoho-form">
-                        <div class="form-header"><span id="voucher-title">Voucher</span> <span class="text-xs bg-blue-100 text-blue-800 px-2 rounded">New</span></div>
-                        <form id="form-voucher" onsubmit="submitData(event, 'save_transaction', 'form-voucher')">
-                            <input type="hidden" name="voucherType" id="hidden-voucher-type" value="Payment">
-                            <div class="grid grid-cols-2 gap-4 mb-4">
-                                <div><label class="form-label">Date</label><input type="date" name="date" class="form-input"></div>
-                                <div><label class="form-label">Party Name</label><input type="text" name="ledgerName" id="v-ledger" class="form-input" placeholder="Client/Ledger"></div>
-                            </div>
-                            <div class="mb-4"><label class="form-label">Item / Particulars</label><input type="text" name="particulars" id="v-item" class="form-input"></div>
-                            <div class="mb-4"><label class="form-label">Amount (₹)</label><input type="number" name="amount" id="v-amount" class="form-input font-bold" placeholder="0.00"></div>
-                            <div class="mb-6"><label class="form-label">Narration</label><textarea name="narration" rows="2" class="form-input"></textarea></div>
-                            <div class="flex justify-between items-center">
-                                <button type="button" class="text-sm text-gray-500 hover:text-secondary" onclick="printInvoice()"><i class="fa-solid fa-print"></i> Print</button>
-                                <button type="submit" class="bg-secondary text-white px-6 py-2 rounded font-bold text-sm">Save</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                <div id="view-financials" class="view-section hidden">
-                    <div class="bg-white p-6 rounded-lg shadow-sm border max-w-3xl mx-auto">
-                        <h3 class="text-lg font-bold text-secondary border-b pb-2 mb-4">Profit & Loss Statement</h3>
-                        <div class="space-y-3 text-sm">
-                            <div class="flex justify-between font-bold text-gray-600"><span>Sales Accounts</span><span id="pl-sales">0.00</span></div>
-                            <div class="flex justify-between text-red-500"><span>Purchase Accounts</span><span id="pl-purchase">0.00</span></div>
-                            <div class="flex justify-between text-red-500"><span>Direct Expenses</span><span id="pl-direct">0.00</span></div>
-                            <div class="border-t border-gray-300 my-2"></div>
-                            <div class="flex justify-between font-bold text-lg"><span>Gross Profit</span><span id="pl-gp">0.00</span></div>
-                            <div class="border-t border-gray-300 my-2"></div>
-                            <div class="flex justify-between text-green-600"><span>Incomes</span><span id="pl-income">0.00</span></div>
-                            <div class="flex justify-between text-red-500"><span>Indirect Expenses</span><span id="pl-indirect">0.00</span></div>
-                            <div class="border-t border-gray-800 my-2"></div>
-                            <div class="flex justify-between font-bold text-xl text-primary bg-gray-50 p-2 rounded"><span>Net Profit</span><span id="pl-np">0.00</span></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="view-report" class="view-section hidden">
-                    <div class="bg-white p-5 rounded-lg border border-gray-200 h-full flex flex-col">
-                        <h3 class="font-bold text-gray-700 mb-4" id="report-title">Report</h3>
-                        <div class="flex-1 overflow-auto rounded border border-gray-100">
-                            <table class="w-full text-sm text-left">
-                                <thead class="bg-gray-50 border-b" id="report-head"></thead>
-                                <tbody class="divide-y divide-gray-100" id="report-body"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="view-users" class="view-section hidden">
-                    <div class="zoho-form">
-                        <div class="form-header">Add User</div>
-                        <form id="form-users" onsubmit="submitData(event, 'add_user', 'form-users')">
-                            <div class="mb-3"><label class="form-label">User</label><input type="text" name="username" class="form-input" required></div>
-                            <div class="mb-3"><label class="form-label">Role</label><select name="role" class="form-input"><option>Admin</option><option>Sales</option></select></div>
-                            <div class="mb-3"><label class="form-label">Pass</label><input type="password" name="password" class="form-input" required></div>
-                            <button type="submit" class="bg-secondary text-white px-6 py-2 rounded font-bold text-sm">Add</button>
-                        </form>
-                    </div>
-                </div>
-
-                <div id="view-crm" class="view-section hidden">
-                    <div class="bg-white p-6 rounded border max-w-lg mx-auto">
-                        <h3 class="font-bold mb-4">CRM & QR</h3>
-                        <input id="crm-mobile" class="form-input mb-4" placeholder="Mobile Number">
-                        <div class="flex gap-2 mb-4">
-                            <button onclick="sendWA('reminder')" class="bg-green-600 text-white px-4 py-2 rounded text-xs flex-1">WA Reminder</button>
-                            <button onclick="sendWA('bank')" class="bg-blue-600 text-white px-4 py-2 rounded text-xs flex-1">WA Bank Details</button>
-                        </div>
-                        <hr class="my-4">
-                        <input id="qr-amount" type="number" class="form-input mb-2 text-center" placeholder="Amount">
-                        <button onclick="generateQR()" class="bg-gray-800 text-white px-4 py-2 rounded w-full text-xs">Generate Payment QR</button>
-                        <div id="qrcode-display" class="mt-4 flex justify-center hidden"></div>
-                    </div>
-                </div>
-
-                <div id="view-placeholder" class="view-section hidden">
-                    <div class="flex flex-col items-center justify-center h-full text-gray-400">
-                        <i class="fa-solid fa-screwdriver-wrench text-4xl mb-4"></i>
-                        <h3 id="ph-title" class="text-lg">Under Development</h3>
-                    </div>
-                </div>
-
-                <div id="invoice-print-area" class="hidden bg-white p-10 max-w-3xl mx-auto">
-                    <div class="flex justify-between mb-8">
-                        <div><h1 class="text-3xl font-bold text-secondary">INVOICE</h1><p class="text-sm text-gray-500" id="print-type">Original Copy</p></div>
-                        <div class="text-right"><h2 class="font-bold text-gray-700">LOTUS ENTERPRISES</h2><p class="text-xs text-gray-500">Kerala, India</p></div>
-                    </div>
-                    <div class="border-t border-b py-4 mb-6 flex justify-between text-sm">
-                        <div><p class="font-bold">Bill To:</p><p id="print-party">Client Name</p></div>
-                        <div class="text-right"><p class="font-bold">Date:</p><p id="print-date">2026-02-16</p></div>
-                    </div>
-                    <table class="w-full text-sm mb-8 border-collapse border">
-                        <thead class="bg-gray-100"><tr><th class="border p-2 text-left">Description</th><th class="border p-2 text-right">Amount</th></tr></thead>
-                        <tbody>
-                            <tr><td class="border p-2" id="print-item">Item Name</td><td class="border p-2 text-right" id="print-amount">0.00</td></tr>
-                            <tr class="h-32"><td class="border"></td><td class="border"></td></tr>
-                        </tbody>
-                        <tfoot><tr><td class="border p-2 font-bold text-right">Total</td><td class="border p-2 text-right font-bold" id="print-total">0.00</td></tr></tfoot>
-                    </table>
-                    <div class="text-xs text-gray-600 mb-8"><p class="font-bold">Amount in Words:</p><p class="italic" id="print-words">Zero Only</p></div>
-                    <div class="flex justify-between items-end mt-10">
-                        <div class="text-xs border p-2 rounded"><p class="font-bold">Bank Details:</p><p>HDFC Bank, Acc: 123456789</p></div>
-                        <div class="text-center"><div class="h-16 w-32 border-b border-gray-400 mb-2"></div><p class="text-xs font-bold">Authorised Signatory</p></div>
-                    </div>
-                </div>
-
-            </div>
-        </main>
+                <button type="submit" class="btn btn-primary">Save Ledger</button>
+            </form>
+        </div>
     </div>
 
-    <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbzcun6QEq1zhVgL509SR7s2jP_sBNVDPEUQYHS5pv4H8yvE5oHE_QwJUKT84wN-Zk7X/exec"; 
+    <div id="view-crm" class="view-section hidden">
+        <div class="grid grid-cols-2 gap-6 max-w-5xl mx-auto">
+            <div class="card">
+                <h3 class="text-lg font-bold text-green-600 mb-4"><i class="fa-brands fa-whatsapp"></i> WhatsApp Tools</h3>
+                <div class="mb-4">
+                    <label class="form-label">Customer Mobile (with 91)</label>
+                    <input type="number" id="wa-mobile" class="form-input" placeholder="919800000000">
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="sendWhatsapp('reminder')" class="btn bg-brandYellow text-black flex-1">Payment Reminder</button>
+                    <button onclick="sendWhatsapp('bank')" class="btn bg-brandBlue text-white flex-1">Send Bank Details</button>
+                </div>
+            </div>
 
-        function toggleSub(id) { const el = document.getElementById(id); el.style.display = (el.style.display === 'block') ? 'none' : 'block'; }
+            <div class="card text-center">
+                <h3 class="text-lg font-bold text-brandBlue mb-4"><i class="fa-solid fa-qrcode"></i> Payment QR</h3>
+                <input type="number" id="qr-amount" class="form-input mb-4" placeholder="Enter Amount">
+                <button onclick="generateQR()" class="btn btn-primary w-full">Generate</button>
+                <div id="qrcode" class="flex justify-center mt-4 p-4 border border-dashed rounded"></div>
+            </div>
+        </div>
+    </div>
 
-        function showView(viewId, navEl, title) {
-            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-            document.getElementById(viewId).classList.add('active');
-            if(title) {
-                document.getElementById('page-title').innerText = title;
-                if(viewId === 'view-voucher') {
-                    document.getElementById('hidden-voucher-type').value = title;
-                    document.getElementById('voucher-title').innerText = title;
-                    document.getElementById('print-type').innerText = title;
-                }
-                if(viewId === 'view-placeholder') document.getElementById('ph-title').innerText = title;
+    <div id="view-transaction" class="view-section hidden">
+        <div class="card max-w-4xl mx-auto">
+            <h3 class="text-lg font-bold text-brandBlue mb-4 border-b pb-2" id="trans-title">Transaction</h3>
+            <form id="form-transaction" onsubmit="submitForm(event, 'TRANSACTION', 'form-transaction')">
+                <input type="hidden" name="Voucher Type" id="voucher-type">
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="form-label">Date</label>
+                        <input type="date" name="Date" class="form-input">
+                    </div>
+                    <div>
+                        <label class="form-label">Ledger Name</label>
+                        <input type="text" name="Ledger Name" class="form-input" placeholder="Search Ledger...">
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label">Particulars / Item Details</label>
+                    <textarea name="Particulars" rows="2" class="form-input"></textarea>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label">Amount</label>
+                    <input type="number" name="Amount" class="form-input font-bold text-right" required>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label">Narration</label>
+                    <input type="text" name="Narration" class="form-input">
+                </div>
+                <button type="submit" class="btn btn-primary">Save Voucher</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="view-users" class="view-section hidden">
+        <div class="card max-w-2xl mx-auto">
+            <h3 class="text-lg font-bold text-brandBlue mb-4">User Management</h3>
+            <form id="form-user" onsubmit="submitForm(event, 'USERS', 'form-user')">
+                <div class="mb-4">
+                    <label class="form-label">Username</label>
+                    <input type="text" name="User Name" class="form-input" required>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label">Role</label>
+                    <select name="Role" class="form-input">
+                        <option>Admin</option>
+                        <option>Accountant</option>
+                        <option>Sales Team</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Add User</button>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // --- 1. CONFIGURATION ---
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx9Cdcs6FzAYoTcDzE-vn_9VzwNs1yPT2XaH24pTuT38tE8F6dTBPc-tLO0FA84Glak/exec";
+
+    // --- 2. NAVIGATION ---
+    function toggleMenu(id) {
+        const el = document.getElementById(id);
+        el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+    }
+
+    function loadView(viewId, voucherType = null) {
+        // Hide all views
+        document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+        
+        // Show selected view
+        document.getElementById(viewId).classList.remove('hidden');
+        
+        // Dynamic Title
+        if(voucherType) {
+            document.getElementById('trans-title').innerText = voucherType + ' Entry';
+            document.getElementById('voucher-type').value = voucherType;
+            document.getElementById('page-title').innerText = voucherType;
+        } else {
+            // Reset page title based on active view if needed
+        }
+    }
+
+    // --- 3. FORM SUBMISSION ---
+    function submitForm(e, sheetName, formId) {
+        e.preventDefault();
+        const form = document.getElementById(formId);
+        const btn = form.querySelector('button');
+        const originalText = btn.innerText;
+        
+        btn.innerText = "Saving...";
+        btn.disabled = true;
+
+        const formData = new FormData(form);
+        const params = new URLSearchParams();
+        params.append("action", "save_data");
+        params.append("sheet_name", sheetName);
+        for(const pair of formData) {
+            params.append(pair[0], pair[1]);
+        }
+
+        fetch(WEB_APP_URL, {
+            method: "POST",
+            body: params
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.result === "success") {
+                alert(data.message);
+                form.reset();
+            } else {
+                alert("Error: " + data.message);
             }
-            if(viewId === 'view-dashboard') loadDashboardStats();
-        }
+        })
+        .catch(err => alert("Connection Error"))
+        .finally(() => {
+            btn.innerText = originalText;
+            btn.disabled = false;
+        });
+    }
 
-        function handleLogin(e) {
-            e.preventDefault();
-            const btn = e.target.querySelector('button'); btn.innerHTML = '<div class="loader"></div>';
-            const data = new FormData(e.target); data.append("action", "login");
-            fetch(API_URL, {method: "POST", body: data}).then(r=>r.json()).then(d=>{
-                if(d.result === 'success') {
-                    document.getElementById('login-overlay').classList.add('hidden');
-                    document.getElementById('user-display-name').innerText = d.message.name;
-                    document.getElementById('user-role').innerText = d.message.role;
-                    loadDashboardStats();
-                } else alert(d.message);
-            }).finally(()=> btn.innerText = "Login");
-        }
+    // --- 4. CRM FUNCTIONS ---
+    function sendWhatsapp(type) {
+        const mobile = document.getElementById('wa-mobile').value;
+        if(!mobile) { alert("Please enter mobile number"); return; }
+        
+        let msg = "";
+        if(type === 'reminder') msg = "Hello, gentle reminder regarding your outstanding payment.";
+        else msg = "Bank Details: HDFC Bank, Acc: 123456789, IFSC: HDFC000123";
+        
+        window.open(`https://wa.me/${mobile}?text=${encodeURIComponent(msg)}`, '_blank');
+    }
 
-        function submitData(e, action, formId) {
-            e.preventDefault();
-            const btn = e.target.querySelector('button[type="submit"]'); const txt = btn.innerText;
-            btn.innerHTML = '<span class="loader"></span> Saving'; btn.disabled = true;
-            const data = new FormData(document.getElementById(formId)); data.append("action", action);
-            fetch(API_URL, {method: "POST", body: data}).then(r=>r.json()).then(d=>{
-                alert(d.message); if(d.result==='success') document.getElementById(formId).reset();
-            }).finally(()=>{ btn.innerText=txt; btn.disabled=false; });
-        }
+    function generateQR() {
+        const amt = document.getElementById('qr-amount').value;
+        const container = document.getElementById('qrcode');
+        container.innerHTML = "";
+        if(!amt) return;
 
-        function loadDashboardStats() {
-            ['stat-receivables','stat-payables','stat-cash','stat-bank'].forEach(i=>document.getElementById(i).innerText="...");
-            const d = new FormData(); d.append("action", "get_dashboard_stats");
-            fetch(API_URL, {method: "POST", body: d}).then(r=>r.json()).then(j=>{
-                if(j.result==='success') {
-                    document.getElementById('stat-receivables').innerText = "₹ "+j.message.receivables.toLocaleString();
-                    document.getElementById('stat-payables').innerText = "₹ "+j.message.payables.toLocaleString();
-                    document.getElementById('stat-cash').innerText = "₹ "+j.message.cash.toLocaleString();
-                    document.getElementById('stat-bank').innerText = "₹ "+j.message.bank.toLocaleString();
-                }
-            });
-        }
+        const upiString = `upi://pay?pa=yourupi@upi&pn=CMBooks&am=${amt}&tn=Payment`;
+        new QRCode(container, { text: upiString, width: 128, height: 128 });
+    }
 
-        function loadFinancials() {
-            showView('view-financials', null, 'Profit & Loss');
-            const d = new FormData(); d.append("action", "get_financial_report");
-            fetch(API_URL, {method: "POST", body: d}).then(r=>r.json()).then(j=>{
-                if(j.result==='success') {
-                    const r = j.message;
-                    document.getElementById('pl-sales').innerText = r.sales.toFixed(2);
-                    document.getElementById('pl-purchase').innerText = r.purchase.toFixed(2);
-                    document.getElementById('pl-direct').innerText = r.directExp.toFixed(2);
-                    document.getElementById('pl-gp').innerText = r.grossProfit.toFixed(2);
-                    document.getElementById('pl-income').innerText = r.income.toFixed(2);
-                    document.getElementById('pl-indirect').innerText = r.indirectExp.toFixed(2);
-                    document.getElementById('pl-np').innerText = r.netProfit.toFixed(2);
-                }
-            });
-        }
+    // Initialize Default View
+    loadView('view-company');
+</script>
 
-        function fetchReport(sheet) {
-            document.getElementById('report-title').innerText = sheet;
-            document.getElementById('report-body').innerHTML = '<tr><td class="p-8 text-center"><div class="loader"></div></td></tr>';
-            const d = new FormData(); d.append("action", "get_data"); d.append("sheetName", sheet);
-            fetch(API_URL, {method: "POST", body: d}).then(r=>r.json()).then(j=>{
-                if(j.result==='success' && j.message.length>0) {
-                    const keys = Object.keys(j.message[0]);
-                    document.getElementById('report-head').innerHTML = '<tr>'+keys.map(k=>`<th class="p-3 whitespace-nowrap">${k}</th>`).join('')+'</tr>';
-                    document.getElementById('report-body').innerHTML = j.message.map(r=>`<tr class="border-b hover:bg-gray-50">`+keys.map(k=>`<td class="p-3 border-r whitespace-nowrap">${r[k]}</td>`).join('')+`</tr>`).join('');
-                } else document.getElementById('report-body').innerHTML = '<tr><td class="p-8 text-center text-gray-400">No Data</td></tr>';
-            });
-        }
-
-        function printInvoice() {
-            document.getElementById('print-party').innerText = document.getElementById('v-ledger').value || "Cash";
-            document.getElementById('print-item').innerText = document.getElementById('v-item').value || "Services";
-            let amt = document.getElementById('v-amount').value || 0;
-            document.getElementById('print-amount').innerText = Number(amt).toFixed(2);
-            document.getElementById('print-total').innerText = Number(amt).toFixed(2);
-            window.print();
-        }
-
-        function sendWA(t) { 
-            const n = document.getElementById('crm-mobile').value; 
-            window.open(`https://wa.me/${n}?text=${encodeURIComponent(t==='reminder'?"Payment Reminder":"Bank Details: HDFC 1234")}`, '_blank'); 
-        }
-
-        function generateQR() {
-            const a = document.getElementById('qr-amount').value;
-            if(!a) return alert("Enter Amount");
-            const d = document.getElementById('qrcode-display'); d.innerHTML=""; d.classList.remove('hidden');
-            new QRCode(d, {text: `upi://pay?pa=cmbooks@upi&pn=CMBooks&am=${a}&tn=Payment`, width:100, height:100});
-        }
-        function initApp() {}
-    </script>
 </body>
 </html>
