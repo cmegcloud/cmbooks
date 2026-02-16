@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CMB ERP | Login</title>
+    <title>CMB ERP | Accounting & CRM</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <script>
@@ -21,7 +23,9 @@
               brandDark: '#1c212e',
               brandGray: '#f4f5f7'
             },
-            fontFamily: { poppins: ['Poppins', 'sans-serif'] }
+            fontFamily: {
+              poppins: ['Poppins', 'sans-serif']
+            }
           }
         }
       }
@@ -30,312 +34,358 @@
     <style>
         body { font-family: 'Poppins', sans-serif; background-color: #f4f5f7; }
         
-        /* LOGIN SCREEN STYLES */
-        .login-wrapper { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: #1c212e; display: flex; justify-content: center; align-items: center; z-index: 9999; }
-        .login-box { background: white; padding: 40px; border-radius: 10px; width: 350px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
-        .login-logo { width: 60px; margin: 0 auto 15px; }
-        .login-input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; outline: none; font-size: 14px; }
-        .login-input:focus { border-color: #1F70D3; }
-        .login-btn { width: 100%; padding: 12px; background: #1F70D3; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: 0.3s; }
-        .login-btn:hover { background: #16509c; }
-        .login-footer { margin-top: 20px; font-size: 12px; color: #888; }
-
-        /* APP STYLES (Hidden Initially) */
-        #app-container { display: none; } 
+        /* LOGIN SCREEN */
+        #login-overlay { position: fixed; inset: 0; background: #1c212e; z-index: 50; display: flex; align-items: center; justify-content: center; }
+        .login-card { background: white; width: 100%; max-width: 380px; padding: 40px; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); text-align: center; }
+        .login-input { width: 100%; padding: 12px 15px; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 15px; outline: none; transition: 0.3s; }
+        .login-input:focus { border-color: #1F70D3; ring: 2px; }
         
-        /* Your Existing Styles */
-        .sidebar { width: 260px; background: #1c212e; color: #d4d6dc; height: 100vh; position: fixed; overflow-y: auto; transition: 0.3s; z-index: 50; }
+        /* APP LAYOUT */
+        #app-layout { display: none; } /* Hidden until login */
+        .sidebar { width: 260px; background: #1c212e; color: #d4d6dc; height: 100vh; position: fixed; overflow-y: auto; transition: 0.3s; z-index: 40; }
+        .main-content { margin-left: 260px; padding: 25px; min-height: 100vh; display: flex; flex-direction: column; }
+        
+        /* SIDEBAR ITEMS */
         .brand-header { padding: 20px; font-size: 20px; font-weight: 700; color: white; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 10px; }
         .menu-cat { font-size: 11px; text-transform: uppercase; color: #6c757d; padding: 15px 20px 5px; font-weight: 700; letter-spacing: 1px; }
         .nav-item { padding: 12px 20px; display: flex; align-items: center; cursor: pointer; transition: 0.2s; font-size: 13px; border-left: 3px solid transparent; }
         .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.05); color: #fff; border-left-color: #F6b936; }
         .nav-item i { width: 25px; font-size: 15px; }
+        
+        /* SUBMENU */
         .submenu { display: none; background: rgba(0,0,0,0.3); }
         .submenu a { display: block; padding: 10px 20px 10px 50px; font-size: 12px; color: #a0a6b5; cursor: pointer; text-decoration: none; }
         .submenu a:hover { color: #fff; }
-        .main { margin-left: 260px; padding: 20px; }
+
+        /* CONTENT ELEMENTS */
         .header { background: white; padding: 15px 25px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.02); margin-bottom: 25px; }
         .card { background: white; border-radius: 8px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); border: 1px solid #e5e7eb; }
         .form-input { width: 100%; border: 1px solid #d1d5db; padding: 10px; border-radius: 6px; font-size: 14px; margin-top: 5px; outline: none; }
         .form-input:focus { border-color: #1F70D3; box-shadow: 0 0 0 2px rgba(31,112,211,0.1); }
         .form-label { font-size: 12px; font-weight: 600; color: #374151; }
+        
+        /* CRM BOX */
         .crm-box { margin: 15px; background: linear-gradient(135deg, #1F70D3 0%, #104c94 100%); border-radius: 8px; padding: 15px; color: white; border: 1px solid #F6b936; }
         .crm-link { display: flex; align-items: center; gap: 10px; padding: 8px; font-size: 12px; cursor: pointer; transition: 0.2s; border-radius: 4px; }
         .crm-link:hover { background: rgba(255,255,255,0.1); }
+
         .btn { padding: 10px 25px; border-radius: 6px; font-weight: 500; font-size: 14px; cursor: pointer; transition: 0.2s; border: none; }
         .btn-primary { background: #1F70D3; color: white; }
+        .btn-primary:hover { background: #16509c; }
         .hidden { display: none; }
     </style>
 </head>
 <body>
 
-    <div id="login-screen" class="login-wrapper">
-        <div class="login-box">
-            <div class="text-4xl text-brandYellow mb-4"><i class="fa-solid fa-cube"></i></div>
-            <h2 class="text-2xl font-bold text-gray-800 mb-1">CMB ERP</h2>
-            <p class="text-xs text-gray-500 mb-6">Sign in to continue</p>
-            
-            <form onsubmit="handleLogin(event)">
-                <input type="text" id="login-user" class="login-input" placeholder="Username" required>
-                <input type="password" id="login-pass" class="login-input" placeholder="Password" required>
-                <button type="submit" id="btn-login" class="login-btn">LOGIN</button>
-            </form>
-            
-            <p id="login-msg" class="text-red-500 text-xs mt-3 h-4"></p>
-            <div class="login-footer">© 2026 CM Books Webapp</div>
+<div id="login-overlay">
+    <div class="login-card">
+        <div class="flex justify-center mb-4">
+            <div class="w-12 h-12 bg-brandYellow rounded flex items-center justify-center text-brandDark text-2xl font-bold">
+                <i class="fa-solid fa-cube"></i>
+            </div>
         </div>
-    </div>
-
-    <div id="app-container">
+        <h2 class="text-2xl font-bold text-gray-800">CMB ERP</h2>
+        <p class="text-sm text-gray-500 mb-6">Sign in to your account</p>
         
-        <aside class="sidebar" id="sidebar">
-            <div class="brand-header">
-                <i class="fa-solid fa-cube text-brandYellow"></i> CMB ERP
-            </div>
-
-            <div class="nav-item active" onclick="loadView('view-company')"><i class="fa-solid fa-building"></i> Company Profile</div>
-
-            <div class="menu-cat">Masters</div>
-            <div class="nav-item" onclick="toggleMenu('sub-create')">
-                <i class="fa-solid fa-folder-plus"></i> Create <i class="fa-solid fa-chevron-down ml-auto text-xs"></i>
-            </div>
-            <div class="submenu" id="sub-create">
-                <a onclick="loadView('view-ledger')">Ledgers</a>
-                <a onclick="alert('Module Loading...')">Project Name</a>
-                <a onclick="alert('Module Loading...')">Project Stage</a>
-            </div>
-
-            <div class="menu-cat">Transactions</div>
-            <div class="nav-item" onclick="toggleMenu('sub-accounts')">
-                <i class="fa-solid fa-file-invoice-dollar"></i> Accounts Entry <i class="fa-solid fa-chevron-down ml-auto text-xs"></i>
-            </div>
-            <div class="submenu" id="sub-accounts">
-                <a onclick="loadView('view-transaction', 'Payment')">Payment</a>
-                <a onclick="loadView('view-transaction', 'Receipt')">Receipt</a>
-                <a onclick="loadView('view-transaction', 'Sales')">Sales / Invoice</a>
-                <a onclick="loadView('view-transaction', 'Purchase')">Purchase</a>
-            </div>
-
-            <div class="menu-cat">Reports</div>
-            <div class="nav-item" onclick="toggleMenu('sub-reports')">
-                <i class="fa-solid fa-chart-pie"></i> Financial Reports <i class="fa-solid fa-chevron-down ml-auto text-xs"></i>
-            </div>
-            <div class="submenu" id="sub-reports">
-                <a>Profit & Loss</a>
-                <a>Balance Sheet</a>
-                <a>GST Reports</a>
-            </div>
-
-            <div class="crm-box">
-                <div class="font-bold text-xs mb-2 flex items-center gap-2"><i class="fa-solid fa-bolt text-brandYellow"></i> SMART CRM</div>
-                <div class="crm-link" onclick="loadView('view-crm')"><i class="fa-brands fa-whatsapp"></i> Send Reminders</div>
-                <div class="crm-link" onclick="loadView('view-crm')"><i class="fa-solid fa-qrcode"></i> Generate QR</div>
-            </div>
-
-            <div class="menu-cat">Settings</div>
-            <div class="nav-item" onclick="loadView('view-users')">
-                <i class="fa-solid fa-users-gear"></i> User Roles
-            </div>
-            
-            <div class="nav-item" style="color: #F6b936; margin-top:20px;" onclick="location.reload()">
-                <i class="fa-solid fa-power-off"></i> Logout
-            </div>
-        </aside>
-
-        <div class="main">
-            <div class="header">
-                <h2 id="page-title" class="text-xl font-bold text-gray-700">Dashboard</h2>
-                <div class="flex items-center gap-4">
-                    <span class="text-sm text-gray-500 font-medium" id="user-display">User</span>
-                    <div class="w-8 h-8 rounded-full bg-brandBlue text-white flex items-center justify-center font-bold text-xs">U</div>
-                </div>
-            </div>
-
-            <div id="view-company" class="view-section">
-                <div class="card max-w-4xl mx-auto">
-                    <h3 class="text-lg font-bold text-brandBlue mb-4 border-b pb-2">Company Details</h3>
-                    <form id="form-company" onsubmit="submitForm(event, 'COMPANY', 'form-company')">
-                        <div class="grid grid-cols-2 gap-4 mb-4">
-                            <div><label class="form-label">Company Name</label><input type="text" name="Company Name" class="form-input" required></div>
-                            <div><label class="form-label">Mailing Name</label><input type="text" name="Mailing Name" class="form-input"></div>
-                        </div>
-                        <div class="grid grid-cols-3 gap-4 mb-4">
-                            <div>
-                                <label class="form-label">State</label>
-                                <select name="State" class="form-input">
-                                    <option>Kerala</option><option>Tamil Nadu</option><option>Karnataka</option>
-                                </select>
-                            </div>
-                            <div><label class="form-label">GSTIN</label><input type="text" name="GSTIN" class="form-input"></div>
-                            <div><label class="form-label">FY From</label><input type="date" name="Financial Year Beginning From" class="form-input" value="2025-04-01"></div>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Save Company</button>
-                    </form>
-                </div>
-            </div>
-
-            <div id="view-ledger" class="view-section hidden">
-                <div class="card max-w-2xl mx-auto">
-                    <h3 class="text-lg font-bold text-brandBlue mb-4">Create Ledger</h3>
-                    <form id="form-ledger" onsubmit="submitForm(event, 'LEDGER', 'form-ledger')">
-                        <div class="mb-4"><label class="form-label">Name</label><input type="text" name="Ledger Name" class="form-input" required></div>
-                        <div class="mb-4"><label class="form-label">Group</label>
-                            <select name="Under" class="form-input">
-                                <option>Sundry Debtors</option><option>Sundry Creditors</option><option>Sales Accounts</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Save</button>
-                    </form>
-                </div>
-            </div>
-
-            <div id="view-transaction" class="view-section hidden">
-                <div class="card max-w-4xl mx-auto">
-                    <h3 class="text-lg font-bold text-brandBlue mb-4" id="trans-title">Transaction</h3>
-                    <form id="form-transaction" onsubmit="submitForm(event, 'TRANSACTION', 'form-transaction')">
-                        <input type="hidden" name="Voucher Type" id="voucher-type">
-                        <div class="grid grid-cols-2 gap-4 mb-4">
-                            <div><label class="form-label">Date</label><input type="date" name="Date" class="form-input"></div>
-                            <div><label class="form-label">Ledger</label><input type="text" name="Ledger Name" class="form-input"></div>
-                        </div>
-                        <div class="mb-4"><label class="form-label">Amount</label><input type="number" name="Amount" class="form-input font-bold text-right" required></div>
-                        <div class="mb-4"><label class="form-label">Narration</label><input type="text" name="Narration" class="form-input"></div>
-                        <button type="submit" class="btn btn-primary">Save Voucher</button>
-                    </form>
-                </div>
-            </div>
-
-            <div id="view-crm" class="view-section hidden">
-                <div class="grid grid-cols-2 gap-6 max-w-5xl mx-auto">
-                    <div class="card">
-                        <h3 class="text-lg font-bold text-green-600 mb-4"><i class="fa-brands fa-whatsapp"></i> WhatsApp</h3>
-                        <input type="number" id="wa-mobile" class="form-input mb-4" placeholder="919800000000">
-                        <div class="flex gap-2">
-                            <button onclick="sendWhatsapp('reminder')" class="btn bg-brandYellow text-black flex-1">Reminder</button>
-                            <button onclick="sendWhatsapp('bank')" class="btn bg-brandBlue text-white flex-1">Bank Details</button>
-                        </div>
-                    </div>
-                    <div class="card text-center">
-                        <h3 class="text-lg font-bold text-brandBlue mb-4">Payment QR</h3>
-                        <input type="number" id="qr-amount" class="form-input mb-4" placeholder="Amount">
-                        <button onclick="generateQR()" class="btn btn-primary w-full">Generate</button>
-                        <div id="qrcode" class="flex justify-center mt-4 p-4 border border-dashed rounded"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="view-users" class="view-section hidden">
-                <div class="card max-w-2xl mx-auto">
-                    <h3 class="text-lg font-bold text-brandBlue mb-4">User Management</h3>
-                    <form id="form-user" onsubmit="submitForm(event, 'USERS', 'form-user')">
-                        <div class="mb-4"><label class="form-label">Username</label><input type="text" name="User Name" class="form-input" required></div>
-                        <div class="mb-4"><label class="form-label">Password</label><input type="text" name="Password" class="form-input" required></div>
-                        <div class="mb-4"><label class="form-label">Role</label>
-                            <select name="Role" class="form-input"><option>Admin</option><option>Accountant</option></select>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Add User</button>
-                    </form>
-                </div>
-            </div>
-
-        </div>
+        <form onsubmit="handleLogin(event)">
+            <input type="text" id="username" class="login-input" placeholder="Username (e.g. admin)" required>
+            <input type="password" id="password" class="login-input" placeholder="Password (e.g. 1234)" required>
+            <button type="submit" id="btn-login" class="btn-primary w-full">LOGIN</button>
+        </form>
+        <p id="login-msg" class="text-xs text-red-500 mt-4 h-4"></p>
     </div>
+</div>
 
-    <script>
-        // --- CONFIG ---
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz0RJrQpJ3cpb1OBTs5jtkMRkni_f2jGKSJMwjAmph8vTdsr7yXkid6YiJA-Gv3unYr/exec"; 
+<div id="app-layout">
+    
+    <aside class="sidebar" id="sidebar">
+        <div class="brand-header">
+            <i class="fa-solid fa-cube text-brandYellow"></i> CMB ERP
+        </div>
 
-        // --- AUTHENTICATION ---
-        function handleLogin(e) {
-            e.preventDefault();
-            const user = document.getElementById('login-user').value;
-            const pass = document.getElementById('login-pass').value;
-            const btn = document.getElementById('btn-login');
-            const msg = document.getElementById('login-msg');
+        <div class="nav-item active" onclick="loadView('view-company')">
+            <i class="fa-solid fa-building"></i> Company Profile
+        </div>
 
-            btn.innerText = "Checking...";
-            btn.disabled = true;
-            msg.innerText = "";
+        <div class="menu-cat">Masters</div>
+        <div class="nav-item" onclick="toggleMenu('sub-create')">
+            <i class="fa-solid fa-folder-plus"></i> Create <i class="fa-solid fa-chevron-down ml-auto text-xs"></i>
+        </div>
+        <div class="submenu" id="sub-create">
+            <a onclick="loadView('view-ledger')">Ledgers</a>
+            <a onclick="alert('Project Module Loading...')">Project Name</a>
+            <a onclick="loadView('view-stock')">Stock Items</a>
+        </div>
 
-            // Check against Google Sheet
-            const params = new URLSearchParams();
-            params.append("action", "login");
-            params.append("username", user);
-            params.append("password", pass);
+        <div class="menu-cat">Transactions</div>
+        <div class="nav-item" onclick="toggleMenu('sub-accounts')">
+            <i class="fa-solid fa-file-invoice-dollar"></i> Accounts Entry <i class="fa-solid fa-chevron-down ml-auto text-xs"></i>
+        </div>
+        <div class="submenu" id="sub-accounts">
+            <a onclick="loadView('view-transaction', 'Payment')">Payment</a>
+            <a onclick="loadView('view-transaction', 'Receipt')">Receipt</a>
+            <a onclick="loadView('view-transaction', 'Sales')">Sales / Invoice</a>
+            <a onclick="loadView('view-transaction', 'Purchase')">Purchase</a>
+            <a>Cash Book</a>
+            <a>Bank Book</a>
+        </div>
 
-            fetch(WEB_APP_URL, { method: "POST", body: params })
-            .then(res => res.json())
-            .then(data => {
-                if(data.result === 'success') {
-                    document.getElementById('login-screen').style.display = 'none';
-                    document.getElementById('app-container').style.display = 'block';
-                    document.getElementById('user-display').innerText = user;
-                } else {
-                    msg.innerText = "Invalid Username or Password";
-                    btn.innerText = "LOGIN";
-                    btn.disabled = false;
-                }
-            })
-            .catch(err => {
-                msg.innerText = "Connection Error";
+        <div class="menu-cat">Reports</div>
+        <div class="nav-item" onclick="toggleMenu('sub-reports')">
+            <i class="fa-solid fa-chart-pie"></i> Financial Reports <i class="fa-solid fa-chevron-down ml-auto text-xs"></i>
+        </div>
+        <div class="submenu" id="sub-reports">
+            <a>Profit & Loss</a>
+            <a>Balance Sheet</a>
+            <a>GST Reports</a>
+        </div>
+
+        <div class="crm-box">
+            <div class="font-bold text-xs mb-2 flex items-center gap-2"><i class="fa-solid fa-bolt text-brandYellow"></i> SMART CRM</div>
+            <div class="crm-link" onclick="loadView('view-crm')"><i class="fa-brands fa-whatsapp"></i> Send Reminders</div>
+            <div class="crm-link" onclick="loadView('view-crm')"><i class="fa-solid fa-qrcode"></i> Generate QR</div>
+        </div>
+
+        <div class="menu-cat">Settings</div>
+        <div class="nav-item" onclick="loadView('view-users')">
+            <i class="fa-solid fa-users-gear"></i> User Roles
+        </div>
+        
+        <div class="nav-item text-brandYellow mt-5" onclick="location.reload()">
+            <i class="fa-solid fa-power-off"></i> Logout
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="header">
+            <h2 id="page-title" class="text-xl font-bold text-gray-700">Dashboard</h2>
+            <div class="flex items-center gap-4">
+                <div class="text-right hidden sm:block">
+                    <p class="text-sm font-bold text-gray-700" id="user-display">User</p>
+                    <p class="text-xs text-green-500">● Online</p>
+                </div>
+                <div class="w-10 h-10 bg-brandBlue rounded-full flex items-center justify-center text-white font-bold">U</div>
+            </div>
+        </div>
+
+        <div id="view-company" class="view-section">
+            <div class="card max-w-4xl mx-auto">
+                <h3 class="text-lg font-bold text-brandBlue mb-4 border-b pb-2">Company Details</h3>
+                <form id="form-company" onsubmit="submitForm(event, 'COMPANY', 'form-company')">
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div><label class="form-label">Company Name</label><input type="text" name="Company Name" class="form-input" required></div>
+                        <div><label class="form-label">Mailing Name</label><input type="text" name="Mailing Name" class="form-input"></div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-4 mb-4">
+                        <div><label class="form-label">State</label><input name="State" class="form-input" value="Kerala"></div>
+                        <div><label class="form-label">GSTIN</label><input name="GSTIN" class="form-input"></div>
+                        <div><label class="form-label">FY From</label><input type="date" name="Financial Year Beginning From" class="form-input" value="2025-04-01"></div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Company</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="view-ledger" class="view-section hidden">
+            <div class="card max-w-2xl mx-auto">
+                <h3 class="text-lg font-bold text-brandBlue mb-4 border-b pb-2">Create Ledger</h3>
+                <form id="form-ledger" onsubmit="submitForm(event, 'LEDGER', 'form-ledger')">
+                    <div class="mb-4">
+                        <label class="form-label">Ledger Name</label>
+                        <input type="text" name="Ledger Name" class="form-input" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Under Group</label>
+                        <select name="Under" class="form-input bg-white">
+                            <option>Sundry Debtors</option>
+                            <option>Sundry Creditors</option>
+                            <option>Sales Accounts</option>
+                            <option>Purchase Accounts</option>
+                            <option>Indirect Expenses</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Ledger</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="view-stock" class="view-section hidden">
+            <div class="card max-w-2xl mx-auto">
+                <h3 class="text-lg font-bold text-brandBlue mb-4 border-b pb-2">Create Stock Item</h3>
+                <form id="form-stock" onsubmit="submitForm(event, 'STOCK', 'form-stock')">
+                    <div class="mb-4">
+                        <label class="form-label">Item Name</label>
+                        <input type="text" name="Name" class="form-input" required>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div><label class="form-label">Units</label><input name="Units" class="form-input" placeholder="Nos/Kgs"></div>
+                        <div><label class="form-label">GST Rate (%)</label><input name="GST Rate" type="number" class="form-input"></div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Item</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="view-transaction" class="view-section hidden">
+            <div class="card max-w-4xl mx-auto">
+                <h3 class="text-lg font-bold text-brandBlue mb-4 border-b pb-2" id="trans-title">Transaction</h3>
+                <form id="form-transaction" onsubmit="submitForm(event, 'TRANSACTION', 'form-transaction')">
+                    <input type="hidden" name="Voucher Type" id="voucher-type">
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div><label class="form-label">Date</label><input type="date" name="Date" class="form-input"></div>
+                        <div><label class="form-label">Ledger Name</label><input type="text" name="Ledger Name" class="form-input" placeholder="Search Ledger"></div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Amount</label>
+                        <input type="number" name="Amount" class="form-input font-bold text-right" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Narration</label>
+                        <input type="text" name="Narration" class="form-input">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Voucher</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="view-crm" class="view-section hidden">
+            <div class="grid grid-cols-2 gap-6 max-w-5xl mx-auto">
+                <div class="card">
+                    <h3 class="text-lg font-bold text-green-600 mb-4"><i class="fa-brands fa-whatsapp"></i> WhatsApp Tools</h3>
+                    <input type="number" id="wa-mobile" class="form-input mb-4" placeholder="919800000000">
+                    <div class="flex gap-2">
+                        <button onclick="sendWhatsapp('reminder')" class="btn bg-brandYellow text-black flex-1">Reminder</button>
+                        <button onclick="sendWhatsapp('bank')" class="btn bg-brandBlue text-white flex-1">Bank Details</button>
+                    </div>
+                </div>
+                <div class="card text-center">
+                    <h3 class="text-lg font-bold text-brandBlue mb-4">Payment QR</h3>
+                    <input type="number" id="qr-amount" class="form-input mb-4" placeholder="Enter Amount">
+                    <button onclick="generateQR()" class="btn btn-primary w-full">Generate QR</button>
+                    <div id="qrcode" class="flex justify-center mt-4 p-4 border border-dashed rounded"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-users" class="view-section hidden">
+            <div class="card max-w-2xl mx-auto">
+                <h3 class="text-lg font-bold text-brandBlue mb-4">User Management</h3>
+                <form id="form-user" onsubmit="submitForm(event, 'USERS', 'form-user')">
+                    <div class="mb-4"><label class="form-label">Username</label><input type="text" name="User Name" class="form-input" required></div>
+                    <div class="mb-4"><label class="form-label">Password</label><input type="text" name="Password" class="form-input" required></div>
+                    <div class="mb-4"><label class="form-label">Role</label>
+                        <select name="Role" class="form-input"><option>Admin</option><option>Accountant</option></select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add User</button>
+                </form>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script>
+    // --- YOUR BACKEND URL IS HERE ---
+    const API_URL = "https://script.google.com/macros/s/AKfycbytdWNPhkrGxVHCcZhqW0js45B0uQ44aE5OZaXf9RGZP4Y23F-kULrq0BCRn-fxVYM-/exec"; 
+
+    // --- AUTHENTICATION ---
+    function handleLogin(e) {
+        e.preventDefault();
+        const user = document.getElementById('username').value;
+        const pass = document.getElementById('password').value;
+        const btn = document.getElementById('btn-login');
+        const msg = document.getElementById('login-msg');
+
+        btn.innerText = "Checking...";
+        btn.disabled = true;
+        msg.innerText = "";
+
+        const formData = new FormData();
+        formData.append('action', 'login');
+        formData.append('username', user);
+        formData.append('password', pass);
+
+        fetch(API_URL, { method: 'POST', body: formData })
+        .then(res => res.json())
+        .then(data => {
+            if (data.result === 'success') {
+                document.getElementById('login-overlay').style.display = 'none';
+                document.getElementById('app-layout').style.display = 'flex';
+                document.getElementById('user-display').innerText = user;
+            } else {
+                msg.innerText = data.message;
                 btn.innerText = "LOGIN";
                 btn.disabled = false;
-            });
-        }
-
-        // --- NAVIGATION ---
-        function toggleMenu(id) {
-            const el = document.getElementById(id);
-            el.style.display = (el.style.display === 'block') ? 'none' : 'block';
-        }
-
-        function loadView(viewId, voucherType = null) {
-            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
-            document.getElementById(viewId).classList.remove('hidden');
-            if(voucherType) {
-                document.getElementById('trans-title').innerText = voucherType;
-                document.getElementById('voucher-type').value = voucherType;
             }
+        })
+        .catch(err => {
+            msg.innerText = "Connection Failed. Check Internet.";
+            btn.innerText = "LOGIN";
+            btn.disabled = false;
+        });
+    }
+
+    // --- NAVIGATION ---
+    function toggleMenu(id) {
+        const el = document.getElementById(id);
+        el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+    }
+
+    function loadView(viewId, voucherType = null) {
+        document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+        document.getElementById(viewId).classList.remove('hidden');
+        if(voucherType) {
+            document.getElementById('trans-title').innerText = voucherType + ' Entry';
+            document.getElementById('voucher-type').value = voucherType;
         }
+    }
 
-        // --- FORM SUBMIT ---
-        function submitForm(e, sheetName, formId) {
-            e.preventDefault();
-            const form = document.getElementById(formId);
-            const btn = form.querySelector('button');
-            const orgText = btn.innerText;
-            btn.innerText = "Saving..."; btn.disabled = true;
+    // --- DATA SUBMISSION ---
+    function submitForm(e, sheetName, formId) {
+        e.preventDefault();
+        const form = document.getElementById(formId);
+        const btn = form.querySelector('button');
+        const originalText = btn.innerText;
 
-            const formData = new FormData(form);
-            const params = new URLSearchParams();
-            params.append("action", "save_data");
-            params.append("sheet_name", sheetName);
-            for(const pair of formData) params.append(pair[0], pair[1]);
+        btn.innerText = "Saving...";
+        btn.disabled = true;
 
-            fetch(WEB_APP_URL, { method: "POST", body: params })
-            .then(res => res.json())
-            .then(data => {
-                if(data.result === 'success') { alert("Saved!"); form.reset(); }
-                else { alert("Error: " + data.message); }
-            })
-            .catch(() => alert("Connection Failed"))
-            .finally(() => { btn.innerText = orgText; btn.disabled = false; });
-        }
+        const formData = new FormData(form);
+        formData.append('action', 'save_data');
+        formData.append('sheet_name', sheetName);
 
-        // --- CRM TOOLS ---
-        function sendWhatsapp(type) {
-            const num = document.getElementById('wa-mobile').value;
-            if(!num) return alert("Enter Mobile");
-            const msg = type === 'reminder' ? "Payment Reminder from CM Books" : "Bank Details: HDFC 12345678";
-            window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`, '_blank');
-        }
+        fetch(API_URL, { method: 'POST', body: formData })
+        .then(res => res.json())
+        .then(data => {
+            if (data.result === 'success') {
+                alert('Saved Successfully!');
+                form.reset();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(err => alert('Connection Error'))
+        .finally(() => {
+            btn.innerText = originalText;
+            btn.disabled = false;
+        });
+    }
 
-        function generateQR() {
-            const amt = document.getElementById('qr-amount').value;
-            const div = document.getElementById('qrcode');
-            div.innerHTML = "";
-            if(amt) new QRCode(div, { text: `upi://pay?pa=upi@id&am=${amt}`, width: 128, height: 128 });
-        }
-    </script>
+    // --- CRM ---
+    function sendWhatsapp(type) {
+        const num = document.getElementById('wa-mobile').value;
+        if(!num) return alert("Enter Mobile");
+        const msg = type === 'reminder' ? "Payment Reminder from CM Books." : "Bank Details: HDFC 12345678";
+        window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    function generateQR() {
+        const amt = document.getElementById('qr-amount').value;
+        const div = document.getElementById('qrcode');
+        div.innerHTML = "";
+        if(amt) new QRCode(div, { text: `upi://pay?pa=yourupi@id&am=${amt}`, width: 128, height: 128 });
+    }
+</script>
+
 </body>
 </html>
