@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CMB ERP | Cloud Accounting & CRM</title>
+    <title>CMB ERP | Professional Cloud Accounting</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -14,11 +14,7 @@
         theme: {
           extend: {
             colors: {
-              brandYellow: '#F6b936',
-              brandBlue: '#1F70D3',
-              brandRed: '#D60000',
-              brandDark: '#1c212e',
-              brandGray: '#f4f5f7'
+              brandYellow: '#F6b936', brandBlue: '#1F70D3', brandRed: '#D60000', brandDark: '#1c212e', brandGray: '#f4f5f7'
             }
           }
         }
@@ -26,22 +22,21 @@
     </script>
 
     <style>
-        body { font-family: 'Poppins', sans-serif; background-color: #f4f5f7; }
-        .sidebar { width: 260px; background: #1c212e; color: #d4d6dc; height: 100vh; position: fixed; overflow-y: auto; z-index: 40; }
-        .main-content { margin-left: 260px; padding: 20px; min-height: 100vh; }
+        body { font-family: 'Poppins', sans-serif; background-color: #f4f5f7; height: 100vh; display: flex; overflow: hidden; }
+        .sidebar { width: 260px; background: #1c212e; color: #d4d6dc; height: 100vh; overflow-y: auto; flex-shrink: 0; }
         .nav-item { padding: 10px 20px; cursor: pointer; display: flex; align-items: center; border-left: 3px solid transparent; font-size: 13px; transition: 0.2s; }
         .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.05); color: white; border-left-color: #F6b936; }
-        .nav-item i { width: 25px; }
         .submenu { display: none; background: rgba(0,0,0,0.3); }
         .submenu.open { display: block; }
-        .card { background: white; border-radius: 10px; padding: 25px; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01); }
-        .form-input { width: 100%; border: 1px solid #d1d5db; padding: 8px; border-radius: 6px; font-size: 13px; margin-top: 4px; outline: none; }
-        .form-label { font-size: 11px; font-weight: 700; color: #374151; text-transform: uppercase; }
+        .main-content { flex: 1; padding: 20px; overflow-y: auto; }
+        .card { background: white; border-radius: 8px; padding: 20px; border: 1px solid #e5e7eb; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .form-label { font-size: 11px; font-weight: 700; color: #374151; text-transform: uppercase; margin-bottom: 4px; display: block; }
+        .form-input { width: 100%; border: 1px solid #d1d5db; padding: 8px 12px; border-radius: 4px; font-size: 13px; outline: none; }
+        .form-input:focus { border-color: #1F70D3; box-shadow: 0 0 0 2px rgba(31,112,211,0.1); }
         .crm-box { margin: 15px; background: linear-gradient(135deg, #1F70D3 0%, #104c94 100%); border-radius: 8px; padding: 15px; color: white; border: 1px solid #F6b936; }
-        .crm-link { display: flex; align-items: center; gap: 10px; padding: 8px; font-size: 12px; cursor: pointer; transition: 0.2s; border-radius: 4px; }
-        .crm-link:hover { background: rgba(255,255,255,0.1); }
-        .btn-primary { background: #1F70D3; color: white; padding: 8px 20px; border-radius: 6px; font-weight: 500; font-size: 13px; }
-        .hidden { display: none; }
+        .btn-primary { background: #1F70D3; color: white; padding: 10px 24px; border-radius: 4px; font-weight: 600; font-size: 13px; transition: 0.2s; }
+        .btn-primary:hover { background: #16509c; }
+        .stat-card { border-top: 4px solid #F6b936; }
     </style>
 </head>
 <body>
@@ -51,142 +46,119 @@
             <i class="fa-solid fa-cube text-brandYellow"></i> CMB ERP
         </div>
 
-        <div class="mt-4 nav-item active" onclick="loadView('view-company')"><i class="fa-solid fa-building"></i> Company Profile</div>
+        <div class="mt-4 nav-item active" onclick="loadView('view-dash')"><i class="fa-solid fa-gauge-high mr-3"></i> Dash Board</div>
+        <div class="nav-item" onclick="loadView('view-company')"><i class="fa-solid fa-building mr-3"></i> Company</div>
 
         <div class="px-5 pt-4 pb-1 text-[10px] font-bold text-gray-500 uppercase">Masters</div>
-        <div class="nav-item" onclick="toggleMenu('sub-create')"><i class="fa-solid fa-plus-circle"></i> Create <i class="fa-solid fa-chevron-down ml-auto text-[10px]"></i></div>
+        <div class="nav-item" onclick="toggleMenu('sub-create')"><i class="fa-solid fa-plus-circle mr-3"></i> Create <i class="fa-solid fa-chevron-down ml-auto text-[10px]"></i></div>
         <div class="submenu" id="sub-create">
-            <a class="nav-item" onclick="loadView('view-ledger')">Ledgers</a>
+            <a class="nav-item" onclick="loadView('view-ledger')">Ledger</a>
             <a class="nav-item" onclick="loadView('view-stock')">Stock Items</a>
-            <a class="nav-item" onclick="loadView('view-project')">Project Name</a>
-            <a class="nav-item" onclick="loadView('view-project-stage')">Project Stage</a>
+            <a class="nav-item">Cost Centre/Project</a>
         </div>
 
-        <div class="px-5 pt-4 pb-1 text-[10px] font-bold text-gray-500 uppercase">Vouchers</div>
-        <div class="nav-item" onclick="toggleMenu('sub-accounts')"><i class="fa-solid fa-file-invoice-dollar"></i> Accounts Entry <i class="fa-solid fa-chevron-down ml-auto text-[10px]"></i></div>
-        <div class="submenu" id="sub-accounts">
-            <a class="nav-item" onclick="loadView('view-transaction', 'Payment')">Payment</a>
-            <a class="nav-item" onclick="loadView('view-transaction', 'Receipt')">Receipt</a>
-            <a class="nav-item" onclick="loadView('view-transaction', 'Sales')">Sales Invoice</a>
-            <a class="nav-item" onclick="loadView('view-transaction', 'Cash Book')">Cash Book</a>
-            <a class="nav-item" onclick="loadView('view-transaction', 'Bank Book')">Bank Book</a>
-            <a class="nav-item" onclick="loadView('view-transaction', 'Journal')">Journal</a>
-            <a class="nav-item" onclick="loadView('view-transaction', 'Credit Note')">Sales Return</a>
-            <a class="nav-item" onclick="loadView('view-transaction', 'Debit Note')">Purchase Return</a>
-            <a class="nav-item" onclick="loadView('view-transaction', 'Estimate')">Estimates</a>
-            <a class="nav-item" onclick="loadView('view-transaction', 'Check Move')">Check Movement</a>
-        </div>
-
-        <div class="px-5 pt-4 pb-1 text-[10px] font-bold text-gray-500 uppercase">Intelligence</div>
-        <div class="nav-item" onclick="toggleMenu('sub-reports')"><i class="fa-solid fa-chart-pie"></i> Reports <i class="fa-solid fa-chevron-down ml-auto text-[10px]"></i></div>
-        <div class="submenu" id="sub-reports">
-            <a class="nav-item">Ledgerwise</a>
-            <a class="nav-item">P&L / Balance Sheet</a>
-            <a class="nav-item">Projectwise Report</a>
-            <div class="nav-item" onclick="toggleMenu('sub-gst')">GST Reports <i class="fa-solid fa-chevron-down ml-auto text-[8px]"></i></div>
-            <div class="submenu" id="sub-gst">
-                <a class="nav-item">GSTR 1</a><a class="nav-item">GSTR 3B</a><a class="nav-item">HSN Report</a>
-            </div>
+        <div class="px-5 pt-4 pb-1 text-[10px] font-bold text-gray-500 uppercase">Transactions</div>
+        <div class="nav-item" onclick="toggleMenu('sub-acc')"><i class="fa-solid fa-receipt mr-3"></i> Accounts Entry <i class="fa-solid fa-chevron-down ml-auto text-[10px]"></i></div>
+        <div class="submenu" id="sub-acc">
+            <a class="nav-item" onclick="loadView('view-trans', 'Payment')">Payment</a>
+            <a class="nav-item" onclick="loadView('view-trans', 'Receipt')">Receipt</a>
+            <a class="nav-item" onclick="loadView('view-trans', 'Sales')">Sales</a>
+            <a class="nav-item" onclick="loadView('view-trans', 'Purchase')">Purchase</a>
         </div>
 
         <div class="crm-box">
-            <div class="font-bold text-[11px] mb-3 flex items-center gap-2"><i class="fa-solid fa-bolt text-brandYellow"></i> SMART CRM</div>
-            <div class="crm-link" onclick="loadView('view-crm')"><i class="fa-brands fa-whatsapp"></i> Send Reminders</div>
-            <div class="crm-link" onclick="loadView('view-crm')"><i class="fa-solid fa-building-columns"></i> Bank Details</div>
-            <div class="crm-link" onclick="loadView('view-crm')"><i class="fa-solid fa-qrcode"></i> CMB QR</div>
+            <div class="font-bold text-[11px] mb-2 flex items-center gap-2 text-brandYellow"><i class="fa-solid fa-bolt"></i> SMART CRM</div>
+            <div class="cursor-pointer text-xs mb-2 hover:underline" onclick="loadView('view-crm')"><i class="fa-brands fa-whatsapp mr-2"></i> WhatsApp Reminder</div>
+            <div class="cursor-pointer text-xs hover:underline" onclick="loadView('view-crm')"><i class="fa-solid fa-qrcode mr-2"></i> CMB QR Generator</div>
         </div>
 
-        <div class="nav-item mt-auto border-t border-gray-700" onclick="loadView('view-users')"><i class="fa-solid fa-users-gear"></i> User Management</div>
-        <div class="nav-item text-brandYellow" onclick="location.reload()"><i class="fa-solid fa-power-off"></i> Logout</div>
+        <div class="mt-auto nav-item text-brandYellow border-t border-gray-700" onclick="location.reload()"><i class="fa-solid fa-power-off mr-3"></i> Logout</div>
     </aside>
 
     <main class="main-content">
         <header class="flex justify-between items-center mb-6 bg-white p-4 rounded-lg border border-gray-200">
-            <h2 id="page-title" class="text-lg font-bold text-gray-700 uppercase tracking-tight">Company Profile</h2>
-            <div class="flex items-center gap-4 text-xs font-medium text-gray-500">
-                FY: 2025-26 | Admin <div class="w-8 h-8 bg-brandBlue rounded-full flex items-center justify-center text-white font-bold">A</div>
+            <h2 id="page-title" class="text-lg font-bold text-gray-700 uppercase">Dashboard</h2>
+            <div class="flex items-center gap-4">
+                <button onclick="refreshData()" class="text-brandBlue text-xs font-bold px-3 py-1 border border-brandBlue rounded hover:bg-brandBlue hover:text-white"><i class="fa-solid fa-sync mr-1"></i> Sync Data</button>
+                <div class="w-8 h-8 bg-brandBlue rounded-full flex items-center justify-center text-white font-bold text-xs">A</div>
             </div>
         </header>
 
-        <div id="view-company" class="view-section">
+        <div id="view-dash" class="view-section">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="card stat-card">
+                    <h3 class="form-label">Total Income</h3>
+                    <div class="text-2xl font-bold text-green-600" id="dash-income">₹ 0.00</div>
+                </div>
+                <div class="card stat-card" style="border-top-color: #D60000;">
+                    <h3 class="form-label">Total Expenses</h3>
+                    <div class="text-2xl font-bold text-brandRed" id="dash-expense">₹ 0.00</div>
+                </div>
+                <div class="card stat-card" style="border-top-color: #1F70D3;">
+                    <h3 class="form-label">Net Balance</h3>
+                    <div class="text-2xl font-bold text-brandBlue" id="dash-balance">₹ 0.00</div>
+                </div>
+                <div class="card stat-card" style="border-top-color: #6b7280;">
+                    <h3 class="form-label">Cash In Hand</h3>
+                    <div class="text-2xl font-bold text-gray-700">₹ 0.00</div>
+                </div>
+            </div>
+            <div class="card">
+                <h3 class="font-bold text-gray-700 mb-4">Recent Transactions</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-gray-50 text-gray-500 uppercase">
+                            <tr><th class="p-3">Date</th><th class="p-3">Voucher</th><th class="p-3">Ledger</th><th class="p-3 text-right">Amount</th></tr>
+                        </thead>
+                        <tbody id="recent-trans-body">
+                            <tr><td colspan="4" class="p-4 text-center text-gray-400 italic">No recent entries. Click 'Sync' to load.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-company" class="view-section hidden">
             <div class="card max-w-5xl mx-auto">
-                <form onsubmit="submitForm(event, 'COMPANY', 'form-company')" id="form-company">
-                    <div class="grid grid-cols-2 gap-4 mb-4">
+                <h3 class="text-brandBlue font-bold mb-6 border-b pb-2">Detailed Company Setup</h3>
+                <form id="form-company" onsubmit="submitForm(event, 'COMPANY', 'form-company')">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 mb-6">
                         <div><label class="form-label">Company Name</label><input name="Company Name" class="form-input" required></div>
-                        <div><label class="form-label">GSTIN</label><input name="GSTIN" class="form-input"></div>
+                        <div><label class="form-label">Mailing Name</label><input name="Mailing Name" class="form-input"></div>
+                        <div class="md:col-span-2"><label class="form-label">Address Line 1</label><input name="Address Line 1" class="form-input"></div>
+                        <div><label class="form-label">State</label>
+                            <select name="State" class="form-input bg-white"><option>Kerala</option><option>Tamil Nadu</option><option>Karnataka</option><option>Maharashtra</option></select>
+                        </div>
+                        <div><label class="form-label">Country</label><input name="Country" class="form-input" value="India"></div>
+                        <div><label class="form-label">Pincode</label><input name="Pincode" class="form-input"></div>
+                        <div><label class="form-label">GSTIN</label><input name="GSTIN" class="form-input" placeholder="29XXXXX0000X1ZX"></div>
+                        <div><label class="form-label">Financial Year Beginning From</label><input type="date" name="Financial Year Beginning From" class="form-input" value="2026-04-01"></div>
+                        <div><label class="form-label">Books Beginning From</label><input type="date" name="Books Beginning From" class="form-input" value="2026-04-01"></div>
+                        <div><label class="form-label">Email Address</label><input name="Email" type="email" class="form-input"></div>
+                        <div><label class="form-label">Base Currency Symbol</label><input name="Base Currency Symbol" class="form-input" value="₹"></div>
+                        <div><label class="form-label">Formal Name</label><input name="Formal Name" class="form-input" value="INR"></div>
                     </div>
-                    <div class="grid grid-cols-3 gap-4 mb-4">
-                        <div><label class="form-label">State</label><input name="State" class="form-input" value="Kerala"></div>
-                        <div><label class="form-label">Financial Year</label><input name="FY" class="form-input" value="2025-26"></div>
-                        <div><label class="form-label">Contact No</label><input name="Mobile" class="form-input"></div>
-                    </div>
-                    <button type="submit" class="btn-primary">Save Company Info</button>
+                    <button type="submit" class="btn-primary">Save Full Company Profile</button>
                 </form>
             </div>
         </div>
 
-        <div id="view-stock" class="view-section hidden">
-            <div class="card max-w-4xl mx-auto">
-                <h3 class="text-brandBlue font-bold mb-4 border-b pb-2">Inventory - Create Stock Item</h3>
-                <form onsubmit="submitForm(event, 'STOCK', 'form-stock')" id="form-stock">
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <div><label class="form-label">Item Name</label><input name="Name" class="form-input" required></div>
-                        <div><label class="form-label">Under Group</label><input name="Under" class="form-input" placeholder="Primary"></div>
-                        <div><label class="form-label">Units (UQC)</label><input name="Units" class="form-input" placeholder="NOS/KGS"></div>
-                        <div><label class="form-label">HSN/SAC</label><input name="HSN/SAC Details" class="form-input"></div>
-                        <div><label class="form-label">GST Rate (%)</label><input name="GST Rate" type="number" class="form-input"></div>
-                        <div><label class="form-label">Opening Qty</label><input name="Opening Balance" type="number" class="form-input"></div>
-                    </div>
-                    <button type="submit" class="btn-primary">Add to Inventory</button>
-                </form>
-            </div>
-        </div>
-
-        <div id="view-transaction" class="view-section hidden">
+        <div id="view-trans" class="view-section hidden">
             <div class="card max-w-3xl mx-auto">
-                <h3 class="text-brandBlue font-bold mb-4 border-b pb-2" id="trans-title">Entry</h3>
-                <form onsubmit="submitForm(event, 'TRANSACTION', 'form-trans')" id="form-trans">
+                <h3 class="text-brandBlue font-bold mb-6 border-b pb-2" id="trans-title">Entry</h3>
+                <form id="form-trans" onsubmit="submitForm(event, 'TRANSACTION', 'form-trans')">
                     <input type="hidden" name="Voucher Type" id="v-type">
                     <div class="grid grid-cols-2 gap-4 mb-4">
                         <div><label class="form-label">Date</label><input type="date" name="Date" class="form-input"></div>
                         <div><label class="form-label">Ledger Account</label><input name="Ledger Name" class="form-input" required></div>
                     </div>
-                    <div class="mb-4"><label class="form-label">Amount (₹)</label><input type="number" name="Amount" class="form-input text-right font-bold text-lg"></div>
+                    <div class="mb-4"><label class="form-label">Amount (₹)</label><input type="number" name="Amount" class="form-input text-right font-bold text-lg" required></div>
                     <div class="mb-4"><label class="form-label">Narration</label><input name="Narration" class="form-input"></div>
-                    <button type="submit" class="btn-primary">Post Voucher</button>
+                    <button type="submit" class="btn-primary">Post Transaction</button>
                 </form>
             </div>
         </div>
 
-        <div id="view-crm" class="view-section hidden">
-            <div class="grid grid-cols-2 gap-4 max-w-4xl mx-auto">
-                <div class="card">
-                    <h3 class="text-green-600 font-bold mb-4"><i class="fa-brands fa-whatsapp"></i> WhatsApp Tools</h3>
-                    <input type="number" id="wa-num" class="form-input mb-4" placeholder="91...">
-                    <button onclick="sendWA('reminder')" class="w-full bg-brandYellow py-2 rounded text-xs font-bold mb-2">Send Payment Reminder</button>
-                    <button onclick="sendWA('bank')" class="w-full bg-brandBlue text-white py-2 rounded text-xs font-bold">Send Bank Details</button>
-                </div>
-                <div class="card text-center">
-                    <h3 class="text-brandBlue font-bold mb-4">CMB QR Generator</h3>
-                    <input type="number" id="qr-amt" class="form-input mb-4" placeholder="Amount">
-                    <button onclick="generateQR()" class="w-full bg-gray-800 text-white py-2 rounded text-xs font-bold">Generate QR</button>
-                    <div id="qrcode" class="flex justify-center mt-2"></div>
-                </div>
-            </div>
-        </div>
-
-        <div id="view-users" class="view-section hidden">
-            <div class="card max-w-xl mx-auto">
-                <h3 class="font-bold mb-4">Manage Users</h3>
-                <form onsubmit="submitForm(event, 'USERS', 'form-u')" id="form-u">
-                    <label class="form-label">Username</label><input name="User Name" class="form-input mb-4">
-                    <label class="form-label">Password</label><input name="Password" type="password" class="form-input mb-4">
-                    <label class="form-label">Role</label>
-                    <select name="Role" class="form-input mb-4"><option>Admin</option><option>Accountant</option><option>Sales</option></select>
-                    <button type="submit" class="btn-primary w-full">Save User</button>
-                </form>
-            </div>
-        </div>
     </main>
 
     <script>
@@ -197,16 +169,14 @@
         function loadView(id, type = null) {
             document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
-            if(type) {
-                document.getElementById('trans-title').innerText = type + ' Voucher';
-                document.getElementById('v-type').value = type;
-            }
+            document.getElementById('page-title').innerText = type ? type : id.replace('view-', '');
+            if(type) { document.getElementById('trans-title').innerText = type + ' Voucher'; document.getElementById('v-type').value = type; }
         }
 
         function submitForm(e, sheet, formId) {
             e.preventDefault();
             const btn = e.target.querySelector('button');
-            btn.innerText = "Saving..."; btn.disabled = true;
+            btn.innerText = "Processing..."; btn.disabled = true;
             const formData = new FormData(document.getElementById(formId));
             const params = new URLSearchParams();
             params.append("action", "save_data");
@@ -214,24 +184,39 @@
             for(const pair of formData) params.append(pair[0], pair[1]);
 
             fetch(API_URL, { method: "POST", body: params })
-            .then(res => res.json()).then(data => { alert(data.message); document.getElementById(formId).reset(); })
-            .catch(() => alert("Network Error"))
+            .then(res => res.json()).then(data => { alert(data.message); document.getElementById(formId).reset(); refreshData(); })
+            .catch(() => alert("Connection Error"))
             .finally(() => { btn.innerText = "Submit"; btn.disabled = false; });
         }
 
-        function sendWA(type) {
-            const num = document.getElementById('wa-num').value;
-            if(!num) return alert("Enter No");
-            let msg = type === 'reminder' ? "Payment Reminder from CM Books" : "HDFC A/c: 12345678 IFSC: HDFC0001";
-            window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`);
+        function refreshData() {
+            // Logic to fetch TRANSACTION data from Sheet and update Dashboard
+            const params = new URLSearchParams({ action: "get_data", sheet_name: "TRANSACTION" });
+            fetch(API_URL + "?" + params.toString())
+            .then(res => res.json()).then(resp => {
+                if(resp.result === "success") {
+                    let income = 0, expense = 0;
+                    const tbody = document.getElementById('recent-trans-body');
+                    tbody.innerHTML = "";
+                    
+                    resp.data.slice(-5).reverse().forEach(row => {
+                        const amt = parseFloat(row.Amount || 0);
+                        if(row['Voucher Type'] === 'Receipt' || row['Voucher Type'] === 'Sales') income += amt;
+                        if(row['Voucher Type'] === 'Payment' || row['Voucher Type'] === 'Purchase') expense += amt;
+                        
+                        tbody.innerHTML += `<tr><td class="p-3">${row.Date}</td><td class="p-3">${row['Voucher Type']}</td><td class="p-3">${row['Ledger Name']}</td><td class="p-3 text-right">₹${amt.toFixed(2)}</td></tr>`;
+                    });
+                    
+                    document.getElementById('dash-income').innerText = "₹ " + income.toLocaleString();
+                    document.getElementById('dash-expense').innerText = "₹ " + expense.toLocaleString();
+                    document.getElementById('dash-balance').innerText = "₹ " + (income - expense).toLocaleString();
+                }
+            });
         }
 
-        function generateQR() {
-            const amt = document.getElementById('qr-amt').value;
-            const qrBox = document.getElementById('qrcode');
-            qrBox.innerHTML = "";
-            new QRCode(qrBox, { text: `upi://pay?pa=yours@upi&am=${amt}`, width: 120, height: 120 });
-        }
+        // Initialize
+        loadView('view-dash');
+        refreshData();
     </script>
 </body>
 </html>
