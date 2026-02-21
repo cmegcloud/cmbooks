@@ -1,53 +1,446 @@
-function doPost(e) {
-  try {
-    const ss = SpreadsheetApp.openById('1PMYDjR3Uy-2FAJiEsJwYKK0zWkm1oZpAFiOQDjKsSs4');
-    const input = JSON.parse(e.postData.contents);
-    const sheet = ss.getSheetByName(input.sheet);
-    let row = [];
+<!doctype html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>CMB ERP - Enterprise Resource Planning</title>
+  
+  <meta name="theme-color" content="#5453EC">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./iconcmb.png">
+  <link rel="icon" type="image/png" href="./iconcmb.png">
 
-    if (input.sheet === "COMPANY") {
-      const id = "CMB" + (4000 + sheet.getLastRow()); // Auto CMB4001
-      row = [
-        id, input.companyDataPath || "", input.companyName, input.constitution, 
-        input.address1, input.address2 || "", input.state, "India", input.pincode, 
-        "", input.mobile, input.whatsapp || "", input.email, "", "", "", "₹", "INR"
-      ];
-    } 
-    else if (input.sheet === "STOCK") {
-      const id = "STK" + (1000 + sheet.getLastRow());
-      row = [
-        id, input.name, input.under, input.units, "Applicable", 
-        input.hsnDetails || "", "Manual", "", input.gstRate, "Goods", "0", 
-        input.openingBalance, input.crDr
-      ];
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            jakarta: ['Plus Jakarta Sans', 'sans-serif'],
+          }
+        }
+      }
     }
-    else if (input.sheet === "LEDGER") {
-      const id = "LDG" + (1000 + sheet.getLastRow());
-      row = [id, input.ledgerName, input.under || "", input.openingBalance, input.crDr];
-    }
-    else if (input.sheet === "TRANSACTION") {
-      const id = "TRN" + (5000 + sheet.getLastRow());
-      row = [id, input.voucherType, input.date, input.ledgerName, "", "", input.amount, input.narration || ""];
-    }
-    else if (input.sheet === "PROJECTS") {
-      const id = "PRJ" + (100 + sheet.getLastRow());
-      row = [id, input.projectName, input.estimatedAmount || "0", input.narration || ""];
-    }
-    else if (input.sheet === "ESTIMATE") {
-      const id = "EST" + (2000 + sheet.getLastRow());
-      row = [
-        id, input.date, input.customerName, input.item || "", "", 
-        input.gstPercent || "0", input.amount || "0", "", input.discount || "0", 
-        "", "", input.grandTotal, ""
-      ];
-    }
-
-    if (row.length > 0) {
-      sheet.appendRow(row);
+  </script>
+  <style>
+    * { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+    
+    :root {
+      --primary: #5453EC;
+      --accent: #F7CB51;
+      --success: #10b981;
+      --danger: #EF4444;
+      --dark: #000000;
+      --light: #FFFFFF;
     }
     
-    return ContentService.createTextOutput("Success").setMimeType(ContentService.MimeType.TEXT);
-  } catch (err) {
-    return ContentService.createTextOutput("Error: " + err.message).setMimeType(ContentService.MimeType.TEXT);
-  }
-}
+    .sidebar-transition {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .menu-item {
+      transition: all 0.2s ease;
+    }
+    
+    .menu-item:hover {
+      transform: translateX(4px);
+    }
+    
+    .card-hover {
+      transition: all 0.3s ease;
+    }
+    
+    .card-hover:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    }
+    
+    .pulse-dot {
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.5s ease forwards;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    /* Form Input Focus */
+    input:focus, select:focus, textarea:focus { border-color: var(--primary) !important; outline: none; box-shadow: 0 0 0 2px rgba(84, 83, 236, 0.2); }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+</head>
+<body class="h-full bg-slate-100 overflow-hidden">
+  <div id="app" class="h-full flex">
+    
+    <aside id="sidebar" class="sidebar-transition bg-slate-900 h-full w-72 flex flex-col shadow-2xl relative z-50 transform -translate-x-full lg:translate-x-0 absolute lg:relative">
+      
+      <div class="p-6 border-b border-slate-700/50">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg bg-white p-1">
+            <img src="./logocmb.png" alt="Logo" class="w-full h-full object-contain" onerror="this.src='https://ui-avatars.com/api/?name=CMB&background=5453EC&color=fff'">
+          </div>
+          <div>
+            <h1 class="text-xl font-bold text-white tracking-tight">CMB ERP</h1>
+            <p class="text-xs text-slate-400 font-medium">Enterprise Solutions</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="p-4 mx-4 mt-4 bg-slate-800/50 rounded-xl border border-slate-700/50">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: linear-gradient(135deg, #5453EC, #F7CB51);">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Active Company</p>
+            <p id="company-name-sidebar" class="text-sm font-semibold text-white truncate">Main Company Ltd.</p>
+          </div>
+          <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4" /></svg>
+        </div>
+      </div>
+      
+      <nav class="flex-1 px-4 py-6 overflow-y-auto">
+        <ul class="space-y-1">
+          <li><button onclick="navigateTo('dashboard')" id="nav-dashboard" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-white" style="background: linear-gradient(135deg, #5453EC, #6B63FF); box-shadow: 0 8px 16px rgba(84, 83, 236, 0.3);"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" /></svg><span class="font-medium">Dashboard</span> </button></li>
+          <li><button onclick="navigateTo('company')" id="nav-company" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/50"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg><span class="font-medium">Company</span> </button></li>
+          <li><button onclick="navigateTo('stock')" id="nav-stock" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/50"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg><span class="font-medium">Stock Master</span> </button></li>
+          <li><button onclick="navigateTo('ledgers')" id="nav-ledgers" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/50"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg><span class="font-medium">Ledgers</span> </button></li>
+          <li><button onclick="navigateTo('transactions')" id="nav-transactions" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/50"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg><span class="font-medium">Transactions</span> </button></li>
+          <li><button onclick="navigateTo('projects')" id="nav-projects" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/50"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" /></svg><span class="font-medium">Projects</span> </button></li>
+          <li><button onclick="navigateTo('estimates')" id="nav-estimates" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/50"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg><span class="font-medium">Estimates</span> </button></li>
+        </ul>
+      </nav>
+      
+      <div class="p-4 border-t border-slate-700/50">
+        <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-800/50">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold">JD</div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold text-white">John Doe</p>
+            <p class="text-xs text-slate-400">Administrator</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="flex-1 h-full overflow-hidden flex flex-col">
+      
+      <header class="bg-white shadow-sm border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <button id="toggleSidebar" onclick="toggleSidebar()" class="p-2 rounded-xl hover:bg-slate-100 text-slate-600 transition-colors lg:hidden"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg></button>
+          <div>
+            <h2 id="page-title" class="text-xl font-bold text-slate-800">Dashboard</h2>
+            <p class="text-sm text-slate-500 hidden sm:block">Welcome back! Here's your financial overview.</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-4">
+          <img src="./processiconcmb.gif" id="global-loader" class="w-6 h-6 hidden" alt="Loading">
+          <div class="hidden lg:flex items-center gap-2 px-4 py-2 bg-slate-50 rounded-xl border border-slate-200">
+            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+            <span class="text-sm font-medium text-slate-600" id="current-date"></span>
+          </div>
+        </div>
+      </header>
+
+      <div class="flex-1 overflow-y-auto p-6 bg-slate-100">
+        
+        <div id="page-dashboard" class="page-content fade-in">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+            <div class="card-hover bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+              <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" style="background: linear-gradient(135deg, #5453EC, #6B63FF); box-shadow: 0 8px 16px rgba(84, 83, 236, 0.3);">
+                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                </div>
+                <span class="flex items-center gap-1 text-emerald-600 text-sm font-semibold bg-emerald-50 px-2 py-1 rounded-lg">12.5%</span>
+              </div>
+              <h3 class="text-2xl font-bold text-slate-800">$124,563</h3>
+              <p class="text-sm text-slate-500 mt-1">Total Revenue</p>
+            </div>
+            <div class="card-hover bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+              <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" style="background: linear-gradient(135deg, #EF4444, #F87171); box-shadow: 0 8px 16px rgba(239, 68, 68, 0.3);">
+                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a.5.5 0 11-1 0 .5.5 0 011 0z" /></svg>
+                </div>
+                <span class="flex items-center gap-1 text-red-600 text-sm font-semibold bg-red-50 px-2 py-1 rounded-lg">3.2%</span>
+              </div>
+              <h3 class="text-2xl font-bold text-slate-800">$45,890</h3>
+              <p class="text-sm text-slate-500 mt-1">Total Expenses</p>
+            </div>
+            <div class="card-hover bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+              <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" style="background: linear-gradient(135deg, #10b981, #34d399); box-shadow: 0 8px 16px rgba(16, 185, 129, 0.3);">
+                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
+                </div>
+                <span class="flex items-center gap-1 text-emerald-600 text-sm font-semibold bg-emerald-50 px-2 py-1 rounded-lg">18.7%</span>
+              </div>
+              <h3 class="text-2xl font-bold text-slate-800">$78,673</h3>
+              <p class="text-sm text-slate-500 mt-1">Net Profit</p>
+            </div>
+            <div class="card-hover bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+              <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" style="background: linear-gradient(135deg, #F7CB51, #FCD34D); box-shadow: 0 8px 16px rgba(247, 203, 81, 0.3);">
+                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                </div>
+                <span class="flex items-center gap-1 text-amber-600 text-sm font-semibold bg-amber-50 px-2 py-1 rounded-lg">+248</span>
+              </div>
+              <h3 class="text-2xl font-bold text-slate-800">1,429</h3>
+              <p class="text-sm text-slate-500 mt-1">Total Transactions</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <div class="lg:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+              <div class="flex items-center justify-between mb-6">
+                <div><h3 class="text-lg font-bold text-slate-800">Profit &amp; Loss Overview</h3><p class="text-sm text-slate-500">Monthly financial performance</p></div>
+              </div>
+              <div class="h-72"><canvas id="plChart"></canvas></div>
+            </div>
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+              <div class="flex items-center justify-between mb-6">
+                <div><h3 class="text-lg font-bold text-slate-800">Revenue Sources</h3><p class="text-sm text-slate-500">By category</p></div>
+              </div>
+              <div class="h-48 flex items-center justify-center"><canvas id="revenueChart"></canvas></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="page-company" class="page-content hidden fade-in">
+          <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-100">
+            <div class="flex items-center gap-4 mb-6 border-b border-slate-100 pb-4">
+              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#5453EC] to-[#F7CB51] flex items-center justify-center text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg></div>
+              <div><h2 class="text-2xl font-bold text-slate-800">Create Company</h2><p class="text-slate-500 text-sm">Register a new enterprise entity.</p></div>
+            </div>
+            <form onsubmit="submitForm(event, 'COMPANY')" class="space-y-5">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div class="md:col-span-2"><label class="block text-xs font-bold text-slate-600 mb-1">Company Name *</label><input type="text" name="companyName" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200"></div>
+                <div><label class="block text-xs font-bold text-slate-600 mb-1">Constitution *</label><select name="constitution" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white"><option value="Proprietorship">Proprietorship</option><option value="Partnership">Partnership</option><option value="LLP">LLP</option><option value="Company">Company</option><option value="Others">Others</option></select></div>
+                <div class="md:col-span-2"><label class="block text-xs font-bold text-slate-600 mb-1">Address Line 1 *</label><input type="text" name="address1" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200"></div>
+                <div><label class="block text-xs font-bold text-slate-600 mb-1">Address Line 2</label><input type="text" name="address2" class="w-full px-4 py-2.5 rounded-xl border border-slate-200"></div>
+                <div><label class="block text-xs font-bold text-slate-600 mb-1">State *</label><select name="state" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white"><option value="Kerala">Kerala</option><option value="Tamil Nadu">Tamil Nadu</option><option value="Karnataka">Karnataka</option><option value="Delhi">Delhi</option><option value="Maharashtra">Maharashtra</option></select></div>
+                <div><label class="block text-xs font-bold text-slate-600 mb-1">Pincode *</label><input type="text" name="pincode" pattern="[0-9]{6}" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200"></div>
+                <div><label class="block text-xs font-bold text-slate-600 mb-1">Email ID *</label><input type="email" name="email" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200"></div>
+                <div><label class="block text-xs font-bold text-slate-600 mb-1">Mobile No *</label>
+                  <div class="flex"><span class="inline-flex items-center px-3 rounded-l-xl border border-r-0 border-slate-200 bg-slate-50 text-slate-500 text-sm font-semibold">+91</span><input type="tel" name="mobile" required pattern="[0-9]{10}" class="w-full px-4 py-2.5 rounded-r-xl border border-slate-200"></div>
+                </div>
+                <div><label class="block text-xs font-bold text-slate-600 mb-1">Whatsapp No</label>
+                  <div class="flex"><span class="inline-flex items-center px-3 rounded-l-xl border border-r-0 border-slate-200 bg-slate-50 text-slate-500 text-sm font-semibold">+91</span><input type="tel" name="whatsapp" pattern="[0-9]{10}" class="w-full px-4 py-2.5 rounded-r-xl border border-slate-200"></div>
+                </div>
+                <div><label class="block text-xs font-bold text-slate-600 mb-1">Data Path</label><input type="text" name="companyDataPath" class="w-full px-4 py-2.5 rounded-xl border border-slate-200"></div>
+              </div>
+              <div class="flex justify-end pt-4"><button type="submit" class="px-8 py-3 rounded-xl font-bold text-white transition-transform active:scale-95 shadow-lg flex items-center justify-center gap-2" style="background: linear-gradient(135deg, #5453EC, #6B63FF);">Save Company</button></div>
+            </form>
+          </div>
+        </div>
+
+        <div id="page-stock" class="page-content hidden fade-in">
+          <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-100">
+            <div class="flex items-center gap-4 mb-6 border-b border-slate-100 pb-4">
+              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#10b981] to-[#34d399] flex items-center justify-center text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg></div>
+              <div><h2 class="text-2xl font-bold text-slate-800">Stock Master</h2><p class="text-slate-500 text-sm">Add a new inventory item.</p></div>
+            </div>
+            <form onsubmit="submitForm(event, 'STOCK')" class="space-y-5">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div class="md:col-span-2"><label class="block text-xs font-bold text-slate-600 mb-1">Item Name *</label><input type="text" name="name" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200"></div>
+                <div><label class="block text-xs font-bold text-slate-600 mb-1">Under Category</label><input type="text" name="under" class="w-full px-4 py-2.5 rounded-xl border border-slate-200"></div>
+                <div><label class="block text-xs font-bold text-slate-600 mb-1">Units</label><input type="text" name="units" placeholder="e.g. Nos, Kgs" class="w-full px-4 py-2.5 rounded-xl border border-slate-200"></div>
+                <div><label class="block text-xs font-bold text-slate-600 mb-1">GST Rate (%)</label><input type="number" name="gstRate" step="0.01" class="w-full px-4 py-2.5 rounded-xl border border-slate-200"></div>
+                <div><label class="block text-xs font-bold text-slate-600 mb-1">HSN/SAC Details</label><input type="text" name="hsnDetails" class="w-full px-4 py-2.5 rounded-xl border border-slate-200"></div>
+                <div><label class="block text-xs font-bold text-slate-600 mb-1">Opening Balance</label><input type="number" name="openingBalance" class="w-full px-4 py-2.5 rounded-xl border border-slate-200"></div>
+                <div><label class="block text-xs font-bold text-slate-600 mb-1">Cr / Dr</label><select name="crDr" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white"><option value="Dr">Debit (Dr)</option><option value="Cr">Credit (Cr)</option></select></div>
+              </div>
+              <div class="flex justify-end pt-4"><button type="submit" class="px-8 py-3 rounded-xl font-bold text-white transition-transform active:scale-95 shadow-lg" style="background: linear-gradient(135deg, #10b981, #34d399);">Save Stock Item</button></div>
+            </form>
+          </div>
+        </div>
+
+        <div id="page-ledgers" class="page-content hidden fade-in">
+          <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-100">
+            <div class="flex items-center gap-4 mb-6 border-b border-slate-100 pb-4">
+              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#5453EC] to-[#F7CB51] flex items-center justify-center text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg></div>
+              <div><h2 class="text-2xl font-bold text-slate-800">Ledger Accounts</h2><p class="text-slate-500 text-sm">Create a new ledger.</p></div>
+            </div>
+            <form onsubmit="submitForm(event, 'LEDGER')" class="space-y-5">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div><label class="block text-xs font-bold text-slate-600 mb-1">Ledger Name *</label><input type="text" name="ledgerName" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200"></div>
+                <div><label class="block text-xs font-bold text-slate-600 mb-1">Under Group</label><input type="text" name="under" class="w-full px-4 py-2.5 rounded-xl border border-slate-200"></div>
+                <div><label class="block text-xs font-bold text-slate-600 mb-1">Opening Balance</label><input type="number" name="openingBalance" class="w-full px-4 py-2.5 rounded-xl border border-slate-200"></div>
+                <div><label class="block text-xs font-bold text-slate-600 mb-1">Cr / Dr</label><select name="crDr" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white"><option value="Dr">Debit (Dr)</option><option value="Cr">Credit (Cr)</option></select></div>
+              </div>
+              <div class="flex justify-end pt-4"><button type="submit" class="px-8 py-3 rounded-xl font-bold text-white transition-transform active:scale-95 shadow-lg" style="background: linear-gradient(135deg, #5453EC, #6B63FF);">Save Ledger</button></div>
+            </form>
+          </div>
+        </div>
+
+        <div id="page-transactions" class="page-content hidden fade-in">
+          <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-100">
+            <div class="flex items-center gap-4 mb-6 border-b border-slate-100 pb-4">
+              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#F7CB51] to-[#FCD34D] flex items-center justify-center text-slate-900"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg></div>
+              <div><h2 class="text-2xl font-bold text-slate-800">Voucher Entry</h2><p class="text-slate-500 text-sm">Record a daily transaction.</p></div>
+            </div>
+            <form onsubmit="submitForm(event, 'TRANSACTION')" class="space-y-5">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div><label class="block text-xs font-bold text-slate-600 mb-1">Voucher Type *</label><select name="voucherType" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white"><option>Payment</option><option>Receipt</option><option>Sales</option><option>Purchase</option><option>Journal</option></select></div>
+                <div><label class="block text-xs font-bold text-slate-600 mb-1">Date *</label><input type="date" name="date" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200"></div>
+                <div><label class="block text-xs font-bold text-slate-600 mb-1">Ledger Name *</label><input type="text" name="ledgerName" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200"></div>
+                <div><label class="block text-xs font-bold text-slate-600 mb-1">Amount *</label><input type="number" name="amount" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200"></div>
+                <div class="md:col-span-2"><label class="block text-xs font-bold text-slate-600 mb-1">Narration</label><textarea name="narration" rows="2" class="w-full px-4 py-2.5 rounded-xl border border-slate-200"></textarea></div>
+              </div>
+              <div class="flex justify-end pt-4"><button type="submit" class="px-8 py-3 rounded-xl font-bold text-slate-900 transition-transform active:scale-95 shadow-lg" style="background: linear-gradient(135deg, #F7CB51, #FCD34D);">Post Transaction</button></div>
+            </form>
+          </div>
+        </div>
+
+        <div id="page-projects" class="page-content hidden fade-in">
+          <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-100">
+            <div class="flex items-center gap-4 mb-6 border-b border-slate-100 pb-4">
+              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#5453EC] to-[#F7CB51] flex items-center justify-center text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" /></svg></div>
+              <div><h2 class="text-2xl font-bold text-slate-800">Projects</h2><p class="text-slate-500 text-sm">Create a new project.</p></div>
+            </div>
+            <form onsubmit="submitForm(event, 'PROJECTS')" class="space-y-5">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div class="md:col-span-2"><label class="block text-xs font-bold text-slate-600 mb-1">Project Name *</label><input type="text" name="projectName" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200"></div>
+                <div><label class="block text-xs font-bold text-slate-600 mb-1">Estimated Amount</label><input type="number" name="estimatedAmount" class="w-full px-4 py-2.5 rounded-xl border border-slate-200"></div>
+                <div class="md:col-span-2"><label class="block text-xs font-bold text-slate-600 mb-1">Narration</label><textarea name="narration" rows="3" class="w-full px-4 py-2.5 rounded-xl border border-slate-200"></textarea></div>
+              </div>
+              <div class="flex justify-end pt-4"><button type="submit" class="px-8 py-3 rounded-xl font-bold text-white transition-transform active:scale-95 shadow-lg" style="background: linear-gradient(135deg, #5453EC, #6B63FF);">Save Project</button></div>
+            </form>
+          </div>
+        </div>
+
+        <div id="page-estimates" class="page-content hidden fade-in">
+          <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-100">
+            <div class="flex items-center gap-4 mb-6 border-b border-slate-100 pb-4">
+              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#10b981] to-[#34d399] flex items-center justify-center text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg></div>
+              <div><h2 class="text-2xl font-bold text-slate-800">Estimates</h2><p class="text-slate-500 text-sm">Generate a new estimate.</p></div>
+            </div>
+            <form onsubmit="submitForm(event, 'ESTIMATE')" class="space-y-5">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div><label class="block text-xs font-bold text-slate-600 mb-1">Date *</label><input type="date" name="date" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200"></div>
+                <div class="md:col-span-2"><label class="block text-xs font-bold text-slate-600 mb-1">Customer Name *</label><input type="text" name="customerName" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200"></div>
+                <div class="md:col-span-2"><label class="block text-xs font-bold text-slate-600 mb-1">Item Description</label><input type="text" name="item" class="w-full px-4 py-2.5 rounded-xl border border-slate-200"></div>
+                <div><label class="block text-xs font-bold text-slate-600 mb-1">Amount</label><input type="number" name="amount" class="w-full px-4 py-2.5 rounded-xl border border-slate-200"></div>
+                <div><label class="block text-xs font-bold text-slate-600 mb-1">Discount</label><input type="number" name="discount" class="w-full px-4 py-2.5 rounded-xl border border-slate-200"></div>
+                <div><label class="block text-xs font-bold text-slate-600 mb-1">GST %</label><input type="number" name="gstPercent" class="w-full px-4 py-2.5 rounded-xl border border-slate-200"></div>
+                <div><label class="block text-xs font-bold text-slate-600 mb-1">Grand Total *</label><input type="number" name="grandTotal" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 font-bold text-lg text-slate-800"></div>
+              </div>
+              <div class="flex justify-end pt-4"><button type="submit" class="px-8 py-3 rounded-xl font-bold text-white transition-transform active:scale-95 shadow-lg" style="background: linear-gradient(135deg, #10b981, #34d399);">Create Estimate</button></div>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // 1. DATE SETUP
+    document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+
+    // 2. SIDEBAR TOGGLE
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('-translate-x-full');
+    }
+
+    // 3. NAVIGATION LOGIC
+    function navigateTo(pageId) {
+      document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
+      document.getElementById(`page-${pageId}`).classList.remove('hidden');
+      
+      const titles = { dashboard: 'Dashboard', company: 'Company', stock: 'Stock Master', ledgers: 'Ledgers', transactions: 'Transactions', projects: 'Projects', estimates: 'Estimates' };
+      document.getElementById('page-title').textContent = titles[pageId] || 'CMB ERP';
+
+      document.querySelectorAll('.menu-item').forEach(btn => {
+        btn.style.background = 'transparent'; btn.style.boxShadow = 'none';
+        btn.className = "menu-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/50 transition-all";
+      });
+
+      const activeBtn = document.getElementById(`nav-${pageId}`);
+      if (activeBtn) {
+        activeBtn.className = "menu-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-white transition-all";
+        activeBtn.style.background = "linear-gradient(135deg, #5453EC, #6B63FF)";
+        activeBtn.style.boxShadow = "0 8px 16px rgba(84, 83, 236, 0.3)";
+      }
+      if (window.innerWidth < 1024) toggleSidebar();
+    }
+
+    // 4. CHART.JS INIT (For Dashboard Theme)
+    function initCharts() {
+      const plCtx = document.getElementById('plChart').getContext('2d');
+      new Chart(plCtx, {
+        type: 'line',
+        data: {
+          labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+          datasets: [
+            { label: 'Revenue', data: [65, 72, 68, 85, 92, 88], borderColor: '#5453EC', backgroundColor: 'rgba(84, 83, 236, 0.1)', fill: true, tension: 0.4 },
+            { label: 'Expenses', data: [35, 38, 36, 42, 45, 43], borderColor: '#EF4444', backgroundColor: 'rgba(239, 68, 68, 0.1)', fill: true, tension: 0.4 }
+          ]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+      });
+
+      const revCtx = document.getElementById('revenueChart').getContext('2d');
+      new Chart(revCtx, {
+        type: 'doughnut',
+        data: { labels: ['Products', 'Services', 'Sub'], datasets: [{ data: [45, 35, 20], backgroundColor: ['#5453EC', '#10b981', '#F7CB51'], borderWidth: 0 }] },
+        options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { display: false } } }
+      });
+    }
+    initCharts();
+
+    // 5. PWA SETUP
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(err => console.log(err));
+    }
+
+    // 6. SUBMIT TO GOOGLE SHEETS
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwwb3rOXuLVHEHFUBEh1cn9hzqPbqlPpbzSoYbDYXM5qURBAjHzYEasCxP-fcVRZKwZ/exec";
+
+    async function submitForm(e, sheetName) {
+      e.preventDefault();
+      const form = e.target;
+      const loader = document.getElementById('global-loader');
+      loader.classList.remove('hidden');
+
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+      data.sheet = sheetName; // Tells Google Script which tab to update
+
+      // Prefix 91 for applicable fields
+      if(data.mobile) data.mobile = "91" + data.mobile;
+      if(data.whatsapp) data.whatsapp = "91" + data.whatsapp;
+
+      try {
+        await fetch(SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors', // Required to bypass CORS on GitHub Pages
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        alert(sheetName + " Data Saved Successfully!");
+        form.reset();
+      } catch (err) {
+        alert("Network Error. Check connection.");
+      } finally {
+        loader.classList.add('hidden');
+      }
+    }
+  </script>
+</body>
+</html>
