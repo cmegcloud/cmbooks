@@ -1,324 +1,53 @@
-<!doctype html>
-<html lang="en" class="h-full">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>CMB ERP | Company Setup</title>
-  
-  <meta name="theme-color" content="#5453EC">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="manifest" href="./manifest.json">
-  <link rel="apple-touch-icon" href="./iconcmb.png">
-  <link rel="icon" type="image/png" href="./iconcmb.png">
+function doPost(e) {
+  try {
+    const ss = SpreadsheetApp.openById('1PMYDjR3Uy-2FAJiEsJwYKK0zWkm1oZpAFiOQDjKsSs4');
+    const input = JSON.parse(e.postData.contents);
+    const sheet = ss.getSheetByName(input.sheet);
+    let row = [];
 
-  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  
-  <style>
-    * { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
-    .fade-in { animation: fadeIn 0.4s ease forwards; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    .sidebar-transition { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-    input:focus, select:focus { border-color: #5453EC !important; ring: 2px #5453EC33; }
-  </style>
-</head>
-<body class="h-full bg-slate-50 overflow-hidden">
-  <div id="app" class="h-full flex">
+    if (input.sheet === "COMPANY") {
+      const id = "CMB" + (4000 + sheet.getLastRow()); // Auto CMB4001
+      row = [
+        id, input.companyDataPath || "", input.companyName, input.constitution, 
+        input.address1, input.address2 || "", input.state, "India", input.pincode, 
+        "", input.mobile, input.whatsapp || "", input.email, "", "", "", "₹", "INR"
+      ];
+    } 
+    else if (input.sheet === "STOCK") {
+      const id = "STK" + (1000 + sheet.getLastRow());
+      row = [
+        id, input.name, input.under, input.units, "Applicable", 
+        input.hsnDetails || "", "Manual", "", input.gstRate, "Goods", "0", 
+        input.openingBalance, input.crDr
+      ];
+    }
+    else if (input.sheet === "LEDGER") {
+      const id = "LDG" + (1000 + sheet.getLastRow());
+      row = [id, input.ledgerName, input.under || "", input.openingBalance, input.crDr];
+    }
+    else if (input.sheet === "TRANSACTION") {
+      const id = "TRN" + (5000 + sheet.getLastRow());
+      row = [id, input.voucherType, input.date, input.ledgerName, "", "", input.amount, input.narration || ""];
+    }
+    else if (input.sheet === "PROJECTS") {
+      const id = "PRJ" + (100 + sheet.getLastRow());
+      row = [id, input.projectName, input.estimatedAmount || "0", input.narration || ""];
+    }
+    else if (input.sheet === "ESTIMATE") {
+      const id = "EST" + (2000 + sheet.getLastRow());
+      row = [
+        id, input.date, input.customerName, input.item || "", "", 
+        input.gstPercent || "0", input.amount || "0", "", input.discount || "0", 
+        "", "", input.grandTotal, ""
+      ];
+    }
+
+    if (row.length > 0) {
+      sheet.appendRow(row);
+    }
     
-<aside id="sidebar" class="sidebar-transition bg-slate-900 h-full w-72 flex flex-col shadow-2xl absolute lg:relative z-50 transform -translate-x-full lg:translate-x-0">
-  <div class="p-6 border-b border-slate-700/50 flex items-center gap-3">
-    <div class="w-12 h-12 rounded-xl bg-white flex items-center justify-center p-1">
-      <img src="./logocmb.png" alt="Logo" class="max-h-full">
-    </div>
-    <div>
-      <h1 class="text-xl font-bold text-white">CMB ERP</h1>
-      <p class="text-[10px] text-slate-400 uppercase tracking-widest">Enterprise</p>
-    </div>
-  </div>
-
-  <nav class="flex-1 px-4 py-6">
-    <ul class="space-y-2">
-      <li>
-        <button onclick="navigateTo('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-800 transition-all">
-          <span class="font-medium">Dashboard</span>
-        </button>
-      </li>
-
-      <li>
-        <button onclick="toggleSubmenu('company-menu')" class="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-800 transition-all">
-          <div class="flex items-center gap-3">
-            <span class="font-medium">Company Setup</span>
-          </div>
-          <svg id="arrow-company" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-        
-        <ul id="company-menu" class="hidden mt-2 ml-4 space-y-1 border-l border-slate-700">
-          <li>
-            <button onclick="navigateTo('create-company')" id="nav-create-company" class="w-full text-left px-6 py-2 text-sm text-slate-400 hover:text-white transition-colors">Create New Company</button>
-          </li>
-          <li>
-            <button onclick="navigateTo('view-company')" id="nav-view-company" class="w-full text-left px-6 py-2 text-sm text-slate-400 hover:text-white transition-colors">View Company</button>
-          </li>
-          <li>
-            <button onclick="navigateTo('edit-company')" id="nav-edit-company" class="w-full text-left px-6 py-2 text-sm text-slate-400 hover:text-white transition-colors">Edit Company</button>
-          </li>
-        </ul>
-      </li>
-    </ul>
-  </nav>
-</aside>
-
-<div class="flex-1 overflow-y-auto p-4 lg:p-8">
-  
-  <div id="page-create-company" class="page-content hidden fade-in">
-     </div>
-
-  <div id="page-view-company" class="page-content hidden fade-in">
-    <div class="max-w-6xl mx-auto bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
-      <div class="flex justify-between items-center mb-6">
-        <h3 class="text-xl font-bold text-slate-800">Company Directory</h3>
-        <button class="text-sm bg-blue-50 text-[#5453EC] px-4 py-2 rounded-lg font-bold">Refresh Data</button>
-      </div>
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm">
-          <thead class="bg-slate-50 text-slate-500 uppercase text-[10px] font-bold">
-            <tr>
-              <th class="px-4 py-3">ID</th>
-              <th class="px-4 py-3">Company Name</th>
-              <th class="px-4 py-3">State</th>
-              <th class="px-4 py-3">Contact</th>
-              <th class="px-4 py-3">Action</th>
-            </tr>
-          </thead>
-          <tbody id="company-table-body">
-            <tr><td colspan="5" class="px-4 py-10 text-center text-slate-400">Loading companies...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <div id="page-edit-company" class="page-content hidden fade-in text-center py-20">
-    <div class="max-w-md mx-auto">
-      <img src="./processiconcmb.gif" class="w-16 h-16 mx-auto mb-4 opacity-40" alt="">
-      <h3 class="text-xl font-bold text-slate-800">Edit Mode</h3>
-      <p class="text-slate-500 mt-2">Select a company from the 'View' tab to begin editing details.</p>
-    </div>
-  </div>
-
-</div>
-
-      <nav class="flex-1 px-4 py-6">
-        <ul class="space-y-2">
-          <li><button onclick="navigateTo('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-800 transition-all"><span class="font-medium">Dashboard</span></button></li>
-          <li><button onclick="navigateTo('company')" id="nav-company" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-white bg-[#5453EC] shadow-lg shadow-blue-900/20"><span class="font-medium">Company Setup</span></button></li>
-        </ul>
-      </nav>
-    </aside>
-
-    <main class="flex-1 h-full flex flex-col overflow-hidden">
-      <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-        <button onclick="toggleSidebar()" class="lg:hidden p-2 text-slate-600"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
-        <h2 id="page-title" class="text-xl font-bold text-slate-800">Company Creation</h2>
-        <div class="flex items-center gap-2">
-            <span class="text-xs font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded-full uppercase">Auto-ID: CMB4001+</span>
-        </div>
-      </header>
-
-      <div class="flex-1 overflow-y-auto p-4 lg:p-8">
-        
-        <div id="page-dashboard" class="page-content hidden fade-in text-center py-20">
-            <img src="./processiconcmb.gif" class="w-16 h-16 mx-auto mb-4 opacity-40" alt="">
-            <h3 class="text-slate-400">Dashboard Metrics Coming Soon</h3>
-        </div>
-
-        <div id="page-company" class="page-content fade-in">
-          <div class="max-w-5xl mx-auto bg-white rounded-3xl p-6 lg:p-10 shadow-sm border border-slate-100">
-            
-            <form id="companyForm" onsubmit="submitCompanyForm(event)" class="space-y-8">
-              
-              <div>
-                <h3 class="text-sm font-bold text-[#5453EC] uppercase tracking-wider mb-4">1. Core Identity (Required)</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-2">Company Name *</label>
-                    <input type="text" name="companyName" required placeholder="Full Legal Name" class="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none text-sm transition-all">
-                  </div>
-                  <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-2">Constitution of Business *</label>
-                    <select name="constitution" required class="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none text-sm bg-white">
-                      <option value="">Select Option</option>
-                      <option value="Proprietorship">Proprietorship</option>
-                      <option value="Partnership">Partnership</option>
-                      <option value="LLP">LLP</option>
-                      <option value="Company">Company</option>
-                      <option value="Others">Others</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-2">Email ID *</label>
-                    <input type="email" name="email" required placeholder="example@company.com" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm">
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <h3 class="text-sm font-bold text-[#5453EC] uppercase tracking-wider mb-4">2. Contact & Address (Required)</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-2">Full Address *</label>
-                    <input type="text" name="address1" required placeholder="Building, Street, Area" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm">
-                  </div>
-                  <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-2">Mobile Number *</label>
-                    <div class="flex">
-                      <span class="inline-flex items-center px-3 rounded-l-xl border border-r-0 border-slate-200 bg-slate-50 text-slate-500 text-sm font-semibold">+91</span>
-                      <input type="tel" name="mobile" required pattern="[0-9]{10}" placeholder="10 Digit Number" class="w-full px-4 py-3 rounded-r-xl border border-slate-200 outline-none text-sm transition-all">
-                    </div>
-                  </div>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-2">State *</label>
-                    <select name="state" required class="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none text-sm bg-white">
-                        <option value="">Select State</option>
-                        <option value="Andhra Pradesh">Andhra Pradesh</option>
-                        <option value="Arunachal Pradesh">Arunachal Pradesh</option>
-                        <option value="Assam">Assam</option>
-                        <option value="Bihar">Bihar</option>
-                        <option value="Chhattisgarh">Chhattisgarh</option>
-                        <option value="Goa">Goa</option>
-                        <option value="Gujarat">Gujarat</option>
-                        <option value="Haryana">Haryana</option>
-                        <option value="Himachal Pradesh">Himachal Pradesh</option>
-                        <option value="Jharkhand">Jharkhand</option>
-                        <option value="Karnataka">Karnataka</option>
-                        <option value="Kerala">Kerala</option>
-                        <option value="Madhya Pradesh">Madhya Pradesh</option>
-                        <option value="Maharashtra">Maharashtra</option>
-                        <option value="Manipur">Manipur</option>
-                        <option value="Meghalaya">Meghalaya</option>
-                        <option value="Mizoram">Mizoram</option>
-                        <option value="Nagaland">Nagaland</option>
-                        <option value="Odisha">Odisha</option>
-                        <option value="Punjab">Punjab</option>
-                        <option value="Rajasthan">Rajasthan</option>
-                        <option value="Sikkim">Sikkim</option>
-                        <option value="Tamil Nadu">Tamil Nadu</option>
-                        <option value="Telangana">Telangana</option>
-                        <option value="Tripura">Tripura</option>
-                        <option value="Uttar Pradesh">Uttar Pradesh</option>
-                        <option value="Uttarakhand">Uttarakhand</option>
-                        <option value="West Bengal">West Bengal</option>
-                        <option value="Delhi">Delhi</option>
-                        <option value="Jammu and Kashmir">Jammu and Kashmir</option>
-                        <option value="Ladakh">Ladakh</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-2">Pincode *</label>
-                    <input type="text" name="pincode" required pattern="[0-9]{6}" placeholder="6 Digit Code" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm">
-                  </div>
-                  <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-2">WhatsApp (Optional)</label>
-                    <div class="flex">
-                      <span class="inline-flex items-center px-3 rounded-l-xl border border-r-0 border-slate-200 bg-slate-50 text-slate-500 text-sm font-semibold">+91</span>
-                      <input type="tel" name="whatsapp" pattern="[0-9]{10}" placeholder="10 Digit Number" class="w-full px-4 py-3 rounded-r-xl border border-slate-200 outline-none text-sm transition-all">
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="bg-slate-50 p-6 rounded-2xl border border-dashed border-slate-200">
-                <h3 class="text-sm font-bold text-slate-600 uppercase tracking-wider mb-4">3. Statutory & Additional Info</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-2">HSN/SAC Code</label>
-                    <input type="text" name="hsnDetails" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm">
-                  </div>
-                  <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-2">GST Rate (%)</label>
-                    <input type="number" step="0.01" name="gstRate" placeholder="e.g. 18" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm">
-                  </div>
-                  <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-2">Company Data Path</label>
-                    <input type="text" name="companyDataPath" placeholder="C:/ERP/Data" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm">
-                  </div>
-                </div>
-              </div>
-
-              <div class="flex flex-col-reverse sm:flex-row items-center justify-end gap-4 border-t border-slate-100 pt-8">
-                <button type="reset" class="w-full sm:w-auto px-8 py-3 font-bold text-slate-400 hover:text-slate-600 transition-colors text-sm">Reset Form</button>
-                <button type="submit" id="btn-submit" class="w-full sm:w-auto px-10 py-4 rounded-2xl font-bold text-white shadow-xl shadow-blue-500/20 flex items-center justify-center gap-3 transition-transform active:scale-95" style="background: linear-gradient(135deg, #5453EC, #6B63FF);">
-                  <img src="./processiconcmb.gif" id="spinner" class="w-6 h-6 hidden" alt="Loading">
-                  Create Company
-                </button>
-              </div>
-
-              <div id="status-box" class="hidden p-4 rounded-xl text-center text-sm font-bold"></div>
-
-            </form>
-          </div>
-        </div>
-      </div>
-    </main>
-  </div>
-
-  <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwo_oDIuKysh-7EilTqi96sBYojpnI4IAmUR_ZBXjSUt0wlQWQXIT_BX-kMIpTxIM4W/exec";
-
-    function toggleSidebar() {
-      document.getElementById('sidebar').classList.toggle('-translate-x-full');
-    }
-
-    function navigateTo(page) {
-      document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
-      document.getElementById(`page-${page}`).classList.remove('hidden');
-      if (window.innerWidth < 1024) toggleSidebar();
-    }
-
-    async function submitCompanyForm(e) {
-      e.preventDefault();
-      const form = e.target;
-      const btn = document.getElementById('btn-submit');
-      const spinner = document.getElementById('spinner');
-      const status = document.getElementById('status-box');
-
-      btn.disabled = true;
-      spinner.classList.remove('hidden');
-      status.classList.add('hidden');
-
-      const formData = new FormData(form);
-      const data = Object.fromEntries(formData.entries());
-
-      // Add 91 Prefix to values
-      if (data.mobile) data.mobile = "91" + data.mobile;
-      if (data.whatsapp) data.whatsapp = "91" + data.whatsapp;
-
-      try {
-        await fetch(SCRIPT_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        });
-
-        status.className = "p-4 rounded-xl text-center text-sm font-bold bg-emerald-50 text-emerald-600 block";
-        status.innerHTML = "Success! Company details registered with ID sequence.";
-        form.reset();
-      } catch (err) {
-        status.className = "p-4 rounded-xl text-center text-sm font-bold bg-red-50 text-red-600 block";
-        status.textContent = "Error saving data. Please check connection.";
-      } finally {
-        btn.disabled = false;
-        spinner.classList.add('hidden');
-      }
-    }
-
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js').catch(err => console.log(err));
-    }
-  </script>
-</body>
-</html>
+    return ContentService.createTextOutput("Success").setMimeType(ContentService.MimeType.TEXT);
+  } catch (err) {
+    return ContentService.createTextOutput("Error: " + err.message).setMimeType(ContentService.MimeType.TEXT);
+  }
+}
