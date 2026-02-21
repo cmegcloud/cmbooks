@@ -26,16 +26,88 @@
 <body class="h-full bg-slate-50 overflow-hidden">
   <div id="app" class="h-full flex">
     
-    <aside id="sidebar" class="sidebar-transition bg-slate-900 h-full w-72 flex flex-col shadow-2xl absolute lg:relative z-50 transform -translate-x-full lg:translate-x-0">
-      <div class="p-6 border-b border-slate-700/50 flex items-center gap-3">
-        <div class="w-12 h-12 rounded-xl bg-white flex items-center justify-center p-1">
-          <img src="./logocmb.png" alt="Logo" class="max-h-full">
-        </div>
-        <div>
-          <h1 class="text-xl font-bold text-white">CMB ERP</h1>
-          <p class="text-[10px] text-slate-400 uppercase tracking-widest">Enterprise</p>
-        </div>
+<aside id="sidebar" class="sidebar-transition bg-slate-900 h-full w-72 flex flex-col shadow-2xl absolute lg:relative z-50 transform -translate-x-full lg:translate-x-0">
+  <div class="p-6 border-b border-slate-700/50 flex items-center gap-3">
+    <div class="w-12 h-12 rounded-xl bg-white flex items-center justify-center p-1">
+      <img src="./logocmb.png" alt="Logo" class="max-h-full">
+    </div>
+    <div>
+      <h1 class="text-xl font-bold text-white">CMB ERP</h1>
+      <p class="text-[10px] text-slate-400 uppercase tracking-widest">Enterprise</p>
+    </div>
+  </div>
+
+  <nav class="flex-1 px-4 py-6">
+    <ul class="space-y-2">
+      <li>
+        <button onclick="navigateTo('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-800 transition-all">
+          <span class="font-medium">Dashboard</span>
+        </button>
+      </li>
+
+      <li>
+        <button onclick="toggleSubmenu('company-menu')" class="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-800 transition-all">
+          <div class="flex items-center gap-3">
+            <span class="font-medium">Company Setup</span>
+          </div>
+          <svg id="arrow-company" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        
+        <ul id="company-menu" class="hidden mt-2 ml-4 space-y-1 border-l border-slate-700">
+          <li>
+            <button onclick="navigateTo('create-company')" id="nav-create-company" class="w-full text-left px-6 py-2 text-sm text-slate-400 hover:text-white transition-colors">Create New Company</button>
+          </li>
+          <li>
+            <button onclick="navigateTo('view-company')" id="nav-view-company" class="w-full text-left px-6 py-2 text-sm text-slate-400 hover:text-white transition-colors">View Company</button>
+          </li>
+          <li>
+            <button onclick="navigateTo('edit-company')" id="nav-edit-company" class="w-full text-left px-6 py-2 text-sm text-slate-400 hover:text-white transition-colors">Edit Company</button>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+</aside>
+
+<div class="flex-1 overflow-y-auto p-4 lg:p-8">
+  
+  <div id="page-create-company" class="page-content hidden fade-in">
+     </div>
+
+  <div id="page-view-company" class="page-content hidden fade-in">
+    <div class="max-w-6xl mx-auto bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-xl font-bold text-slate-800">Company Directory</h3>
+        <button class="text-sm bg-blue-50 text-[#5453EC] px-4 py-2 rounded-lg font-bold">Refresh Data</button>
       </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+          <thead class="bg-slate-50 text-slate-500 uppercase text-[10px] font-bold">
+            <tr>
+              <th class="px-4 py-3">ID</th>
+              <th class="px-4 py-3">Company Name</th>
+              <th class="px-4 py-3">State</th>
+              <th class="px-4 py-3">Contact</th>
+              <th class="px-4 py-3">Action</th>
+            </tr>
+          </thead>
+          <tbody id="company-table-body">
+            <tr><td colspan="5" class="px-4 py-10 text-center text-slate-400">Loading companies...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="page-edit-company" class="page-content hidden fade-in text-center py-20">
+    <div class="max-w-md mx-auto">
+      <img src="./processiconcmb.gif" class="w-16 h-16 mx-auto mb-4 opacity-40" alt="">
+      <h3 class="text-xl font-bold text-slate-800">Edit Mode</h3>
+      <p class="text-slate-500 mt-2">Select a company from the 'View' tab to begin editing details.</p>
+    </div>
+  </div>
+
+</div>
 
       <nav class="flex-1 px-4 py-6">
         <ul class="space-y-2">
