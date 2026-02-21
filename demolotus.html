@@ -1,456 +1,361 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lotus Enterprises | CMB ERP</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CMB ERP</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      font-family: 'DM Sans', sans-serif;
+    }
     
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#1e3a8a">
-    <link rel="icon" type="image/png" href="logocmb.png">
-    <link rel="apple-touch-icon" href="logocmb.png">
+    /* Sidebar transition */
+    #sidebar {
+      transition: transform 0.3s ease-in-out;
+    }
     
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
-
-    <style>
-        :root {
-            /* CMB Brand Colors */
-            --primary-dark: #1e3a8a; /* Blue 900 */
-            --primary-light: #1e40af; /* Blue 800 */
-            --accent-yellow: #f5ba31; /* Zoho Yellow */
-            --bg-light: #f9fafb;
-        }
-
-        html, body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-light); color: #1f2937; }
-        
-        /* Sidebar Transitions */
-        .sidebar-nav { transition: transform 0.3s ease-in-out; background: linear-gradient(180deg, var(--primary-dark) 0%, var(--primary-light) 100%); }
-        .nav-item { transition: all 0.2s ease; border-left: 4px solid transparent; }
-        .nav-item:hover { background-color: rgba(255,255,255,0.1); border-left-color: var(--accent-yellow); color: #fff; }
-        .nav-item.active { background-color: rgba(255,255,255,0.15); border-left-color: var(--accent-yellow); font-weight: 600; color: #fff; }
-        
-        /* Utilities */
-        .hidden-section { display: none; }
-        .modal-overlay { background: rgba(0,0,0,0.6); position: fixed; inset: 0; display: none; justify-content: center; align-items: center; z-index: 50; padding: 20px; }
-        .modal-overlay.show { display: flex; }
-        .ledger-balance { font-variant-numeric: tabular-nums; letter-spacing: -0.5px; }
-        
-        /* Mobile */
-        @media (max-width: 768px) {
-            .sidebar-nav { position: fixed; z-index: 50; height: 100vh; width: 260px; transform: translateX(-100%); }
-            .sidebar-nav.open { transform: translateX(0); }
-            .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 40; }
-            .overlay.active { display: block; }
-        }
-    </style>
+    /* Scrollbar styling for a cleaner look */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9; 
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1; 
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8; 
+    }
+  </style>
 </head>
-<body class="h-screen flex overflow-hidden" onload="loadAllData()">
+<body class="h-full bg-slate-50 flex overflow-hidden">
 
-    <div id="mainApp" class="flex h-screen w-full">
-        <div id="mobileBackdrop" class="overlay" onclick="toggleSidebar()"></div>
+  <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden" onclick="toggleSidebar()"></div>
 
-        <aside id="sidebar" class="sidebar-nav w-64 flex-shrink-0 flex flex-col text-blue-100 shadow-2xl">
-            <div class="p-6 border-b border-blue-700/50">
-                <div class="flex items-center gap-3">
-                    <img src="logocmb.png" class="h-10 rounded bg-white p-1">
-                    <div>
-                        <h1 class="text-2xl font-bold text-white tracking-tight">CMB</h1>
-                        <p class="text-[10px] text-[#f5ba31] uppercase tracking-wider font-bold">Cloud ERP</p>
-                    </div>
-                </div>
-
-                <div class="mt-6 bg-blue-900/40 p-3 rounded-lg border border-blue-700/30">
-                    <p class="text-[10px] text-blue-300 uppercase mb-1">Current Company</p>
-                    <div class="flex items-center gap-2">
-                        <div class="w-6 h-6 rounded bg-green-600 text-white flex items-center justify-center font-bold text-xs">L</div>
-                        <h2 class="font-bold text-white text-sm truncate">Lotus Enterprises</h2>
-                    </div>
-                    <p class="text-[10px] text-blue-400 mt-1 truncate">Thalassery, Kannur</p>
-                </div>
-            </div>
-
-            <nav class="flex-1 overflow-y-auto py-4 space-y-1">
-                <button onclick="nav('dashboard', this)" class="nav-item active w-full text-left px-6 py-3 flex items-center gap-3">
-                    <i class="fa-solid fa-chart-pie w-5 text-center"></i> <span>Dashboard</span>
-                </button>
-
-                <div class="pt-6 px-6 pb-2 text-[10px] font-bold text-[#f5ba31] uppercase tracking-widest">Accounting</div>
-                <button onclick="nav('vouchers', this)" class="nav-item w-full text-left px-6 py-3 flex items-center gap-3">
-                    <i class="fa-solid fa-file-invoice w-5 text-center"></i> <span>Vouchers</span>
-                </button>
-                <button onclick="nav('ledger', this)" class="nav-item w-full text-left px-6 py-3 flex items-center gap-3">
-                    <i class="fa-solid fa-book-open w-5 text-center"></i> <span>Ledgers</span>
-                </button>
-
-                <div class="pt-6 px-6 pb-2 text-[10px] font-bold text-[#f5ba31] uppercase tracking-widest">Business</div>
-                <button onclick="nav('inventory', this)" class="nav-item w-full text-left px-6 py-3 flex items-center gap-3">
-                    <i class="fa-solid fa-boxes-stacked w-5 text-center"></i> <span>Inventory</span>
-                </button>
-                <button onclick="nav('crm', this)" class="nav-item w-full text-left px-6 py-3 flex items-center gap-3">
-                    <i class="fa-solid fa-users w-5 text-center"></i> <span>CRM & Sales</span>
-                </button>
-            </nav>
-            
-            <div class="p-4 text-xs text-center text-blue-300 opacity-50">
-                Powered by CMB v1.0<br>Lotus Demo
-            </div>
-        </aside>
-
-        <main class="flex-1 flex flex-col h-full overflow-hidden relative">
-            
-            <header class="bg-white h-16 border-b border-gray-200 flex items-center justify-between px-6 shadow-sm z-10 flex-shrink-0">
-                <div class="flex items-center gap-4">
-                    <button class="md:hidden text-gray-600 text-xl" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
-                    <div>
-                        <h2 id="pageTitle" class="text-xl font-bold text-gray-800">Dashboard</h2>
-                        <p class="text-xs text-gray-500 hidden md:block">Lotus Enterprises • Thalassery, 670101</p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-4">
-                    <div id="loadingIndicator" class="text-blue-600 text-sm font-bold hidden flex items-center gap-2">
-                        <i class="fa-solid fa-spinner fa-spin"></i> Syncing...
-                    </div>
-                    <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-bold uppercase">Admin User</span>
-                </div>
-            </header>
-
-            <div class="flex-1 overflow-y-auto p-4 md:p-8 pb-20">
-                
-                <div id="dashboard" class="section">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                        <div class="bg-white p-6 rounded-xl border-l-4 border-green-500 shadow-sm">
-                            <p class="text-gray-500 text-xs font-bold uppercase">Total Income</p>
-                            <p class="text-2xl font-bold mt-1 text-gray-800 ledger-balance" id="dashIncome">₹ 0.00</p>
-                        </div>
-                        <div class="bg-white p-6 rounded-xl border-l-4 border-red-500 shadow-sm">
-                            <p class="text-gray-500 text-xs font-bold uppercase">Total Expense</p>
-                            <p class="text-2xl font-bold mt-1 text-gray-800 ledger-balance" id="dashExpense">₹ 0.00</p>
-                        </div>
-                        <div class="bg-white p-6 rounded-xl border-l-4 border-blue-500 shadow-sm">
-                            <p class="text-gray-500 text-xs font-bold uppercase">Net Balance</p>
-                            <p class="text-2xl font-bold mt-1 text-gray-800 ledger-balance" id="dashBalance">₹ 0.00</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="vouchers" class="section hidden-section">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-lg font-bold text-gray-700">Transactions</h3>
-                        <button class="bg-[#f5ba31] text-blue-900 px-4 py-2 rounded-lg font-bold text-sm shadow-sm hover:bg-yellow-400 transition" onclick="openModal('voucherModal')">+ New Voucher</button>
-                    </div>
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-x-auto">
-                        <table class="w-full text-sm text-left">
-                            <thead class="bg-gray-50 text-gray-600 uppercase text-xs border-b border-gray-200">
-                                <tr>
-                                    <th class="p-4">ID</th>
-                                    <th class="p-4">Date</th>
-                                    <th class="p-4">Type</th>
-                                    <th class="p-4 text-right">Amount</th>
-                                    <th class="p-4 hidden md:table-cell">Narration</th>
-                                </tr>
-                            </thead>
-                            <tbody id="voucherTableBody">
-                                <tr><td colspan="5" class="p-4 text-center text-gray-400">Loading data...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div id="inventory" class="section hidden-section">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-lg font-bold text-gray-700">Stock Items</h3>
-                        <button class="bg-[#f5ba31] text-blue-900 px-4 py-2 rounded-lg font-bold text-sm shadow-sm hover:bg-yellow-400 transition" onclick="openModal('itemModal')">+ Add Item</button>
-                    </div>
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-x-auto">
-                        <table class="w-full text-sm text-left">
-                            <thead class="bg-gray-50 text-gray-600 uppercase text-xs border-b border-gray-200">
-                                <tr>
-                                    <th class="p-4">Code</th>
-                                    <th class="p-4">Item Name</th>
-                                    <th class="p-4">Group</th>
-                                    <th class="p-4 text-right">Selling Price</th>
-                                </tr>
-                            </thead>
-                            <tbody id="inventoryTableBody">
-                                <tr><td colspan="4" class="p-4 text-center text-gray-400">No items found</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div id="crm" class="section hidden-section">
-                    <div class="bg-blue-50 p-4 rounded-lg border border-blue-100 mb-6 flex items-start gap-3">
-                        <i class="fa-solid fa-circle-info text-blue-600 mt-1"></i>
-                        <div>
-                            <h4 class="font-bold text-blue-800 text-sm">CRM Actions</h4>
-                            <p class="text-xs text-blue-600">Send payment reminders via WhatsApp, Email, or generate UPI QR codes instantly.</p>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-x-auto">
-                        <table class="w-full text-sm text-left">
-                            <thead class="bg-gray-50 text-gray-600 uppercase text-xs border-b border-gray-200">
-                                <tr>
-                                    <th class="p-4">Customer</th>
-                                    <th class="p-4">Pending Invoice</th>
-                                    <th class="p-4 text-right">Due Amount</th>
-                                    <th class="p-4 text-center">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="crmTableBody">
-                                <tr><td colspan="4" class="p-4 text-center text-gray-400">Loading customers...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div id="ledger" class="section hidden-section">
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
-                        <i class="fa-solid fa-book-open text-4xl text-gray-300 mb-4"></i>
-                        <h3 class="text-lg font-bold text-gray-600">Ledger View</h3>
-                        <p class="text-sm text-gray-400">Select an account to view detailed transactions.</p>
-                    </div>
-                </div>
-
-            </div>
-        </main>
+  <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-30 w-64 bg-slate-900 text-slate-300 flex flex-col transform -translate-x-full lg:translate-x-0 h-full">
+    
+    <div class="h-16 flex items-center px-6 bg-slate-950 text-white border-b border-slate-800">
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-blue-500 mr-3">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+      </div>
+      <h1 class="text-xl font-bold tracking-wide">CMB ERP</h1>
     </div>
 
-    <div id="voucherModal" class="modal-overlay">
-        <div class="bg-white rounded-xl w-full max-w-md p-6 relative shadow-2xl">
-            <button class="absolute top-4 right-4 text-gray-400 hover:text-gray-600" onclick="closeModal('voucherModal')"><i class="fa-solid fa-xmark text-xl"></i></button>
-            <h3 class="font-bold text-xl text-blue-900 mb-6">New Transaction</h3>
-            <form onsubmit="submitData(event, 'saveVoucher')">
-                <div class="space-y-4">
-                    <div>
-                        <label class="text-xs font-bold text-gray-500 uppercase">Type</label>
-                        <select name="type" class="w-full p-3 border border-gray-300 rounded-lg bg-white"><option>Payment</option><option>Receipt</option><option>Sales</option><option>Purchase</option></select>
-                    </div>
-                    <div>
-                        <label class="text-xs font-bold text-gray-500 uppercase">Date</label>
-                        <input type="date" name="date" class="w-full p-3 border border-gray-300 rounded-lg" required>
-                    </div>
-                    <div>
-                        <label class="text-xs font-bold text-gray-500 uppercase">Debit Account</label>
-                        <select name="drLedger" id="drSelect" class="w-full p-3 border border-gray-300 rounded-lg bg-white"><option>Loading...</option></select>
-                    </div>
-                    <div>
-                        <label class="text-xs font-bold text-gray-500 uppercase">Credit Account</label>
-                        <select name="crLedger" id="crSelect" class="w-full p-3 border border-gray-300 rounded-lg bg-white"><option>Loading...</option></select>
-                    </div>
-                    <div>
-                        <label class="text-xs font-bold text-gray-500 uppercase">Amount</label>
-                        <input type="number" name="amount" class="w-full p-3 border border-gray-300 rounded-lg" required step="0.01" placeholder="Amount">
-                    </div>
-                    <div>
-                        <label class="text-xs font-bold text-gray-500 uppercase">Narration</label>
-                        <input type="text" name="narration" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="Narration">
-                    </div>
-                </div>
-                <button class="w-full mt-6 bg-[#f5ba31] text-blue-900 py-3 rounded-lg font-bold hover:bg-yellow-400 transition">Save Voucher</button>
-            </form>
-        </div>
-    </div>
-
-    <div id="itemModal" class="modal-overlay">
-        <div class="bg-white rounded-xl w-full max-w-md p-6 relative shadow-2xl">
-            <button class="absolute top-4 right-4 text-gray-400" onclick="closeModal('itemModal')"><i class="fa-solid fa-xmark text-xl"></i></button>
-            <h3 class="font-bold text-xl text-blue-900 mb-6">New Stock Item</h3>
-            <form onsubmit="submitData(event, 'saveInventory')">
-                <div class="space-y-4">
-                    <input type="text" name="itemCode" placeholder="Item Code" class="w-full p-3 border border-gray-300 rounded-lg" required>
-                    <input type="text" name="itemName" placeholder="Item Name" class="w-full p-3 border border-gray-300 rounded-lg" required>
-                    <select name="group" class="w-full p-3 border border-gray-300 rounded-lg bg-white"><option>General</option><option>Electronics</option><option>Services</option></select>
-                    <div class="flex gap-4">
-                        <input type="text" name="unit" placeholder="Unit (Nos)" class="w-full p-3 border border-gray-300 rounded-lg">
-                        <input type="number" name="sellPrice" placeholder="Price" class="w-full p-3 border border-gray-300 rounded-lg">
-                    </div>
-                </div>
-                <button class="w-full mt-6 bg-[#1e3a8a] text-white py-3 rounded-lg font-bold hover:bg-blue-800 transition">Save Item</button>
-            </form>
-        </div>
-    </div>
-
-    <div id="upiModal" class="modal-overlay">
-        <div class="bg-white rounded-xl w-full max-w-xs p-6 relative text-center shadow-2xl">
-            <button class="absolute top-4 right-4 text-gray-400" onclick="closeModal('upiModal')"><i class="fa-solid fa-xmark"></i></button>
-            <h3 class="font-bold text-lg text-blue-900 mb-2">Scan to Pay</h3>
-            <div class="bg-gray-100 p-2 rounded inline-block mb-2">
-                <canvas id="qrCanvas"></canvas>
-            </div>
-            <p id="upiText" class="text-[10px] text-gray-400 break-all font-mono"></p>
-            <button class="w-full mt-4 bg-green-600 text-white py-2 rounded-lg font-bold" onclick="closeModal('upiModal')">Done</button>
-        </div>
-    </div>
-
-    <script>
-        // *** NEW SCRIPT URL ***
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzARJonG2FRrFnvqctaoNKbZabY3DoYvbUwuk8YqnCej1b9aLqPJZKmY6gRqXrIYFWM/exec";
+    <div class="flex-1 overflow-y-auto py-4">
+      <nav class="space-y-1 px-3">
         
-        // Configuration
-        const MY_UPI_ID = "cmtaxexperts@oksbi"; 
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-blue-600 text-white font-medium">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+          Dashboard
+        </a>
+
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+          Company
+        </a>
+
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+          Ledgers
+        </a>
+
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          Vouchers
+        </a>
+
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+          Projects
+        </a>
+
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+          Smart CRM
+        </a>
+
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          Reports
+        </a>
+
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+          Inventory
+        </a>
+
+        <div class="my-4 border-t border-slate-700"></div>
+
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+          Users
+        </a>
+
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          Settings
+        </a>
+
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          Help
+        </a>
+
+      </nav>
+    </div>
+  </aside>
+
+  <div class="flex-1 flex flex-col min-w-0">
+    
+    <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 lg:px-8 z-10">
+      
+      <div class="flex items-center gap-4">
+        <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-lg text-slate-500 hover:bg-slate-100 focus:outline-none">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+
+        <div class="flex items-center bg-slate-100 rounded-lg px-3 py-1.5 cursor-pointer hover:bg-slate-200 transition-colors border border-slate-200">
+          <div class="w-6 h-6 rounded bg-slate-800 text-white flex items-center justify-center text-xs font-bold mr-2">D</div>
+          <span class="text-sm font-bold text-slate-800">DUMMY COMPANY LTD</span>
+          <svg class="w-4 h-4 ml-2 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <button class="text-slate-500 hover:text-slate-700 relative">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+          <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+        </button>
+        <div class="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold border border-blue-200 cursor-pointer">
+          A
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-1 overflow-y-auto p-4 lg:p-8">
+      
+      <div class="mb-6">
+        <h2 class="text-2xl font-bold text-slate-800">Dashboard Overview</h2>
+        <p class="text-slate-500 text-sm mt-1">Financial summary for current fiscal year</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         
-        let appData = { ledgers: [], vouchers: [], inventory: [] };
+        <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-medium text-slate-500">Total Revenue</h3>
+            <div class="p-2 bg-emerald-100 text-emerald-600 rounded-lg">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+          </div>
+          <div class="text-3xl font-bold text-slate-800">₹ 24,50,000</div>
+          <p class="text-sm text-emerald-500 mt-2 font-medium flex items-center">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+            +12.5% from last month
+          </p>
+        </div>
 
-        // --- DATA & SYNC ---
-        function loadAllData() {
-            document.getElementById('loadingIndicator').classList.remove('hidden');
-            document.getElementById('loadingIndicator').classList.add('flex');
+        <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-medium text-slate-500">Total Expenses</h3>
+            <div class="p-2 bg-rose-100 text-rose-600 rounded-lg">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/></svg>
+            </div>
+          </div>
+          <div class="text-3xl font-bold text-slate-800">₹ 12,30,000</div>
+          <p class="text-sm text-rose-500 mt-2 font-medium flex items-center">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/></svg>
+            +4.2% from last month
+          </p>
+        </div>
 
-            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'getAllData' }) })
-            .then(r => r.json())
-            .then(res => {
-                if(res.status === 'SUCCESS') {
-                    appData = res.data;
-                    renderDashboard(res.data.stats);
-                    renderVouchers(res.data.vouchers);
-                    populateDropdowns();
-                    // If CRM is active, reload it to refresh balance
-                    if(!document.getElementById('crm').classList.contains('hidden-section')) loadCRM();
-                }
-            })
-            .finally(() => {
-                document.getElementById('loadingIndicator').classList.add('hidden');
-                document.getElementById('loadingIndicator').classList.remove('flex');
-            });
-        }
+        <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-medium text-slate-500">Net Profit</h3>
+            <div class="p-2 bg-blue-100 text-blue-600 rounded-lg">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            </div>
+          </div>
+          <div class="text-3xl font-bold text-slate-800">₹ 12,20,000</div>
+          <p class="text-sm text-emerald-500 mt-2 font-medium flex items-center">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+            +8.1% from last month
+          </p>
+        </div>
 
-        function loadInventory() {
-            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'getInventory' }) })
-            .then(r => r.json())
-            .then(res => {
-                const tbody = document.getElementById('inventoryTableBody');
-                tbody.innerHTML = "";
-                if(res.data.length === 0) {
-                    tbody.innerHTML = "<tr><td colspan='4' class='p-4 text-center text-gray-400'>No items found</td></tr>";
-                    return;
-                }
-                res.data.forEach(i => {
-                    tbody.innerHTML += `<tr class="border-b hover:bg-gray-50"><td class="p-4 font-mono text-xs text-blue-600">${i.code}</td><td class="p-4">${i.name}</td><td class="p-4 text-gray-500 text-xs">${i.group}</td><td class="p-4 text-right font-bold">₹ ${i.price}</td></tr>`;
-                });
-            });
-        }
+        <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-medium text-slate-500">Pending Receivables</h3>
+            <div class="p-2 bg-amber-100 text-amber-600 rounded-lg">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+          </div>
+          <div class="text-3xl font-bold text-slate-800">₹ 3,45,000</div>
+          <p class="text-sm text-slate-400 mt-2 font-medium">12 Invoices Overdue</p>
+        </div>
 
-        function loadCRM() {
-            const tbody = document.getElementById('crmTableBody');
-            tbody.innerHTML = "";
-            // Ideally, filter by "Sundry Debtors" from backend
-            const debtors = appData.ledgers.filter(l => (l.category === 'Customer' || l.category === 'Sundry Debtors'));
-            
-            if(debtors.length === 0) { tbody.innerHTML = "<tr><td colspan='4' class='p-4 text-center text-gray-400'>No Customers Found</td></tr>"; return; }
+      </div>
 
-            debtors.forEach(d => {
-                const due = d.bal || 0; 
-                const randomInv = "INV-" + Math.floor(Math.random() * 1000); 
-                tbody.innerHTML += `
-                <tr class="border-b hover:bg-gray-50">
-                    <td class="p-4 font-medium text-gray-800">${d.name}</td>
-                    <td class="p-4 text-xs text-gray-500">${randomInv}</td>
-                    <td class="p-4 text-right font-bold text-red-600 ledger-balance">₹ ${parseFloat(due).toLocaleString()}</td>
-                    <td class="p-4 text-center flex justify-center gap-3">
-                        <button class="text-green-500 hover:text-green-600 text-lg" onclick="sendWhatsApp('${d.name}', '${due}', '${randomInv}')"><i class="fa-brands fa-whatsapp"></i></button>
-                        <button class="text-blue-500 hover:text-blue-600 text-lg" onclick="sendEmail('${d.name}', '${due}', '${randomInv}')"><i class="fa-solid fa-envelope"></i></button>
-                        <button class="text-purple-500 hover:text-purple-600 text-lg" onclick="showUPI('${d.name}', '${due}', '${randomInv}')"><i class="fa-solid fa-qrcode"></i></button>
-                    </td>
-                </tr>`;
-            });
-        }
+      <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-lg font-bold text-slate-800">Profit & Loss Overview</h3>
+          <select class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 outline-none focus:ring-2 focus:ring-blue-500">
+            <option>This Year</option>
+            <option>Last Year</option>
+            <option>Last 6 Months</option>
+          </select>
+        </div>
+        
+        <div class="relative h-80 w-full">
+          <canvas id="plGraph"></canvas>
+        </div>
+      </div>
 
-        // --- RENDERERS ---
-        function renderDashboard(stats) {
-            if(!stats) return;
-            document.getElementById('dashIncome').textContent = "₹ " + stats.income.toLocaleString('en-IN', {minimumFractionDigits: 2});
-            document.getElementById('dashExpense').textContent = "₹ " + stats.expense.toLocaleString('en-IN', {minimumFractionDigits: 2});
-            document.getElementById('dashBalance').textContent = "₹ " + stats.balance.toLocaleString('en-IN', {minimumFractionDigits: 2});
-        }
+    </main>
+  </div>
 
-        function renderVouchers(list) {
-            const tbody = document.getElementById('voucherTableBody');
-            tbody.innerHTML = "";
-            if(!list || list.length === 0) { tbody.innerHTML = "<tr><td colspan='5' class='p-4 text-center text-gray-400'>No transactions yet</td></tr>"; return; }
-            list.forEach(v => {
-                tbody.innerHTML += `
-                <tr class="border-b hover:bg-gray-50 transition">
-                    <td class="p-4 text-xs font-mono text-blue-600">${v.id}</td>
-                    <td class="p-4 text-sm text-gray-700">${v.date}</td>
-                    <td class="p-4"><span class="px-2 py-1 rounded text-xs bg-gray-100 text-gray-600 font-medium border border-gray-200">${v.type}</span></td>
-                    <td class="p-4 text-right font-bold text-gray-800 ledger-balance">₹ ${parseFloat(v.amount).toLocaleString('en-IN')}</td>
-                    <td class="p-4 text-xs text-gray-500 hidden md:table-cell truncate max-w-xs">${v.narration}</td>
-                </tr>`;
-            });
-        }
+  <script>
+    // --- Sidebar Toggle Logic ---
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebar-overlay');
+      
+      if (sidebar.classList.contains('-translate-x-full')) {
+        // Open
+        sidebar.classList.remove('-translate-x-full');
+        overlay.classList.remove('hidden');
+      } else {
+        // Close
+        sidebar.classList.add('-translate-x-full');
+        overlay.classList.add('hidden');
+      }
+    }
 
-        function populateDropdowns() {
-            const opts = appData.ledgers.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
-            const dr = document.getElementById('drSelect');
-            const cr = document.getElementById('crSelect');
-            if(dr && cr) {
-                dr.innerHTML = '<option value="">Select Account</option>' + opts;
-                cr.innerHTML = '<option value="">Select Account</option>' + opts;
+    // --- Chart.js Configuration for Profit & Loss Graph ---
+    const ctx = document.getElementById('plGraph').getContext('2d');
+    
+    // Sample Data
+    const months = ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'];
+    const revenueData = [120000, 190000, 150000, 220000, 180000, 250000, 210000, 280000, 240000, 310000, 280000, 340000];
+    const expenseData = [80000, 110000, 95000, 130000, 100000, 140000, 120000, 160000, 130000, 180000, 150000, 190000];
+    const profitData = revenueData.map((rev, index) => rev - expenseData[index]);
+
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: months,
+        datasets: [
+          {
+            label: 'Revenue',
+            data: revenueData,
+            backgroundColor: '#10b981', // Tailwind Emerald-500
+            borderRadius: 4,
+            barPercentage: 0.6,
+            categoryPercentage: 0.8
+          },
+          {
+            label: 'Expenses',
+            data: expenseData,
+            backgroundColor: '#f43f5e', // Tailwind Rose-500
+            borderRadius: 4,
+            barPercentage: 0.6,
+            categoryPercentage: 0.8
+          },
+          {
+            label: 'Net Profit',
+            data: profitData,
+            type: 'line',
+            borderColor: '#3b82f6', // Tailwind Blue-500
+            backgroundColor: '#3b82f6',
+            borderWidth: 2,
+            tension: 0.3,
+            fill: false,
+            pointBackgroundColor: '#ffffff',
+            pointBorderColor: '#3b82f6',
+            pointBorderWidth: 2,
+            pointRadius: 4,
+            pointHoverRadius: 6
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          intersect: false,
+          mode: 'index',
+        },
+        plugins: {
+          legend: {
+            position: 'top',
+            align: 'end',
+            labels: {
+              usePointStyle: true,
+              boxWidth: 8,
+              font: {
+                family: "'DM Sans', sans-serif",
+                size: 13,
+                weight: '500'
+              },
+              color: '#64748b'
             }
-        }
-
-        // --- ACTIONS ---
-        function submitData(e, action) {
-            e.preventDefault();
-            const form = e.target;
-            const btn = form.querySelector('button');
-            const oldText = btn.innerText;
-            btn.innerText = "Processing..."; btn.disabled = true;
-
-            const fd = new FormData(form);
-            const data = { action: action };
-            fd.forEach((v, k) => data[k] = v);
-
-            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(data) })
-            .then(r => r.json())
-            .then(res => {
-                alert(res.message);
-                if(res.status === 'SUCCESS') {
-                    form.reset();
-                    closeModal(form.closest('.modal-overlay').id);
-                    if(action === 'saveInventory') loadInventory();
-                    else loadAllData();
+          },
+          tooltip: {
+            backgroundColor: '#1e293b',
+            titleFont: { family: "'DM Sans', sans-serif", size: 14 },
+            bodyFont: { family: "'DM Sans', sans-serif", size: 13 },
+            padding: 12,
+            cornerRadius: 8,
+            callbacks: {
+              label: function(context) {
+                let label = context.dataset.label || '';
+                if (label) {
+                  label += ': ';
                 }
-            })
-            .finally(() => { btn.innerText = oldText; btn.disabled = false; });
+                if (context.parsed.y !== null) {
+                  label += '₹ ' + new Intl.NumberFormat('en-IN').format(context.parsed.y);
+                }
+                return label;
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: '#f1f5f9',
+              drawBorder: false,
+            },
+            ticks: {
+              font: { family: "'DM Sans', sans-serif" },
+              color: '#94a3b8',
+              callback: function(value) {
+                if (value >= 100000) return '₹' + (value / 100000) + 'L';
+                if (value >= 1000) return '₹' + (value / 1000) + 'k';
+                return '₹' + value;
+              }
+            }
+          },
+          x: {
+            grid: {
+              display: false,
+              drawBorder: false,
+            },
+            ticks: {
+              font: { family: "'DM Sans', sans-serif" },
+              color: '#64748b'
+            }
+          }
         }
-
-        // --- CRM UTILS ---
-        function sendWhatsApp(name, amount, inv) {
-            const msg = `Dear ${name},%0a%0aYour payment of ₹${amount} for Invoice ${inv} is pending. Please pay at the earliest.%0a%0a- Lotus Enterprises, Thalassery`;
-            window.open(`https://wa.me/?text=${msg}`, '_blank');
-        }
-
-        function showUPI(name, amount, inv) {
-            openModal('upiModal');
-            const upiString = `upi://pay?pa=${MY_UPI_ID}&pn=LotusEnterprises&am=${amount}&tr=${inv}&tn=Payment ${inv}`;
-            const qr = new QRious({ element: document.getElementById('qrCanvas'), value: upiString, size: 200 });
-            document.getElementById('upiText').innerText = upiString;
-        }
-
-        // --- UI TOGGLES ---
-        function nav(id, el) {
-            document.querySelectorAll('.section').forEach(s => s.classList.add('hidden-section'));
-            document.getElementById(id).classList.remove('hidden-section');
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            el.classList.add('active');
-            document.getElementById('pageTitle').innerText = el.querySelector('span').innerText;
-            if(window.innerWidth < 768) toggleSidebar();
-            
-            if(id === 'inventory') loadInventory();
-            if(id === 'crm') loadCRM();
-        }
-
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('open');
-            document.getElementById('mobileBackdrop').classList.toggle('active');
-        }
-
-        function openModal(id) { document.getElementById(id).classList.add('show'); }
-        function closeModal(id) { document.getElementById(id).classList.remove('show'); }
-
-    </script>
+      }
+    });
+  </script>
 </body>
 </html>
