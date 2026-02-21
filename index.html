@@ -39,59 +39,33 @@
       --light: #FFFFFF;
     }
     
-    .sidebar-transition {
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
+    .sidebar-transition { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    .menu-item { transition: all 0.2s ease; }
+    .menu-item:hover { transform: translateX(4px); }
+    .card-hover { transition: all 0.3s ease; }
+    .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1); }
     
-    .menu-item {
-      transition: all 0.2s ease;
-    }
+    .pulse-dot { animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
     
-    .menu-item:hover {
-      transform: translateX(4px);
-    }
-    
-    .card-hover {
-      transition: all 0.3s ease;
-    }
-    
-    .card-hover:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-    }
-    
-    .pulse-dot {
-      animation: pulse 2s infinite;
-    }
-    
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
-    
-    .fade-in {
-      animation: fadeIn 0.5s ease forwards;
-    }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    .fade-in { animation: fadeIn 0.5s ease forwards; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: #f1f5f9; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-    /* Form Input Focus */
     input:focus, select:focus, textarea:focus { border-color: var(--primary) !important; outline: none; box-shadow: 0 0 0 2px rgba(84, 83, 236, 0.2); }
   </style>
-  <style>body { box-sizing: border-box; }</style>
 </head>
 <body class="h-full bg-slate-100 overflow-hidden">
-  <div id="app" class="h-full flex">
+  
+  <div id="app" class="h-full flex w-full relative">
     
-    <aside id="sidebar" class="sidebar-transition bg-slate-900 h-full w-72 flex flex-col shadow-2xl relative z-50 transform -translate-x-full lg:translate-x-0 absolute lg:relative">
+    <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 hidden lg:hidden transition-opacity" onclick="toggleSidebar()"></div>
+
+    <aside id="sidebar" class="sidebar-transition bg-slate-900 h-full w-72 flex flex-col shadow-2xl fixed lg:relative z-50 transform -translate-x-full lg:translate-x-0">
       
       <div class="p-6 border-b border-slate-700/50">
         <div class="flex items-center gap-3">
@@ -114,36 +88,21 @@
             <p class="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Active Company</p>
             <p id="company-name-sidebar" class="text-sm font-semibold text-white truncate">Main Company Ltd.</p>
           </div>
-          <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4" /></svg>
         </div>
       </div>
       
       <nav class="flex-1 px-4 py-6 overflow-y-auto">
         <ul class="space-y-1">
-          <li><button onclick="navigateTo('dashboard')" id="nav-dashboard" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-white" style="background: linear-gradient(135deg, #5453EC, #6B63FF); box-shadow: 0 8px 16px rgba(84, 83, 236, 0.3);"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" /></svg><span class="font-medium">Dashboard</span> </button></li>
-          <li><button onclick="navigateTo('company')" id="nav-company" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/50"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg><span class="font-medium">Company</span> </button></li>
-          <li><button onclick="navigateTo('stock')" id="nav-stock" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/50"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg><span class="font-medium">Stock Master</span> </button></li>
-          <li><button onclick="navigateTo('ledgers')" id="nav-ledgers" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/50"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg><span class="font-medium">Ledgers</span> </button></li>
-          <li><button onclick="navigateTo('transactions')" id="nav-transactions" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/50"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg><span class="font-medium">Transactions</span> </button></li>
-          <li><button onclick="navigateTo('projects')" id="nav-projects" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/50"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" /></svg><span class="font-medium">Projects</span> </button></li>
-          <li><button onclick="navigateTo('estimates')" id="nav-estimates" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/50"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg><span class="font-medium">Estimates</span> </button></li>
-          <li>
-  <button onclick="toggleSubmenu('submenu-crm')" class="menu-item w-full flex items-center justify-between px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/50 transition-all">
-    <div class="flex items-center gap-3">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-      <span class="font-medium">CRM</span>
-    </div>
-    <svg id="arrow-submenu-crm" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-  </button>
-  
-  <ul id="submenu-crm" class="hidden mt-1 ml-4 space-y-1 border-l border-slate-700/50 pl-2">
-    <li>
-      <button onclick="navigateTo('payment-reminders')" id="nav-payment-reminders" class="menu-item w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/50 text-sm transition-all">
-        Payment Reminders
-      </button>
-    </li>
-    </ul>
-</li>
+          <li><button onclick="navigateTo('dashboard')" id="nav-dashboard" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-white" style="background: linear-gradient(135deg, #5453EC, #6B63FF); box-shadow: 0 8px 16px rgba(84, 83, 236, 0.3);"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" /></svg><span class="font-medium">Dashboard</span></button></li>
+          
+          <li><button onclick="navigateTo('company')" id="nav-company" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/50"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg><span class="font-medium">Create Company</span></button></li>
+          <li><button onclick="navigateTo('company-view')" id="nav-company-view" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/50"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg><span class="font-medium">View Companies</span></button></li>
+          
+          <li><button onclick="navigateTo('stock')" id="nav-stock" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/50"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg><span class="font-medium">Stock Master</span></button></li>
+          <li><button onclick="navigateTo('ledgers')" id="nav-ledgers" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/50"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg><span class="font-medium">Ledgers</span></button></li>
+          <li><button onclick="navigateTo('transactions')" id="nav-transactions" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/50"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg><span class="font-medium">Transactions</span></button></li>
+          <li><button onclick="navigateTo('projects')" id="nav-projects" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/50"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" /></svg><span class="font-medium">Projects</span></button></li>
+          <li><button onclick="navigateTo('estimates')" id="nav-estimates" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/50"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg><span class="font-medium">Estimates</span></button></li>
         </ul>
       </nav>
       
@@ -158,11 +117,13 @@
       </div>
     </aside>
 
-    <main class="flex-1 h-full overflow-hidden flex flex-col">
+    <main class="flex-1 h-full overflow-hidden flex flex-col w-full relative">
       
-      <header class="bg-white shadow-sm border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+      <header class="bg-white shadow-sm border-b border-slate-200 px-4 sm:px-6 py-4 flex items-center justify-between z-10 shrink-0">
         <div class="flex items-center gap-4">
-          <button id="toggleSidebar" onclick="toggleSidebar()" class="p-2 rounded-xl hover:bg-slate-100 text-slate-600 transition-colors lg:hidden"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg></button>
+          <button id="toggleSidebarBtn" onclick="toggleSidebar()" class="p-2 rounded-xl hover:bg-slate-100 text-slate-600 transition-colors lg:hidden">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+          </button>
           <div>
             <h2 id="page-title" class="text-xl font-bold text-slate-800">Dashboard</h2>
             <p class="text-sm text-slate-500 hidden sm:block">Welcome back! Here's your financial overview.</p>
@@ -177,10 +138,10 @@
         </div>
       </header>
 
-      <div class="flex-1 overflow-y-auto p-6 bg-slate-100">
+      <div class="flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-100">
         
         <div id="page-dashboard" class="page-content fade-in">
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
             <div class="card-hover bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
               <div class="flex items-center justify-between mb-4">
                 <div class="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" style="background: linear-gradient(135deg, #5453EC, #6B63FF); box-shadow: 0 8px 16px rgba(84, 83, 236, 0.3);">
@@ -227,7 +188,7 @@
               <div class="flex items-center justify-between mb-6">
                 <div><h3 class="text-lg font-bold text-slate-800">Profit &amp; Loss Overview</h3><p class="text-sm text-slate-500">Monthly financial performance</p></div>
               </div>
-              <div class="h-72"><canvas id="plChart"></canvas></div>
+              <div class="h-72 w-full"><canvas id="plChart"></canvas></div>
             </div>
             <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
               <div class="flex items-center justify-between mb-6">
@@ -239,10 +200,10 @@
         </div>
 
         <div id="page-company" class="page-content hidden fade-in">
-          <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-100">
+          <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-100">
             <div class="flex items-center gap-4 mb-6 border-b border-slate-100 pb-4">
               <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#5453EC] to-[#F7CB51] flex items-center justify-center text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg></div>
-              <div><h2 class="text-2xl font-bold text-slate-800">Create Company</h2><p class="text-slate-500 text-sm">Register a new enterprise entity.</p></div>
+              <div><h2 class="text-xl sm:text-2xl font-bold text-slate-800">Create Company</h2><p class="text-slate-500 text-xs sm:text-sm">Register a new enterprise entity.</p></div>
             </div>
             <form onsubmit="submitForm(event, 'COMPANY')" class="space-y-5">
               <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -261,16 +222,48 @@
                 </div>
                 <div><label class="block text-xs font-bold text-slate-600 mb-1">Data Path</label><input type="text" name="companyDataPath" class="w-full px-4 py-2.5 rounded-xl border border-slate-200"></div>
               </div>
-              <div class="flex justify-end pt-4"><button type="submit" class="px-8 py-3 rounded-xl font-bold text-white transition-transform active:scale-95 shadow-lg flex items-center justify-center gap-2" style="background: linear-gradient(135deg, #5453EC, #6B63FF);">Save Company</button></div>
+              <div class="flex justify-end pt-4"><button type="submit" class="w-full md:w-auto px-8 py-3 rounded-xl font-bold text-white transition-transform active:scale-95 shadow-lg flex items-center justify-center" style="background: linear-gradient(135deg, #5453EC, #6B63FF);">Save Company</button></div>
             </form>
           </div>
         </div>
 
+        <div id="page-company-view" class="page-content hidden fade-in">
+          <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-100">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-slate-100 pb-4">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#5453EC] to-[#F7CB51] flex items-center justify-center text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg></div>
+                <div><h2 class="text-xl sm:text-2xl font-bold text-slate-800">Company Directory</h2><p class="text-slate-500 text-xs sm:text-sm">View all registered companies.</p></div>
+              </div>
+              <button onclick="loadViewData('COMPANY')" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-indigo-50 text-[#5453EC] font-bold hover:bg-indigo-100 transition-colors flex items-center justify-center gap-2">
+                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg> Refresh Data
+              </button>
+            </div>
+            
+            <div class="overflow-x-auto rounded-xl border border-slate-200">
+              <table class="w-full min-w-[700px] text-left border-collapse">
+                <thead>
+                  <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider border-b border-slate-200">
+                    <th class="p-4 font-semibold whitespace-nowrap">ID</th>
+                    <th class="p-4 font-semibold whitespace-nowrap">Company Name</th>
+                    <th class="p-4 font-semibold whitespace-nowrap">Constitution</th>
+                    <th class="p-4 font-semibold whitespace-nowrap">State</th>
+                    <th class="p-4 font-semibold whitespace-nowrap">Mobile</th>
+                    <th class="p-4 font-semibold whitespace-nowrap">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="company-table-body" class="divide-y divide-slate-100">
+                  <tr><td colspan="6" class="p-10 text-center text-slate-400 font-medium">Click "Refresh Data" to load companies from server.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
         <div id="page-stock" class="page-content hidden fade-in">
-          <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-100">
+          <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-100">
             <div class="flex items-center gap-4 mb-6 border-b border-slate-100 pb-4">
               <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#10b981] to-[#34d399] flex items-center justify-center text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg></div>
-              <div><h2 class="text-2xl font-bold text-slate-800">Stock Master</h2><p class="text-slate-500 text-sm">Add a new inventory item.</p></div>
+              <div><h2 class="text-xl sm:text-2xl font-bold text-slate-800">Stock Master</h2><p class="text-slate-500 text-xs sm:text-sm">Add a new inventory item.</p></div>
             </div>
             <form onsubmit="submitForm(event, 'STOCK')" class="space-y-5">
               <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -282,16 +275,16 @@
                 <div><label class="block text-xs font-bold text-slate-600 mb-1">Opening Balance</label><input type="number" name="openingBalance" class="w-full px-4 py-2.5 rounded-xl border border-slate-200"></div>
                 <div><label class="block text-xs font-bold text-slate-600 mb-1">Cr / Dr</label><select name="crDr" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white"><option value="Dr">Debit (Dr)</option><option value="Cr">Credit (Cr)</option></select></div>
               </div>
-              <div class="flex justify-end pt-4"><button type="submit" class="px-8 py-3 rounded-xl font-bold text-white transition-transform active:scale-95 shadow-lg" style="background: linear-gradient(135deg, #10b981, #34d399);">Save Stock Item</button></div>
+              <div class="flex justify-end pt-4"><button type="submit" class="w-full md:w-auto px-8 py-3 rounded-xl font-bold text-white transition-transform active:scale-95 shadow-lg" style="background: linear-gradient(135deg, #10b981, #34d399);">Save Stock Item</button></div>
             </form>
           </div>
         </div>
 
         <div id="page-ledgers" class="page-content hidden fade-in">
-          <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-100">
+          <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-100">
             <div class="flex items-center gap-4 mb-6 border-b border-slate-100 pb-4">
               <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#5453EC] to-[#F7CB51] flex items-center justify-center text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg></div>
-              <div><h2 class="text-2xl font-bold text-slate-800">Ledger Accounts</h2><p class="text-slate-500 text-sm">Create a new ledger.</p></div>
+              <div><h2 class="text-xl sm:text-2xl font-bold text-slate-800">Ledger Accounts</h2><p class="text-slate-500 text-xs sm:text-sm">Create a new ledger.</p></div>
             </div>
             <form onsubmit="submitForm(event, 'LEDGER')" class="space-y-5">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -300,16 +293,16 @@
                 <div><label class="block text-xs font-bold text-slate-600 mb-1">Opening Balance</label><input type="number" name="openingBalance" class="w-full px-4 py-2.5 rounded-xl border border-slate-200"></div>
                 <div><label class="block text-xs font-bold text-slate-600 mb-1">Cr / Dr</label><select name="crDr" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white"><option value="Dr">Debit (Dr)</option><option value="Cr">Credit (Cr)</option></select></div>
               </div>
-              <div class="flex justify-end pt-4"><button type="submit" class="px-8 py-3 rounded-xl font-bold text-white transition-transform active:scale-95 shadow-lg" style="background: linear-gradient(135deg, #5453EC, #6B63FF);">Save Ledger</button></div>
+              <div class="flex justify-end pt-4"><button type="submit" class="w-full md:w-auto px-8 py-3 rounded-xl font-bold text-white transition-transform active:scale-95 shadow-lg" style="background: linear-gradient(135deg, #5453EC, #6B63FF);">Save Ledger</button></div>
             </form>
           </div>
         </div>
 
         <div id="page-transactions" class="page-content hidden fade-in">
-          <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-100">
+          <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-100">
             <div class="flex items-center gap-4 mb-6 border-b border-slate-100 pb-4">
               <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#F7CB51] to-[#FCD34D] flex items-center justify-center text-slate-900"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg></div>
-              <div><h2 class="text-2xl font-bold text-slate-800">Voucher Entry</h2><p class="text-slate-500 text-sm">Record a daily transaction.</p></div>
+              <div><h2 class="text-xl sm:text-2xl font-bold text-slate-800">Voucher Entry</h2><p class="text-slate-500 text-xs sm:text-sm">Record a daily transaction.</p></div>
             </div>
             <form onsubmit="submitForm(event, 'TRANSACTION')" class="space-y-5">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -319,16 +312,16 @@
                 <div><label class="block text-xs font-bold text-slate-600 mb-1">Amount *</label><input type="number" name="amount" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200"></div>
                 <div class="md:col-span-2"><label class="block text-xs font-bold text-slate-600 mb-1">Narration</label><textarea name="narration" rows="2" class="w-full px-4 py-2.5 rounded-xl border border-slate-200"></textarea></div>
               </div>
-              <div class="flex justify-end pt-4"><button type="submit" class="px-8 py-3 rounded-xl font-bold text-slate-900 transition-transform active:scale-95 shadow-lg" style="background: linear-gradient(135deg, #F7CB51, #FCD34D);">Post Transaction</button></div>
+              <div class="flex justify-end pt-4"><button type="submit" class="w-full md:w-auto px-8 py-3 rounded-xl font-bold text-slate-900 transition-transform active:scale-95 shadow-lg" style="background: linear-gradient(135deg, #F7CB51, #FCD34D);">Post Transaction</button></div>
             </form>
           </div>
         </div>
 
         <div id="page-projects" class="page-content hidden fade-in">
-          <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-100">
+          <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-100">
             <div class="flex items-center gap-4 mb-6 border-b border-slate-100 pb-4">
               <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#5453EC] to-[#F7CB51] flex items-center justify-center text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" /></svg></div>
-              <div><h2 class="text-2xl font-bold text-slate-800">Projects</h2><p class="text-slate-500 text-sm">Create a new project.</p></div>
+              <div><h2 class="text-xl sm:text-2xl font-bold text-slate-800">Projects</h2><p class="text-slate-500 text-xs sm:text-sm">Create a new project.</p></div>
             </div>
             <form onsubmit="submitForm(event, 'PROJECTS')" class="space-y-5">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -336,16 +329,16 @@
                 <div><label class="block text-xs font-bold text-slate-600 mb-1">Estimated Amount</label><input type="number" name="estimatedAmount" class="w-full px-4 py-2.5 rounded-xl border border-slate-200"></div>
                 <div class="md:col-span-2"><label class="block text-xs font-bold text-slate-600 mb-1">Narration</label><textarea name="narration" rows="3" class="w-full px-4 py-2.5 rounded-xl border border-slate-200"></textarea></div>
               </div>
-              <div class="flex justify-end pt-4"><button type="submit" class="px-8 py-3 rounded-xl font-bold text-white transition-transform active:scale-95 shadow-lg" style="background: linear-gradient(135deg, #5453EC, #6B63FF);">Save Project</button></div>
+              <div class="flex justify-end pt-4"><button type="submit" class="w-full md:w-auto px-8 py-3 rounded-xl font-bold text-white transition-transform active:scale-95 shadow-lg" style="background: linear-gradient(135deg, #5453EC, #6B63FF);">Save Project</button></div>
             </form>
           </div>
         </div>
 
         <div id="page-estimates" class="page-content hidden fade-in">
-          <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-100">
+          <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-100">
             <div class="flex items-center gap-4 mb-6 border-b border-slate-100 pb-4">
               <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#10b981] to-[#34d399] flex items-center justify-center text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg></div>
-              <div><h2 class="text-2xl font-bold text-slate-800">Estimates</h2><p class="text-slate-500 text-sm">Generate a new estimate.</p></div>
+              <div><h2 class="text-xl sm:text-2xl font-bold text-slate-800">Estimates</h2><p class="text-slate-500 text-xs sm:text-sm">Generate a new estimate.</p></div>
             </div>
             <form onsubmit="submitForm(event, 'ESTIMATE')" class="space-y-5">
               <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -357,7 +350,7 @@
                 <div><label class="block text-xs font-bold text-slate-600 mb-1">GST %</label><input type="number" name="gstPercent" class="w-full px-4 py-2.5 rounded-xl border border-slate-200"></div>
                 <div><label class="block text-xs font-bold text-slate-600 mb-1">Grand Total *</label><input type="number" name="grandTotal" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 font-bold text-lg text-slate-800"></div>
               </div>
-              <div class="flex justify-end pt-4"><button type="submit" class="px-8 py-3 rounded-xl font-bold text-white transition-transform active:scale-95 shadow-lg" style="background: linear-gradient(135deg, #10b981, #34d399);">Create Estimate</button></div>
+              <div class="flex justify-end pt-4"><button type="submit" class="w-full md:w-auto px-8 py-3 rounded-xl font-bold text-white transition-transform active:scale-95 shadow-lg" style="background: linear-gradient(135deg, #10b981, #34d399);">Create Estimate</button></div>
             </form>
           </div>
         </div>
@@ -370,9 +363,20 @@
     // 1. DATE SETUP
     document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
 
-    // 2. SIDEBAR TOGGLE
+    // 2. SIDEBAR TOGGLE (FIXED FOR MOBILE)
     function toggleSidebar() {
-      document.getElementById('sidebar').classList.toggle('-translate-x-full');
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebar-overlay');
+      
+      sidebar.classList.toggle('-translate-x-full');
+      
+      if(overlay.classList.contains('hidden')) {
+          overlay.classList.remove('hidden');
+          // small timeout to allow display:block to apply before changing opacity
+          setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+      } else {
+          overlay.classList.add('hidden');
+      }
     }
 
     // 3. NAVIGATION LOGIC
@@ -380,7 +384,16 @@
       document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
       document.getElementById(`page-${pageId}`).classList.remove('hidden');
       
-      const titles = { dashboard: 'Dashboard', company: 'Company', stock: 'Stock Master', ledgers: 'Ledgers', transactions: 'Transactions', projects: 'Projects', estimates: 'Estimates' };
+      const titles = { 
+        dashboard: 'Dashboard', 
+        company: 'Company', 
+        'company-view': 'Company Directory',
+        stock: 'Stock Master', 
+        ledgers: 'Ledgers', 
+        transactions: 'Transactions', 
+        projects: 'Projects', 
+        estimates: 'Estimates' 
+      };
       document.getElementById('page-title').textContent = titles[pageId] || 'CMB ERP';
 
       document.querySelectorAll('.menu-item').forEach(btn => {
@@ -394,6 +407,11 @@
         activeBtn.style.background = "linear-gradient(135deg, #5453EC, #6B63FF)";
         activeBtn.style.boxShadow = "0 8px 16px rgba(84, 83, 236, 0.3)";
       }
+      
+      if (pageId === 'company-view') {
+          loadViewData('COMPANY');
+      }
+      
       if (window.innerWidth < 1024) toggleSidebar();
     }
 
@@ -419,7 +437,11 @@
         options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { display: false } } }
       });
     }
-    initCharts();
+    
+    // Only init charts if the canvas exists to prevent errors
+    if(document.getElementById('plChart')) {
+        initCharts();
+    }
 
     // 5. PWA SETUP
     if ('serviceWorker' in navigator) {
@@ -427,7 +449,7 @@
     }
 
     // 6. SUBMIT TO GOOGLE SHEETS
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz6T-YHKiU_r78SDc0YBd4BaKFnXwExui0gnrcomFWGxW-EkQlVQuB4VNGDM5xQPVMM/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwwb3rOXuLVHEHFUBEh1cn9hzqPbqlPpbzSoYbDYXM5qURBAjHzYEasCxP-fcVRZKwZ/exec";
 
     async function submitForm(e, sheetName) {
       e.preventDefault();
@@ -437,16 +459,15 @@
 
       const formData = new FormData(form);
       const data = Object.fromEntries(formData.entries());
-      data.sheet = sheetName; // Tells Google Script which tab to update
+      data.sheet = sheetName; 
 
-      // Prefix 91 for applicable fields
       if(data.mobile) data.mobile = "91" + data.mobile;
       if(data.whatsapp) data.whatsapp = "91" + data.whatsapp;
 
       try {
         await fetch(SCRIPT_URL, {
           method: 'POST',
-          mode: 'no-cors', // Required to bypass CORS on GitHub Pages
+          mode: 'no-cors', 
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
         });
@@ -454,6 +475,50 @@
         form.reset();
       } catch (err) {
         alert("Network Error. Check connection.");
+      } finally {
+        loader.classList.add('hidden');
+      }
+    }
+
+    // 7. FETCH AND DISPLAY DATA (VIEW COMPANIES)
+    async function loadViewData(sheetName) {
+      const tableBody = document.getElementById('company-table-body');
+      const loader = document.getElementById('global-loader');
+      
+      tableBody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-500 font-bold animate-pulse">Fetching data from Google Sheets...</td></tr>';
+      loader.classList.remove('hidden');
+
+      try {
+        const response = await fetch(SCRIPT_URL + "?sheet=" + sheetName);
+        const json = await response.json();
+        
+        if (json.status === "success") {
+          tableBody.innerHTML = '';
+          
+          if(json.data.length === 0) {
+              tableBody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-400">No companies found. Create one first!</td></tr>';
+              return;
+          }
+          
+          json.data.reverse().forEach(row => { 
+            const tr = document.createElement('tr');
+            tr.className = "border-b border-slate-50 hover:bg-slate-50/80 transition-colors text-sm text-slate-700";
+            
+            tr.innerHTML = `
+              <td class="p-4 font-bold text-[#5453EC]">${row['Company ID'] || '--'}</td>
+              <td class="p-4 font-bold text-slate-800">${row['Company Name'] || '--'}</td>
+              <td class="p-4"><span class="bg-slate-100 text-slate-600 px-3 py-1 rounded-lg text-xs font-bold">${row['Constitution of Business'] || '--'}</span></td>
+              <td class="p-4">${row['State'] || '--'}</td>
+              <td class="p-4">${row['Mobile'] || '--'}</td>
+              <td class="p-4"><button class="text-[#5453EC] hover:text-indigo-800 text-xs font-bold bg-indigo-50 px-3 py-1.5 rounded-lg transition-colors">Edit</button></td>
+            `;
+            tableBody.appendChild(tr);
+          });
+        } else {
+          tableBody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-red-500 font-bold">Error: ${json.message}</td></tr>`;
+        }
+      } catch (err) {
+        tableBody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-red-500 font-bold">Failed to load data. Make sure Google Script "doGet" is active.</td></tr>';
       } finally {
         loader.classList.add('hidden');
       }
