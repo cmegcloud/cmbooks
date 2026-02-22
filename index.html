@@ -64,9 +64,20 @@
         </div>
       </div>
       
+      <div class="p-4 mx-4 mt-4 bg-slate-800/50 rounded-xl border border-slate-700/50 shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: linear-gradient(135deg, #5453EC, #F7CB51);">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Active Company</p>
+            <p id="company-name-sidebar" class="text-sm font-semibold text-white truncate">No Company Selected</p>
+          </div>
+        </div>
+      </div>
+
       <nav class="flex-1 px-4 py-6 overflow-y-auto w-full">
         <ul class="space-y-1 w-full" id="menu-container">
-          
           <li>
             <button onclick="navigateTo('dashboard', 'Dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-white mb-2" style="background: linear-gradient(135deg, #5453EC, #6B63FF); box-shadow: 0 8px 16px rgba(84, 83, 236, 0.3);">
               <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" /></svg>
@@ -101,6 +112,12 @@
         
         <div class="flex items-center gap-3">
           <img src="./processiconcmb.gif" id="global-loader" class="w-6 h-6 hidden" alt="Loading">
+          
+          <div class="hidden md:flex items-center gap-2 px-3 py-2 bg-indigo-50 dark:bg-slate-800 rounded-xl border border-indigo-100 dark:border-slate-700">
+            <svg class="w-4 h-4 text-[#5453EC] dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+            <span id="active-company-name" class="text-sm font-bold text-[#5453EC] dark:text-indigo-300 truncate max-w-[150px]">No Company Selected</span>
+          </div>
+
           <button onclick="syncAllData()" class="px-3 sm:px-4 py-2 rounded-xl bg-indigo-50 dark:bg-indigo-500/20 text-[#5453EC] dark:text-indigo-300 font-bold hover:bg-indigo-100 dark:hover:bg-indigo-500/30 transition-all flex items-center gap-2 group shadow-sm">
             <svg id="sync-icon" class="w-4 h-4 transition-transform group-hover:rotate-180 duration-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
             <span class="text-xs sm:text-sm hidden sm:block">Sync All</span>
@@ -248,7 +265,7 @@
                     <th class="p-4 font-semibold whitespace-nowrap">Constitution</th>
                     <th class="p-4 font-semibold whitespace-nowrap">State</th>
                     <th class="p-4 font-semibold whitespace-nowrap">Mobile</th>
-                    <th class="p-4 font-semibold whitespace-nowrap">Action</th>
+                    <th class="p-4 font-semibold whitespace-nowrap text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody id="company-table-body" class="divide-y divide-slate-100 dark:divide-slate-700 text-slate-700 dark:text-slate-300">
@@ -362,9 +379,17 @@
         }
     }, 1000);
 
+    // Load Active Company from Memory on Startup
+    document.addEventListener("DOMContentLoaded", () => {
+        const savedCompany = localStorage.getItem('activeCompany');
+        if(savedCompany) {
+            updateActiveCompanyUI(savedCompany);
+        }
+    });
+
     // 2. MENU CONFIGURATION
     const menuStructure = [
-      { id: 'company', label: 'Company', icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4', subs: ['Add', 'View'] }, // Only Add and View
+      { id: 'company', label: 'Company', icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4', subs: ['Add', 'View'] },
       { id: 'ledgers', label: 'Ledgers', icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253' },
       { id: 'vouchers', label: 'Vouchers', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4' },
       { id: 'stock', label: 'Stock', icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' },
@@ -465,7 +490,20 @@
       if (window.innerWidth < 1024) toggleSidebar();
     }
 
-    // 4. FORM RESET & EDIT LOGIC
+    // 4. FORM RESET, EDIT, & DELETE LOGIC
+    function selectCompany(companyName) {
+        localStorage.setItem('activeCompany', companyName);
+        updateActiveCompanyUI(companyName);
+        alert(`Active Company set to: ${companyName}`);
+    }
+
+    function updateActiveCompanyUI(name) {
+        const headerName = document.getElementById('active-company-name');
+        const sidebarName = document.getElementById('company-name-sidebar');
+        if (headerName) headerName.textContent = name;
+        if (sidebarName) sidebarName.textContent = name;
+    }
+
     function resetCompanyForm() {
         const form = document.getElementById('companyForm');
         if(form) {
@@ -481,7 +519,6 @@
 
     function editRecord(sheetName, id) {
         if(!window.fetchedData || !window.fetchedData[sheetName]) return;
-        
         const record = window.fetchedData[sheetName].find(r => r['Company ID'] === id);
         if(!record) return;
 
@@ -519,6 +556,30 @@
         if(form.booksBeginning) form.booksBeginning.value = parseDate(record['Books Beginning From']);
     }
 
+    async function deleteRecord(sheetName, id) {
+        if (!confirm(`WARNING: Are you sure you want to delete ${id}?\n\nThis action cannot be undone.`)) {
+            return;
+        }
+        
+        const loader = document.getElementById('global-loader');
+        loader.classList.remove('hidden');
+
+        try {
+            await fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sheet: sheetName, action: 'DELETE', deleteId: id })
+            });
+            alert(`Record ${id} Deleted Successfully!`);
+            loadViewData(sheetName); 
+        } catch (err) {
+            alert("Network Error. Check connection.");
+        } finally {
+            loader.classList.add('hidden');
+        }
+    }
+
     // 5. CHART.JS
     function initCharts() {
       if(!document.getElementById('plChart')) return;
@@ -545,7 +606,7 @@
     setTimeout(initCharts, 100);
 
     // 6. GOOGLE SCRIPT COMMS
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzlRchIrf1Ri3mY2QwkxAHIscYJG9atfuCIX4Co-Eq-7FUVhm7fXjaA2Ib2wnlNF_02/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwwb3rOXuLVHEHFUBEh1cn9hzqPbqlPpbzSoYbDYXM5qURBAjHzYEasCxP-fcVRZKwZ/exec";
 
     async function submitForm(e, sheetName) {
       e.preventDefault();
@@ -556,7 +617,7 @@
       const formData = new FormData(form);
       const data = Object.fromEntries(formData.entries());
       data.sheet = sheetName;
-      
+
       if(data.mobile) data.mobile = "91" + data.mobile;
       if(data.whatsapp) data.whatsapp = "91" + data.whatsapp;
 
@@ -606,7 +667,13 @@
               <td class="p-4"><span class="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-3 py-1 rounded-lg text-[10px] font-bold uppercase">${row['Constitution of Business'] || '--'}</span></td>
               <td class="p-4">${row['State'] || '--'}</td>
               <td class="p-4">${row['Mobile'] || '--'}</td>
-              <td class="p-4"><button onclick="editRecord('${sheetName}', '${row['Company ID']}')" class="text-[#5453EC] hover:text-indigo-800 dark:hover:text-indigo-300 text-xs font-bold bg-indigo-50 dark:bg-indigo-900/30 px-4 py-2 rounded-lg transition-colors shadow-sm">Edit</button></td>
+              <td class="p-4">
+                <div class="flex items-center gap-2 justify-end">
+                  <button onclick="selectCompany('${row['Company Name']}')" class="text-emerald-600 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300 text-xs font-bold bg-emerald-50 dark:bg-emerald-900/30 px-3 py-1.5 rounded-lg transition-colors shadow-sm">Select</button>
+                  <button onclick="editRecord('${sheetName}', '${row['Company ID']}')" class="text-[#5453EC] hover:text-indigo-800 dark:hover:text-indigo-300 text-xs font-bold bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1.5 rounded-lg transition-colors shadow-sm">Edit</button>
+                  <button onclick="deleteRecord('${sheetName}', '${row['Company ID']}')" class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 text-xs font-bold bg-red-50 dark:bg-red-900/30 px-3 py-1.5 rounded-lg transition-colors shadow-sm">Delete</button>
+                </div>
+              </td>
             `;
             tableBody.appendChild(tr);
           });
