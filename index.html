@@ -163,7 +163,7 @@
 
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6 w-full">
             <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-100 dark:border-slate-700 relative w-full min-w-0 transition-colors">
-              <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-4">Profit &amp; Loss</h3>
+              <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-4">Profit & Loss</h3>
               <div class="relative w-full h-64 sm:h-72"><canvas id="plChart"></canvas></div>
             </div>
             <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-100 dark:border-slate-700 relative w-full min-w-0 transition-colors">
@@ -179,13 +179,15 @@
               <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#5453EC] to-[#F7CB51] flex items-center justify-center text-white">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
               </div>
-              <div><h2 class="text-xl sm:text-2xl font-bold text-slate-800 dark:text-white">Create Company</h2><p class="text-slate-500 dark:text-slate-400 text-xs sm:text-sm">Register a new enterprise entity.</p></div>
+              <div><h2 id="company-form-title" class="text-xl sm:text-2xl font-bold text-slate-800 dark:text-white">Create Company</h2><p class="text-slate-500 dark:text-slate-400 text-xs sm:text-sm">Register a new enterprise entity.</p></div>
             </div>
 
-            <form onsubmit="submitForm(event, 'COMPANY')" class="space-y-8">
-              
+            <form id="companyForm" onsubmit="submitForm(event, 'COMPANY')" class="space-y-8">
+              <input type="hidden" name="action" id="company-action" value="ADD">
+              <input type="hidden" name="editId" id="company-editId" value="">
+
               <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                <div><label class="block text-[10px] font-extrabold uppercase text-slate-500 dark:text-slate-400 mb-1">Company ID</label><input type="text" value="Auto-Generated" readonly class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 cursor-not-allowed"></div>
+                <div><label class="block text-[10px] font-extrabold uppercase text-slate-500 dark:text-slate-400 mb-1">Company ID</label><input type="text" id="display-company-id" value="Auto-Generated" readonly class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 cursor-not-allowed"></div>
                 <div><label class="block text-[10px] font-extrabold uppercase text-slate-500 dark:text-slate-400 mb-1">Company Data Path</label><input type="text" name="companyDataPath" placeholder="C:/ERP/Data" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white"></div>
                 <div><label class="block text-[10px] font-extrabold uppercase text-slate-500 dark:text-slate-400 mb-1">GST No</label><input type="text" name="gstNo" placeholder="22AAAAA0000A1Z5" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white"></div>
                 
@@ -224,7 +226,7 @@
                 <div class="md:col-span-2"><label class="block text-[10px] font-extrabold uppercase text-slate-500 dark:text-slate-400 mb-1">Creation Log</label><input type="text" id="creationLog" name="createdLog" readonly class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 text-xs cursor-not-allowed"></div>
               </div>
 
-              <div class="flex justify-end pt-6"><button type="submit" class="w-full md:w-auto px-10 py-3.5 rounded-xl font-bold text-white transition-transform active:scale-95 shadow-lg flex items-center justify-center gap-2 tracking-wide" style="background: linear-gradient(135deg, #5453EC, #6B63FF);">Generate ID & Save</button></div>
+              <div class="flex justify-end pt-6"><button type="submit" id="company-submit-btn" class="w-full md:w-auto px-10 py-3.5 rounded-xl font-bold text-white transition-transform active:scale-95 shadow-lg flex items-center justify-center gap-2 tracking-wide" style="background: linear-gradient(135deg, #5453EC, #6B63FF);">Generate ID & Save</button></div>
             </form>
           </div>
         </div>
@@ -347,23 +349,22 @@
   </div>
 
   <script>
-    // ----------------------------------------------------
-    // 1. DATE & TIME AUTO-STAMPING
-    // ----------------------------------------------------
+    // Global Storage for fetched records
+    window.fetchedData = {};
+
+    // 1. DATE SETUP & CREATION LOG AUTO-STAMP
     document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
 
     setInterval(() => {
         const logField = document.getElementById('creationLog');
-        if(logField) {
+        if(logField && !logField.value.includes('Updated')) {
             logField.value = `Created: ${new Date().toLocaleString('en-IN')} | User: JD-Admin`;
         }
     }, 1000);
 
-    // ----------------------------------------------------
     // 2. MENU CONFIGURATION
-    // ----------------------------------------------------
     const menuStructure = [
-      { id: 'company', label: 'Company', icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' },
+      { id: 'company', label: 'Company', icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4', subs: ['Add', 'View'] }, // Only Add and View
       { id: 'ledgers', label: 'Ledgers', icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253' },
       { id: 'vouchers', label: 'Vouchers', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4' },
       { id: 'stock', label: 'Stock', icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' },
@@ -382,8 +383,8 @@
 
     const menuContainer = document.getElementById('menu-container');
 
-    // Build standard Add/Edit/View/Report menus
     menuStructure.forEach(item => {
+      const subs = item.subs || ['Add', 'Edit', 'View', 'Report'];
       const html = `
         <li>
           <button onclick="toggleMenu('${item.id}')" class="w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all group">
@@ -394,17 +395,13 @@
             <svg id="arrow-${item.id}" class="w-4 h-4 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
           </button>
           <ul id="sub-${item.id}" class="hidden mt-1 mb-2 ml-4 pl-4 border-l border-slate-700/50 space-y-1">
-            <li><button onclick="navigateTo('${item.id}-add', '${item.label} > Add')" class="w-full text-left px-3 py-2 text-sm text-slate-500 hover:text-white rounded-lg hover:bg-slate-800/50 transition-colors">Add</button></li>
-            <li><button onclick="navigateTo('${item.id}-edit', '${item.label} > Edit')" class="w-full text-left px-3 py-2 text-sm text-slate-500 hover:text-white rounded-lg hover:bg-slate-800/50 transition-colors">Edit</button></li>
-            <li><button onclick="navigateTo('${item.id}-view', '${item.label} > View')" class="w-full text-left px-3 py-2 text-sm text-slate-500 hover:text-white rounded-lg hover:bg-slate-800/50 transition-colors">View</button></li>
-            <li><button onclick="navigateTo('${item.id}-report', '${item.label} > Report')" class="w-full text-left px-3 py-2 text-sm text-slate-500 hover:text-white rounded-lg hover:bg-slate-800/50 transition-colors">Report</button></li>
+            ${subs.map(s => `<li><button onclick="navigateTo('${item.id}-${s.toLowerCase()}', '${item.label} > ${s}')" class="w-full text-left px-3 py-2 text-sm text-slate-500 hover:text-white rounded-lg hover:bg-slate-800/50 transition-colors">${s}</button></li>`).join('')}
           </ul>
         </li>
       `;
       menuContainer.insertAdjacentHTML('beforeend', html);
     });
 
-    // Build specific submenus
     specificMenus.forEach(item => {
       let subsHtml = item.subs.map(sub => {
         if (sub === 'Night / Day Mode') {
@@ -429,72 +426,102 @@
       menuContainer.insertAdjacentHTML('beforeend', html);
     });
 
-    // ----------------------------------------------------
-    // 3. INTERACTION & ROUTING LOGIC
-    // ----------------------------------------------------
-
-    function toggleDarkMode() {
-        document.documentElement.classList.toggle('dark');
-    }
-
+    // 3. UI LOGIC
+    function toggleDarkMode() { document.documentElement.classList.toggle('dark'); }
     function toggleSidebar() {
       const sidebar = document.getElementById('sidebar');
       const overlay = document.getElementById('sidebar-overlay');
       sidebar.classList.toggle('-translate-x-full');
       if(sidebar.classList.contains('-translate-x-full')) {
-          overlay.classList.add('opacity-0');
-          setTimeout(() => overlay.classList.add('hidden'), 300);
+          overlay.classList.add('opacity-0'); setTimeout(() => overlay.classList.add('hidden'), 300);
       } else {
-          overlay.classList.remove('hidden');
-          setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+          overlay.classList.remove('hidden'); setTimeout(() => overlay.classList.remove('opacity-0'), 10);
       }
     }
-
     function toggleMenu(id) {
       const el = document.getElementById(`sub-${id}`);
       const arrow = document.getElementById(`arrow-${id}`);
-      if (el.classList.contains('hidden')) {
-        el.classList.remove('hidden');
-        arrow.style.transform = 'rotate(180deg)';
-      } else {
-        el.classList.add('hidden');
-        arrow.style.transform = 'rotate(0deg)';
-      }
+      if (el.classList.contains('hidden')) { el.classList.remove('hidden'); arrow.style.transform = 'rotate(180deg)'; } 
+      else { el.classList.add('hidden'); arrow.style.transform = 'rotate(0deg)'; }
     }
 
-    // Dynamic Navigation Core Logic
     function navigateTo(routeId, title = 'Dashboard') {
       document.getElementById('page-title').textContent = title;
-      
-      // Hide all application views
       document.querySelectorAll('.app-view').forEach(el => el.classList.add('hidden'));
 
       if (routeId === 'dashboard') {
           document.getElementById('view-dashboard').classList.remove('hidden');
       } else {
-          // Look for an exact match (e.g. view-company-add, view-company-view)
           const targetView = document.getElementById('view-' + routeId);
-          
           if (targetView) {
               targetView.classList.remove('hidden');
-              // Automatically load data if they click the View Table
+              if (routeId === 'company-add') resetCompanyForm();
               if (routeId === 'company-view') loadViewData('COMPANY');
           } else {
-              // Show placeholder if the HTML form hasn't been built yet
               document.getElementById('module-placeholder').classList.remove('hidden');
               document.getElementById('module-title').textContent = title;
           }
       }
-
       if (window.innerWidth < 1024) toggleSidebar();
     }
 
-    // ----------------------------------------------------
-    // 4. CHART.JS & GOOGLE SHEETS
-    // ----------------------------------------------------
+    // 4. FORM RESET & EDIT LOGIC
+    function resetCompanyForm() {
+        const form = document.getElementById('companyForm');
+        if(form) {
+            form.reset();
+            document.getElementById('company-action').value = 'ADD';
+            document.getElementById('company-editId').value = '';
+            document.getElementById('display-company-id').value = 'Auto-Generated';
+            document.getElementById('company-form-title').textContent = 'Create Company';
+            document.getElementById('company-submit-btn').innerHTML = 'Generate ID & Save';
+            document.getElementById('creationLog').value = `Created: ${new Date().toLocaleString('en-IN')} | User: JD-Admin`;
+        }
+    }
+
+    function editRecord(sheetName, id) {
+        if(!window.fetchedData || !window.fetchedData[sheetName]) return;
+        
+        const record = window.fetchedData[sheetName].find(r => r['Company ID'] === id);
+        if(!record) return;
+
+        navigateTo('company-add', 'Edit Company');
+
+        const form = document.getElementById('companyForm');
+        document.getElementById('company-action').value = 'UPDATE';
+        document.getElementById('company-editId').value = id;
+        document.getElementById('display-company-id').value = id;
+        document.getElementById('company-form-title').textContent = 'Edit Company (' + id + ')';
+        document.getElementById('company-submit-btn').innerHTML = 'Update Company Data';
+
+        if(form.companyName) form.companyName.value = record['Company Name'] || '';
+        if(form.constitution) form.constitution.value = record['Constitution of Business'] || '';
+        if(form.address1) form.address1.value = record['Address Line 1'] || '';
+        if(form.address2) form.address2.value = record['Address Line 2'] || '';
+        if(form.state) form.state.value = record['State'] || '';
+        if(form.pincode) form.pincode.value = record['Pincode'] || '';
+        if(form.telephone) form.telephone.value = record['Telephone'] || '';
+        if(form.mobile && record['Mobile']) form.mobile.value = record['Mobile'].toString().replace(/^91/, '');
+        if(form.whatsapp && record['Whatsapp No']) form.whatsapp.value = record['Whatsapp No'].toString().replace(/^91/, '');
+        if(form.email) form.email.value = record['Email'] || '';
+        if(form.website) form.website.value = record['Website'] || '';
+        if(form.companyDataPath) form.companyDataPath.value = record['Company Data Path'] || '';
+        if(form.gstNo) form.gstNo.value = record['GST No'] || '';
+        if(form.createdLog) form.createdLog.value = `Updated: ${new Date().toLocaleString('en-IN')} | By: JD-Admin`;
+
+        const parseDate = (d) => {
+            if(!d) return '';
+            const p = d.split(/[-/T]/);
+            if(p.length >= 3) return `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
+            return d;
+        };
+        if(form.fyBeginning) form.fyBeginning.value = parseDate(record['Financial Year Beginning From']);
+        if(form.booksBeginning) form.booksBeginning.value = parseDate(record['Books Beginning From']);
+    }
+
+    // 5. CHART.JS
     function initCharts() {
       if(!document.getElementById('plChart')) return;
-      
       const plCtx = document.getElementById('plChart').getContext('2d');
       new Chart(plCtx, {
         type: 'line',
@@ -517,7 +544,8 @@
     }
     setTimeout(initCharts, 100);
 
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxywuUyz4URV-BqT7fEamElHheuGKCsIymVf459xqjkqIw_KFJ1gEptLsoXYRJ2xddQ/exec";
+    // 6. GOOGLE SCRIPT COMMS
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwwb3rOXuLVHEHFUBEh1cn9hzqPbqlPpbzSoYbDYXM5qURBAjHzYEasCxP-fcVRZKwZ/exec";
 
     async function submitForm(e, sheetName) {
       e.preventDefault();
@@ -528,8 +556,7 @@
       const formData = new FormData(form);
       const data = Object.fromEntries(formData.entries());
       data.sheet = sheetName;
-
-      // Ensure prefixes
+      
       if(data.mobile) data.mobile = "91" + data.mobile;
       if(data.whatsapp) data.whatsapp = "91" + data.whatsapp;
 
@@ -540,8 +567,9 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
         });
-        alert(sheetName + " Data Saved Successfully!");
-        form.reset();
+        alert(sheetName + (data.action === "UPDATE" ? " Data Updated Successfully!" : " Data Saved Successfully!"));
+        if(sheetName === 'COMPANY') resetCompanyForm();
+        else form.reset();
       } catch (err) {
         alert("Network Error. Check connection.");
       } finally {
@@ -561,31 +589,30 @@
         const json = await response.json();
         
         if (json.status === "success") {
+          window.fetchedData[sheetName] = json.data; 
           tableBody.innerHTML = '';
+          
           if(json.data.length === 0) {
-              tableBody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-400">No companies found. Create one first!</td></tr>';
+              tableBody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-400">No records found.</td></tr>';
               return;
           }
           
           json.data.reverse().forEach(row => { 
             const tr = document.createElement('tr');
             tr.className = "border-b border-slate-50 dark:border-slate-700 hover:bg-slate-50/80 dark:hover:bg-slate-800 transition-colors text-sm text-slate-700 dark:text-slate-300";
-            
             tr.innerHTML = `
               <td class="p-4 font-bold text-[#5453EC]">${row['Company ID'] || '--'}</td>
               <td class="p-4 font-bold text-slate-800 dark:text-white">${row['Company Name'] || '--'}</td>
-              <td class="p-4"><span class="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-3 py-1 rounded-lg text-xs font-bold">${row['Constitution of Business'] || '--'}</span></td>
+              <td class="p-4"><span class="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-3 py-1 rounded-lg text-[10px] font-bold uppercase">${row['Constitution of Business'] || '--'}</span></td>
               <td class="p-4">${row['State'] || '--'}</td>
               <td class="p-4">${row['Mobile'] || '--'}</td>
-              <td class="p-4"><button class="text-[#5453EC] hover:text-indigo-800 dark:hover:text-indigo-300 text-xs font-bold bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1.5 rounded-lg transition-colors">Edit</button></td>
+              <td class="p-4"><button onclick="editRecord('${sheetName}', '${row['Company ID']}')" class="text-[#5453EC] hover:text-indigo-800 dark:hover:text-indigo-300 text-xs font-bold bg-indigo-50 dark:bg-indigo-900/30 px-4 py-2 rounded-lg transition-colors shadow-sm">Edit</button></td>
             `;
             tableBody.appendChild(tr);
           });
-        } else {
-          tableBody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-red-500 font-bold">Error: ${json.message}</td></tr>`;
         }
       } catch (err) {
-        tableBody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-red-500 font-bold">Failed to load data. Make sure Google Script "doGet" is active.</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-red-500 font-bold">Failed to load data.</td></tr>';
       } finally {
         loader.classList.add('hidden');
       }
@@ -594,16 +621,12 @@
     async function syncAllData() {
       const syncIcon = document.getElementById('sync-icon');
       if (syncIcon) syncIcon.classList.add('animate-spin');
-      
-      // If the user is currently on the Company View page, sync that specific table
       if (!document.getElementById('view-company-view').classList.contains('hidden')) {
           await loadViewData('COMPANY');
       } else {
-          // Otherwise, just simulate a general sync delay
           await new Promise(r => setTimeout(r, 1000));
-          alert("All Enterprise Data Synced Successfully.");
+          alert("All Enterprise Data Synced.");
       }
-      
       if (syncIcon) syncIcon.classList.remove('animate-spin');
     }
   </script>
