@@ -91,7 +91,7 @@
         <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-800/50">
           <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#5453EC] to-[#F7CB51] flex items-center justify-center text-white font-bold text-sm">JD</div>
           <div class="flex-1 min-w-0">
-            <p class="text-sm font-semibold text-white truncate">John Doe</p>
+            <p class="text-sm font-semibold text-white truncate">Lotus Admin</p>
             <p class="text-xs text-slate-400 truncate">Administrator</p>
           </div>
         </div>
@@ -375,7 +375,7 @@
     setInterval(() => {
         const logField = document.getElementById('creationLog');
         if(logField && !logField.value.includes('Updated')) {
-            logField.value = `Created: ${new Date().toLocaleString('en-IN')} | User: JD-Admin`;
+            logField.value = `Created: ${new Date().toLocaleString('en-IN')} | User: Lotus Admin`;
         }
     }, 1000);
 
@@ -513,7 +513,7 @@
             document.getElementById('display-company-id').value = 'Auto-Generated';
             document.getElementById('company-form-title').textContent = 'Create Company';
             document.getElementById('company-submit-btn').innerHTML = 'Generate ID & Save';
-            document.getElementById('creationLog').value = `Created: ${new Date().toLocaleString('en-IN')} | User: JD-Admin`;
+            document.getElementById('creationLog').value = `Created: ${new Date().toLocaleString('en-IN')} | User: Lotus Admin`;
         }
     }
 
@@ -544,7 +544,7 @@
         if(form.website) form.website.value = record['Website'] || '';
         if(form.companyDataPath) form.companyDataPath.value = record['Company Data Path'] || '';
         if(form.gstNo) form.gstNo.value = record['GST No'] || '';
-        if(form.createdLog) form.createdLog.value = `Updated: ${new Date().toLocaleString('en-IN')} | By: JD-Admin`;
+        if(form.createdLog) form.createdLog.value = `Updated: ${new Date().toLocaleString('en-IN')} | By: Lotus Admin`;
 
         const parseDate = (d) => {
             if(!d) return '';
