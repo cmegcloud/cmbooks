@@ -1,0 +1,18 @@
+{
+  "name": "CMB ERP Solutions",
+  "short_name": "CMB ERP",
+  "description": "Enterprise Resource Planning system for CMB Global.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#5453EC",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "./iconcmb.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
